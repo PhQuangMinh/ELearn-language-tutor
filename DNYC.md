@@ -126,7 +126,8 @@
      - Từ vựng
      - Độ trôi chảy
    - Lưu kết quả vào hồ sơ người dùng
-
+### 2.4 Người dùng có thể tạo tình huống để nói chuyện với AI
+![Example](case.jpg)
 ---
 
 ## 3. Module đọc tin tức
