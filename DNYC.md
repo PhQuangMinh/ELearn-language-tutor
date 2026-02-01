@@ -26,6 +26,9 @@
 - Hoạt động hợp lệ bao gồm:
   - Phiên nói tiếng Anh với AI
   - Thời lượng speaking ≥ *X* giây (config được)
+  - Xem video trong khóa học (>= *X* phút)
+  - Làm bài test trong khóa học
+  - Xem flash card trong khóa học
 
 **Chức năng**
 - Tự động kiểm tra hoạt động mỗi ngày
@@ -67,7 +70,7 @@
   - Theo từng phiên
   - Cộng dồn theo ngày / tuần / tháng
 - Chỉ tính thời gian người dùng thực sự nói (không tính thời gian chờ)
-
+- Bảng xếp hạng số giờ nói của người dùng
 **Hiển thị**
 - Tổng thời gian nói (giây / phút / giờ)
 - Biểu đồ tiến độ theo thời gian
@@ -97,6 +100,9 @@
 - **Scenario** (Tình huống nói chuyện)
   - Bối cảnh cụ thể
   - Vai trò rõ ràng cho AI & người học
+- **Free Style**
+  - Cho phép người dùng nói chuyện với AI về chủ đề tự do
+  - Lưu các chủ đề người dùng quan tâm
 
 **Chức năng**
 - Cho phép mở rộng nội dung theo cấp độ
@@ -152,6 +158,7 @@
 **Chức năng đọc**
 - Hiển thị nội dung bài báo
 - Highlight từ vựng quan trọng
+- Dịch từ khi chuột di qua các từ khóa ở bài đọc
 - Hỗ trợ text-to-speech
 
 **Hỗ trợ AI**
@@ -167,6 +174,7 @@
 
 ### 4.1. Mục tiêu chức năng
 - Giúp người học ghi nhớ và sử dụng từ vựng chủ động
+- Sử dụng từ trong đúng bối cảnh, phân biệt các từ cùng nghĩa khác sắc thái
 - Học từ:
   - Ngữ cảnh thực tế
   - Lặp lại có kiểm soát
@@ -195,7 +203,9 @@
 - Hỗ trợ:
   - Nghe phát âm
   - Đánh dấu đã nhớ / chưa nhớ
-
+**Video**
+- Video dạy từ vựng và cách sử dụng từ
+- Comment câu mẫu sử dụng từ trong video -> AI trả lời phân tích cách sử dụng
 **Theo dõi tiến độ**
 - Số từ đã học
 - Tỷ lệ nhớ từ
