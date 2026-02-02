@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Voice Assessment</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <h1>Voice Assessment</h1>
+          <p class="sub">
+            Ghi âm ngắn → gửi lên backend → nhận đánh giá tổng + chi tiết theo word/syllable/phoneme.
+          </p>
+        </div>
+        <div class="chip" id="serverStatus">Server: /api/voice/assess</div>
+      </header>
+
+      <section class="card">
+        <h2>Cấu hình</h2>
+        <div class="grid">
+          <label class="field">
+            <span>Ngôn ngữ</span>
+            <select id="language">
+              <option value="ja-JP">ja-JP (Japanese)</option>
+              <option value="en-US">en-US (English US)</option>
+              <option value="vi-VN">vi-VN (Vietnamese)</option>
+              <option value="ko-KR">ko-KR (Korean)</option>
+              <option value="zh-CN">zh-CN (Chinese Simplified)</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Reference text (bắt buộc)</span>
+            <input
+              id="referenceText"
+              placeholder="Ví dụ: こんにちわ"
+              autocomplete="off"
+            />
+            <small class="hint">Câu/đoạn chuẩn để Azure chấm phát âm.</small>
+          </label>
+
+          <label class="field">
+            <span>Thời lượng tối đa</span>
+            <select id="maxSeconds">
+              <option value="3">3 giây</option>
+              <option value="5" selected>5 giây</option>
+              <option value="8">8 giây</option>
+              <option value="10">10 giây</option>
+            </select>
+            <small class="hint">UI sẽ tự dừng khi tới giới hạn.</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Ghi âm</h2>
+
+        <div class="row">
+          <button id="btnStart" class="btn primary">Bắt đầu ghi</button>
+          <button id="btnStop" class="btn" disabled>Dừng</button>
+          <button id="btnSend" class="btn success" disabled>Gửi để chấm</button>
+          <div class="pill" id="recordState">Idle</div>
+          <div class="pill mono" id="timer">00.0s</div>
+        </div>
+
+        <div class="row">
+          <audio id="player" controls></audio>
+          <div class="meta">
+            <div><span class="k">Format</span> <span id="fmt">WAV (PCM 16-bit)</span></div>
+            <div><span class="k">Sample rate</span> <span id="sr">16,000 Hz</span></div>
+            <div><span class="k">Channels</span> <span id="ch">1 (mono)</span></div>
+          </div>
+        </div>
+
+        <div id="error" class="error" hidden></div>
+        <div id="loading" class="loading" hidden>Đang chấm…</div>
+      </section>
+
+      <section class="card" id="resultCard" hidden>
+        <h2>Kết quả</h2>
+
+        <div class="grid2">
+          <div class="panel">
+            <h3>Đánh giá chung</h3>
+            <div class="kv">
+              <div class="k">Recognition status</div>
+              <div class="v" id="rStatus">-</div>
+              <div class="k">Display text</div>
+              <div class="v" id="rText">-</div>
+            </div>
+
+            <div class="scores" id="overallScores"></div>
+          </div>
+
+          <div class="panel">
+            <h3>Chi tiết theo word</h3>
+            <div id="words"></div>
+          </div>
+        </div>
+
+        <details class="raw">
+          <summary>Raw JSON (debug)</summary>
+          <pre id="rawJson"></pre>
+        </details>
+      </section>
+
+      <footer class="footer">
+        <div>
+          <strong>Tip</strong>: Nếu xin mic bị block, hãy bấm icon 🔒 trên thanh URL và Allow microphone.
+        </div>
+      </footer>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
+

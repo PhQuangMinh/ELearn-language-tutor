@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: demo-voice-ai
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+azure:
+  speech:
+    # Khuyến nghị: set bằng biến môi trường để không hard-code secrets
+    key: ${AZURE_SPEECH_KEY:}
+    region: ${AZURE_SPEECH_REGION:eastus2}
+    default-language: ${AZURE_SPEECH_DEFAULT_LANGUAGE:ja-JP}
