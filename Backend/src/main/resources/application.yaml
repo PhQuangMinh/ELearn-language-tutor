@@ -17,6 +17,28 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
+  # OAuth2 redirect flow: bấm "Đăng nhập Google/FB" -> chuyển tới Google/FB -> quay lại nhận JWT
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${oauth2.google.client-id}
+            client-secret: ${oauth2.google.client-secret}
+            scope: openid, profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          facebook:
+            client-id: ${oauth2.facebook.app-id}
+            client-secret: ${oauth2.facebook.app-secret}
+            scope: public_profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          facebook:
+            authorization-uri: https://www.facebook.com/v18.0/dialog/oauth
+            token-uri: https://graph.facebook.com/v18.0/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email
+            user-name-attribute: id
+
 server:
   port: 8080
   servlet:
@@ -24,8 +46,8 @@ server:
 
 jwt:
   secret: BTLMobileSecretKeyForJWTTokenGenerationAndValidation2026ThisIsAVeryLongSecretKeyToEnsureSecurityAndMeetTheMinimumRequirements
-  expiration: 900000  # 15 minutes in milliseconds (access token)
-  refresh-expiration: 604800000  # 7 days in milliseconds (refresh token)
+  expiration: 900000  
+  refresh-expiration: 604800000
 
 oauth2:
   google:
@@ -34,3 +56,6 @@ oauth2:
   facebook:
     app-id: 1575619266897525
     app-secret: a8e227580eddb1a79364b891d81e12c6
+  # URL cho app Android: scheme elearn:// để app bắt deep link và nhận token
+  mobile-redirect-url: elearn://login/callback
+

@@ -3,17 +3,18 @@ package com.example.BTL_Mobile.controller;
 import com.example.BTL_Mobile.dto.ApiResponse;
 import com.example.BTL_Mobile.dto.AuthResponse;
 import com.example.BTL_Mobile.dto.LoginRequest;
-import com.example.BTL_Mobile.dto.OAuth2LoginRequest;
 import com.example.BTL_Mobile.dto.RefreshTokenRequest;
 import com.example.BTL_Mobile.dto.RegisterRequest;
 import com.example.BTL_Mobile.dto.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.UserResponse;
 import com.example.BTL_Mobile.service.AuthService;
-import com.example.BTL_Mobile.service.OAuth2Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,7 +23,24 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final OAuth2Service oAuth2Service;
+
+    /**
+     * Bấm "Đăng nhập bằng Google" -> redirect tới trang đăng nhập Google.
+     * Project này dành cho mobile app: login xong redirect về deep link elearn://login/callback.
+     */
+    @GetMapping("/oauth2/authorize/google")
+    public void authorizeGoogle(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/google");
+    }
+
+    /**
+     * Bấm "Đăng nhập bằng Facebook" -> redirect tới trang đăng nhập Facebook.
+     * Project này dành cho mobile app: login xong redirect về deep link elearn://login/callback.
+     */
+    @GetMapping("/oauth2/authorize/facebook")
+    public void authorizeFacebook(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/facebook");
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
@@ -34,23 +52,6 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công!", response));
-    }
-
-    @PostMapping("/oauth2/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> oauth2Login(@Valid @RequestBody OAuth2LoginRequest request) {
-        AuthResponse response;
-        
-        if ("google".equalsIgnoreCase(request.getProvider())) {
-            response = oAuth2Service.loginWithGoogle(request.getAccessToken());
-        } else if ("facebook".equalsIgnoreCase(request.getProvider())) {
-            response = oAuth2Service.loginWithFacebook(request.getAccessToken());
-        } else {
-            return ResponseEntity.badRequest().body(
-                    ApiResponse.error("Provider không được hỗ trợ. Chỉ hỗ trợ 'google' và 'facebook'", "INVALID_PROVIDER")
-            );
-        }
-        
-        return ResponseEntity.ok(ApiResponse.success("Đăng nhập với " + request.getProvider() + " thành công!", response));
     }
 
     @PostMapping("/refresh")
