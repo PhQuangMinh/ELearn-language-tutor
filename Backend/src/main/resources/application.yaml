@@ -23,13 +23,13 @@ spring:
       client:
         registration:
           google:
-            client-id: ${oauth2.google.client-id}
-            client-secret: ${oauth2.google.client-secret}
+            client-id: 454969516364-5j0vmvl2ghh1rie2klb543o6kj8vh90j.apps.googleusercontent.com
+            client-secret: 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
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
-            client-id: ${oauth2.facebook.app-id}
-            client-secret: ${oauth2.facebook.app-secret}
+            client-id: 1575619266897525
+            client-secret: a8e227580eddb1a79364b891d81e12c6
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
@@ -50,12 +50,12 @@ jwt:
   refresh-expiration: 604800000
 
 oauth2:
-  google:
-    client-id: 454969516364-5j0vmvl2ghh1rie2klb543o6kj8vh90j.apps.googleusercontent.com
-    client-secret: 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
-  facebook:
-    app-id: 1575619266897525
-    app-secret: a8e227580eddb1a79364b891d81e12c6
   # URL cho app Android: scheme elearn:// để app bắt deep link và nhận token
   mobile-redirect-url: elearn://login/callback
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.example.BTL_Mobile: DEBUG
+
 
