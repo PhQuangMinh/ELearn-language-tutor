@@ -1,21 +1,13 @@
 spring:
   application:
     name: BTL_Mobile
+  config:
+    import: optional:file:.env[.properties]
   
   datasource:
-    url: jdbc:mysql://localhost:3306/btl_mobile?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: 21122004
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
+    url: jdbc:mariadb://${MARIADB_ADDR}/btl_mobile?useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MARIADB_USERNAME}
+    password: ${MARIADB_PASSWORD}
 
 server:
   port: 8080
@@ -23,14 +15,14 @@ server:
     context-path: /
 
 jwt:
-  secret: BTLMobileSecretKeyForJWTTokenGenerationAndValidation2026ThisIsAVeryLongSecretKeyToEnsureSecurityAndMeetTheMinimumRequirements
-  expiration: 900000  # 15 minutes in milliseconds (access token)
-  refresh-expiration: 604800000  # 7 days in milliseconds (refresh token)
+  secret: ${JWT_SECRET_KEY}
+  expiration: ${JWT_EXPIRATION}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION}
 
 oauth2:
   google:
-    client-id: 454969516364-5j0vmvl2ghh1rie2klb543o6kj8vh90j.apps.googleusercontent.com
-    client-secret: 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
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
   facebook:
-    app-id: 1575619266897525
-    app-secret: a8e227580eddb1a79364b891d81e12c6
+    app-id: ${FACEBOOK_APP_ID}
+    app-secret: ${FACEBOOK_APP_SECRET}
