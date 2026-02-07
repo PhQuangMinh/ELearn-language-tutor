@@ -6,7 +6,7 @@ import com.example.BTL_Mobile.dto.RegisterRequest;
 import com.example.BTL_Mobile.dto.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.UserResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
-import com.example.BTL_Mobile.model.Role;
+import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;
 import com.example.BTL_Mobile.repository.RefreshTokenRepository;
 import com.example.BTL_Mobile.repository.UserRepository;
@@ -57,9 +57,8 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber())
                 .provider("local")
-                .role(Role.USER)
+                .role(ERole.USER)
                 .enabled(true)
                 .build();
 
@@ -236,7 +235,6 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole().name())
                 .build();
     }
