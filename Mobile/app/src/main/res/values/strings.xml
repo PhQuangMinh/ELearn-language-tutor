@@ -3,4 +3,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="back">Back</string>
+    <string name="email">Email</string>
+    <string name="ten_nguoi_dung">Tên người dùng</string>
+    <string name="quay_ve_trang_dang_nhap">Quay về trang đăng nhập</string>
+    <string name="mat_khau">Mật khẩu</string>
+    <string name="tao_tai_khoan">Tạo tài khoản</string>
+    <string name="dang_nhap">Đăng nhập</string>
+    <string name="quen_mat_khau">Quên mật khẩu</string>
+    <string name="lua_chon_khac">Lựa chọn khác</string>
+    <string name="nahp_lai_mat_khau">Nhập lại mật khẩu</string>
+    <string name="ten_day_du">Tên đầy đủ</string>
+    <string name="so_dien_thoai">Số điện thoại</string>
 </resources>
