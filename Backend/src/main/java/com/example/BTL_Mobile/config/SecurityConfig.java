@@ -3,6 +3,7 @@ package com.example.BTL_Mobile.config;
 import com.example.BTL_Mobile.security.JwtAuthenticationFilter;
 import com.example.BTL_Mobile.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +34,10 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    @Value("${oauth2.mobile-redirect-url:elearn://login/callback}")
+    private String mobileRedirectUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,8 +45,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/privacy-policy", "/terms", "/data-deletion").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/oauth2/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/test", "/api/auth/validate").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/oauth2/authorize/**", "/api/auth/refresh", "/api/auth/logout", "/api/auth/test", "/api/auth/validate").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/error").permitAll()
@@ -49,6 +55,14 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            String redirectUrl = mobileRedirectUrl + "?error=oauth_failed&message=" +
+                                    java.net.URLEncoder.encode(exception.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+                            response.sendRedirect(redirectUrl);
+                        })
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
