@@ -4,7 +4,7 @@ import com.example.BTL_Mobile.dto.AdminUserCreateRequest;
 import com.example.BTL_Mobile.dto.AdminUserUpdateRequest;
 import com.example.BTL_Mobile.dto.UserResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
-import com.example.BTL_Mobile.model.Role;
+import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;
 import com.example.BTL_Mobile.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class AdminUserService {
         return userRepository.findAll(pageable).map(this::toUserResponse);
     }
 
-    public UserResponse getById(Long id) {
+    public UserResponse getById(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy user", "USER_NOT_FOUND"));
         return toUserResponse(user);
@@ -45,10 +45,9 @@ public class AdminUserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber())
                 .provider("local")
                 .providerId(null)
-            .role(request.getRole() == null ? Role.USER : request.getRole())
+            .role(request.getRole() == null ? ERole.USER : request.getRole())
                 .enabled(request.getEnabled() == null || request.getEnabled())
                 .build();
 
@@ -57,7 +56,7 @@ public class AdminUserService {
     }
 
     @Transactional
-    public UserResponse update(Long id, AdminUserUpdateRequest request) {
+    public UserResponse update(Integer id, AdminUserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy user", "USER_NOT_FOUND"));
 
@@ -86,10 +85,6 @@ public class AdminUserService {
             user.setFullName(request.getFullName());
         }
 
-        if (request.getPhoneNumber() != null) {
-            user.setPhoneNumber(request.getPhoneNumber());
-        }
-
         if (request.getRole() != null) {
             user.setRole(request.getRole());
         }
@@ -103,7 +98,7 @@ public class AdminUserService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Integer id) {
         if (!userRepository.existsById(id)) {
             throw new BusinessException("Không tìm thấy user", "USER_NOT_FOUND");
         }
@@ -116,7 +111,6 @@ public class AdminUserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole() == null ? null : user.getRole().name())
                 .build();
     }

@@ -1,7 +1,7 @@
 package com.example.BTL_Mobile.service;
 
 import com.example.BTL_Mobile.dto.AuthResponse;
-import com.example.BTL_Mobile.model.Role;
+import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;
 import com.example.BTL_Mobile.repository.UserRepository;
 import com.example.BTL_Mobile.security.JwtTokenProvider;
@@ -67,7 +67,7 @@ public class OAuth2Service {
                         .fullName(name)
                         .provider(provider)
                         .providerId(providerId)
-                        .role(Role.USER)
+                        .role(ERole.USER)
                         .enabled(true)
                         .build();
             }

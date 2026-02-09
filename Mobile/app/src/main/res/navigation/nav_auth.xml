@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_auth"
+    app:startDestination="@id/nameRegisterFragment">
+    <fragment
+        android:id="@+id/nameRegisterFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.register.NameRegisterFragment"
+        android:label="NameRegisterFragment">
+        <action
+            android:id="@+id/action_name_to_email"
+            app:destination="@+id/emailRegisterFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/emailRegisterFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.register.EmailRegisterFragment"
+        android:label="EmailRegisterFragment">
+        <action
+            android:id="@+id/action_email_to_verify"
+            app:destination="@+id/verifyCodeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verifyCodeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.register.VerifyCodeFragment"
+        android:label="VerifyCodeFragment">
+        <action
+            android:id="@+id/action_verify_to_password"
+            app:destination="@+id/passwordRegisterFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/passwordRegisterFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.register.PasswordRegisterFragment"
+        android:label="PasswordRegisterFragment">
+        <action
+            android:id="@+id/action_password_to_register"
+            app:destination="@+id/registerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.login.LoginFragment"
+        android:label="LoginFragment" />
+</navigation>

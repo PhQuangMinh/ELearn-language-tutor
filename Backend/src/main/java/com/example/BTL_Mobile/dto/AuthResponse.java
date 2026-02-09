@@ -16,13 +16,13 @@ public class AuthResponse {
     private String refreshToken;
     @Default
     private String type = "Bearer";
-    private Long id;
+    private Integer id;
     private String username;
     private String email;
     private String fullName;
     private String role;
 
-    public AuthResponse(String token, Long id, String username, String email, String fullName, String role) {
+    public AuthResponse(String token, Integer id, String username, String email, String fullName, String role) {
         this.token = token;
         this.id = id;
         this.username = username;
@@ -31,7 +31,7 @@ public class AuthResponse {
         this.role = role;
     }
 
-    public AuthResponse(String token, String refreshToken, Long id, String username, String email, String fullName, String role) {
+    public AuthResponse(String token, String refreshToken, Integer id, String username, String email, String fullName, String role) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.id = id;

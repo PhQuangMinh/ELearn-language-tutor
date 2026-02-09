@@ -1,21 +1,27 @@
 spring:
   application:
     name: BTL_Mobile
-  
+
+  # Load .env for local runs (supports running from repo root or Backend/)
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:./Backend/.env[.properties]
+
   datasource:
-    url: jdbc:mysql://localhost:3306/btl_mobile?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: 21122004
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  
+    # Support both new (DB_*) and old (MARIADB_*) env names
+    url: ${DB_URL:jdbc:mariadb://${MARIADB_ADDR:localhost}/btl_mobile?useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:${MARIADB_USERNAME:}}
+    password: ${DB_PASSWORD:${MARIADB_PASSWORD:}}
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      # Disable Hibernate auto schema changes; Liquibase is source of truth
+      ddl-auto: ${JPA_DDL_AUTO:none}
+    show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
+        format_sql: ${JPA_FORMAT_SQL:true}
 
   # OAuth2 redirect flow: bấm "Đăng nhập Google/FB" -> chuyển tới Google/FB -> quay lại nhận JWT
   security:
@@ -23,13 +29,13 @@ spring:
       client:
         registration:
           google:
-            client-id: 454969516364-5j0vmvl2ghh1rie2klb543o6kj8vh90j.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${OAUTH2_GOOGLE_CLIENT_ID:${GOOGLE_CLIENT_ID}}
+            client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET:${GOOGLE_CLIENT_SECRET}}
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
           facebook:
-            client-id: 1575619266897525
-            client-secret: a8e227580eddb1a79364b891d81e12c6
+            client-id: ${OAUTH2_FACEBOOK_APP_ID:${FACEBOOK_APP_ID}}
+            client-secret: ${OAUTH2_FACEBOOK_APP_SECRET:${FACEBOOK_APP_SECRET}}
             scope: public_profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
@@ -40,22 +46,16 @@ spring:
             user-name-attribute: id
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /
 
 jwt:
-  secret: BTLMobileSecretKeyForJWTTokenGenerationAndValidation2026ThisIsAVeryLongSecretKeyToEnsureSecurityAndMeetTheMinimumRequirements
-  expiration: 900000  
-  refresh-expiration: 604800000
+  # Support both JWT_SECRET and legacy JWT_SECRET_KEY
+  secret: ${JWT_SECRET:${JWT_SECRET_KEY}}
+  expiration: ${JWT_EXPIRATION:900000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 oauth2:
   # URL cho app Android: scheme elearn:// để app bắt deep link và nhận token
-  mobile-redirect-url: elearn://login/callback
-
-logging:
-  level:
-    org.springframework.web: DEBUG
-    com.example.BTL_Mobile: DEBUG
-
-
+  mobile-redirect-url: ${OAUTH2_MOBILE_REDIRECT_URL:${MOBILE_REDIRECT_URL:elearn://login/callback}}

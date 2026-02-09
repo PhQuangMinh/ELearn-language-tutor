@@ -1,6 +1,6 @@
 package com.example.BTL_Mobile.dto;
 
-import com.example.BTL_Mobile.model.Role;
+import com.example.BTL_Mobile.model.enums.ERole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,10 +27,7 @@ public class AdminUserUpdateRequest {
     @Size(max = 100, message = "Họ tên tối đa 100 ký tự")
     private String fullName;
 
-    @Size(max = 15, message = "Số điện thoại tối đa 15 ký tự")
-    private String phoneNumber;
-
-    private Role role;
+    private ERole role;
 
     private Boolean enabled;
 }

@@ -30,7 +30,7 @@ public class AdminUserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Integer id) {
         UserResponse user = adminUserService.getById(id);
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin user thành công!", user));
     }
@@ -45,7 +45,7 @@ public class AdminUserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> update(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @Valid @RequestBody AdminUserUpdateRequest request
     ) {
         UserResponse user = adminUserService.update(id, request);
@@ -54,7 +54,7 @@ public class AdminUserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
         adminUserService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa user thành công!", null));
     }
