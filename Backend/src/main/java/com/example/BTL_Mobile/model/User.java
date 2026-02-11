@@ -66,6 +66,12 @@ public class User extends AbstractAuditEntity implements UserDetails {
     @Column(name = "reset_password_expiry")
     private LocalDateTime resetPasswordExpiry;
 
+    @Column(name = "reset_password_token", length = 64)
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    private LocalDateTime resetPasswordTokenExpiry;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

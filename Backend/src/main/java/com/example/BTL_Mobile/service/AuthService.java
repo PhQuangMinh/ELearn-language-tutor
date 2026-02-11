@@ -3,9 +3,11 @@ package com.example.BTL_Mobile.service;
 import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
 import com.example.BTL_Mobile.dto.request.RegisterRequest;
-import com.example.BTL_Mobile.dto.request.ResetPasswordRequest;
+import com.example.BTL_Mobile.dto.request.ResetPasswordWithTokenRequest;
 import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
+import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.security.SecureRandom;
 import java.util.Date;
 
 @Service
@@ -292,22 +295,21 @@ public class AuthService {
         String otp = generateOtp();
         user.setResetPasswordCode(otp);
         user.setResetPasswordExpiry(LocalDateTime.now().plusMinutes(10));
+        // clear any previous reset token
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
         userRepository.save(user);
 
         emailService.sendOtp(user.getEmail(), "Mã đặt lại mật khẩu", otp);
     }
 
     @Transactional
-    public void resetPassword(ResetPasswordRequest request) {
+    public ResetPasswordTokenResponse verifyForgotPasswordCode(VerifyForgotPasswordCodeRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
 
         if (!user.isEnabled()) {
             throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
-        }
-
-        if (request.getConfirmPassword() == null || !request.getConfirmPassword().equals(request.getNewPassword())) {
-            throw new BusinessException("Confirm password does not match!", "CONFIRM_PASSWORD_MISMATCH");
         }
 
         if (user.getResetPasswordCode() == null ||
@@ -320,9 +322,43 @@ public class AuthService {
             throw new BusinessException("Your verification code is incorrect.", "RESET_CODE_EXPIRED");
         }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Mark code as consumed, issue short-lived reset token
         user.setResetPasswordCode(null);
         user.setResetPasswordExpiry(null);
+        String resetToken = generateResetToken();
+        user.setResetPasswordToken(resetToken);
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        userRepository.save(user);
+
+        return new ResetPasswordTokenResponse(resetToken);
+    }
+
+    @Transactional
+    public void resetPasswordWithToken(ResetPasswordWithTokenRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
+
+        if (!user.isEnabled()) {
+            throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
+        }
+
+        if (request.getConfirmPassword() == null || !request.getConfirmPassword().equals(request.getNewPassword())) {
+            throw new BusinessException("Confirm password does not match!", "CONFIRM_PASSWORD_MISMATCH");
+        }
+
+        if (user.getResetPasswordToken() == null ||
+                user.getResetPasswordTokenExpiry() == null ||
+                !user.getResetPasswordToken().equals(request.getResetToken())) {
+            throw new BusinessException("Your verification code is incorrect.", "INVALID_RESET_TOKEN");
+        }
+
+        if (LocalDateTime.now().isAfter(user.getResetPasswordTokenExpiry())) {
+            throw new BusinessException("Your verification code is incorrect.", "RESET_TOKEN_EXPIRED");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
         user.setLastLogoutAt(LocalDateTime.now());
         userRepository.save(user);
 
@@ -333,5 +369,16 @@ public class AuthService {
     private String generateOtp() {
         int code = (int) (Math.random() * 900000) + 100000; // 6 digits
         return String.valueOf(code);
+    }
+
+    private String generateResetToken() {
+        // 32 bytes => 64 hex chars
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }
