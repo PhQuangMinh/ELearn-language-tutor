@@ -17,6 +17,25 @@ data class LoginRequestDTO (
 )
 
 @Serializable
+data class ForgotPasswordRequestDTO (
+    val email: String
+)
+
+@Serializable
+data class VerifyForgotPasswordCodeRequestDTO (
+    val email: String,
+    val code: String
+)
+
+@Serializable
+data class ResetPasswordWithTokenRequestDTO (
+    val email: String,
+    val resetToken: String,
+    val newPassword: String,
+    val confirmPassword: String
+)
+
+@Serializable
 data class RefreshTokenRequestDTO (
     val refreshToken: String
 )

@@ -1,6 +1,7 @@
 package com.nhom2.elearnlanguage.data.mapper
 
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
+import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
 import com.nhom2.elearnlanguage.domain.model.AuthSession
 import com.nhom2.elearnlanguage.domain.model.User
 

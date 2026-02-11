@@ -84,4 +84,11 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:3.0.0")
     implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
+
+    //Custom tabs
+    implementation("androidx.browser:browser:1.9.0")
+
+    //Credential Manager + Google Identity Services
+    implementation("androidx.credentials:credentials:1.2.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
 }
