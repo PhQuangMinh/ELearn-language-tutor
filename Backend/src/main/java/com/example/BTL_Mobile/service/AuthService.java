@@ -1,10 +1,13 @@
 package com.example.BTL_Mobile.service;
 
-import com.example.BTL_Mobile.dto.AuthResponse;
-import com.example.BTL_Mobile.dto.LoginRequest;
-import com.example.BTL_Mobile.dto.RegisterRequest;
-import com.example.BTL_Mobile.dto.TokenValidationResponse;
-import com.example.BTL_Mobile.dto.UserResponse;
+import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
+import com.example.BTL_Mobile.dto.request.LoginRequest;
+import com.example.BTL_Mobile.dto.request.RegisterRequest;
+import com.example.BTL_Mobile.dto.request.ResetPasswordRequest;
+import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
+import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
+import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;
@@ -38,20 +41,21 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final EmailService emailService;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         // Kiểm tra username đã tồn tại
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException("Username đã được sử dụng!", "USERNAME_EXISTS");
+            throw new BusinessException("This username has been used. Please choose another username!", "USERNAME_EXISTS");
         }
 
         // Kiểm tra email đã tồn tại
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException("Email đã được sử dụng!", "EMAIL_EXISTS");
+            throw new BusinessException("This email has been used. Please choose another email!", "EMAIL_EXISTS");
         }
 
-        // Tạo user mới
+        // Tạo user mới, chưa kích hoạt (chờ xác thực email)
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -59,12 +63,46 @@ public class AuthService {
                 .fullName(request.getFullName())
                 .provider("local")
                 .role(ERole.USER)
-                .enabled(true)
+                .enabled(false)
                 .build();
+
+        // Sinh mã OTP 6 chữ số và hạn 10 phút
+        String otp = generateOtp();
+        user.setEmailVerificationCode(otp);
+        user.setEmailVerificationExpiry(LocalDateTime.now().plusMinutes(10));
 
         userRepository.save(user);
 
-        // Tạo access token và refresh token
+        // Gửi email xác thực
+        emailService.sendOtp(user.getEmail(), "Xác thực đăng ký tài khoản", otp);
+    }
+
+    @Transactional
+    public AuthResponse verifyEmail(VerifyEmailRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
+
+        if (user.isEnabled()) {
+            throw new BusinessException("Account is already verified.", "ALREADY_VERIFIED");
+        }
+
+        if (user.getEmailVerificationCode() == null ||
+                user.getEmailVerificationExpiry() == null ||
+                !user.getEmailVerificationCode().equals(request.getCode())) {
+            throw new BusinessException("Your verification code is incorrect.", "INVALID_VERIFICATION_CODE");
+        }
+
+        if (LocalDateTime.now().isAfter(user.getEmailVerificationExpiry())) {
+            throw new BusinessException("Your verification code is incorrect.", "VERIFICATION_CODE_EXPIRED");
+        }
+
+        // Kích hoạt tài khoản
+        user.setEnabled(true);
+        user.setEmailVerificationCode(null);
+        user.setEmailVerificationExpiry(null);
+        userRepository.save(user);
+
+        // Tạo access token và refresh token sau khi xác thực thành công
         String token = jwtTokenProvider.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
 
@@ -96,6 +134,9 @@ public class AuthService {
             throw new RuntimeException("Authentication principal is not a User instance");
         }
         User user = (User) principal;
+        if (!user.isEnabled()) {
+            throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
+        }
         
         // Tạo access token và refresh token
         String token = jwtTokenProvider.generateToken(user);
@@ -237,5 +278,60 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("No account associated with this email.", "EMAIL_NOT_FOUND"));
+
+        if (!user.isEnabled()) {
+            throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
+        }
+
+        String otp = generateOtp();
+        user.setResetPasswordCode(otp);
+        user.setResetPasswordExpiry(LocalDateTime.now().plusMinutes(10));
+        userRepository.save(user);
+
+        emailService.sendOtp(user.getEmail(), "Mã đặt lại mật khẩu", otp);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
+
+        if (!user.isEnabled()) {
+            throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
+        }
+
+        if (request.getConfirmPassword() == null || !request.getConfirmPassword().equals(request.getNewPassword())) {
+            throw new BusinessException("Confirm password does not match!", "CONFIRM_PASSWORD_MISMATCH");
+        }
+
+        if (user.getResetPasswordCode() == null ||
+                user.getResetPasswordExpiry() == null ||
+                !user.getResetPasswordCode().equals(request.getCode())) {
+            throw new BusinessException("Your verification code is incorrect.", "INVALID_RESET_CODE");
+        }
+
+        if (LocalDateTime.now().isAfter(user.getResetPasswordExpiry())) {
+            throw new BusinessException("Your verification code is incorrect.", "RESET_CODE_EXPIRED");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordCode(null);
+        user.setResetPasswordExpiry(null);
+        user.setLastLogoutAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        // Revoke toàn bộ refresh tokens hiện tại
+        refreshTokenService.revokeAllUserTokens(user);
+    }
+
+    private String generateOtp() {
+        int code = (int) (Math.random() * 900000) + 100000; // 6 digits
+        return String.valueOf(code);
     }
 }

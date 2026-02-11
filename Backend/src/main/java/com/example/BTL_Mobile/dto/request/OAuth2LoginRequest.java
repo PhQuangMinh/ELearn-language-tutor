@@ -1,4 +1,4 @@
-package com.example.BTL_Mobile.dto;
+package com.example.BTL_Mobile.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 public class OAuth2LoginRequest {
     
     @NotBlank(message = "Provider không được để trống")
-    private String provider;  // google hoặc facebook
+    private String provider;  // google
     
     @NotBlank(message = "Access token không được để trống")
-    private String accessToken;  // Token từ Google/Facebook SDK
+    private String accessToken;  // Token từ Google SDK
 }

@@ -63,12 +63,4 @@ public class TokenBlacklistService {
             // Vì token không hợp lệ sẽ bị reject ở filter rồi
         }
     }
-
-    /**
-     * Xóa các token đã hết hạn khỏi blacklist (cleanup)
-     */
-    @Transactional
-    public void cleanupExpiredTokens() {
-        blacklistedTokenRepository.deleteExpiredTokens();
-    }
 }

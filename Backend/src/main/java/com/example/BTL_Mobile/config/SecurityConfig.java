@@ -46,10 +46,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/oauth2/authorize/**", "/api/auth/refresh", "/api/auth/logout", "/api/auth/test", "/api/auth/validate").permitAll()
+                        .requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/register/verify",
+                                "/api/auth/login",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
+                                "/api/auth/oauth2/authorize/google",
+                                "/api/auth/refresh",
+                                "/api/auth/logout",
+                                "/api/auth/test",
+                                "/api/auth/validate"
+                        ).permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
-                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

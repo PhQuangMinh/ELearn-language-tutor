@@ -1,6 +1,6 @@
 package com.example.BTL_Mobile.service;
 
-import com.example.BTL_Mobile.dto.AuthResponse;
+import com.example.BTL_Mobile.dto.response.AuthResponse;
 import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;
 import com.example.BTL_Mobile.repository.UserRepository;
