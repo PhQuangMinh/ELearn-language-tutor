@@ -1,6 +1,5 @@
 package com.example.BTL_Mobile.exception;
 
-import com.example.BTL_Mobile.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.example.BTL_Mobile.dto.response.ApiResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class GlobalExceptionHandler {
         });
 
         ApiResponse<Map<String, String>> response = ApiResponse.error(
-                "Dữ liệu không hợp lệ",
+                "Validation failed",
                 "VALIDATION_ERROR"
         );
         response.setData(errors);

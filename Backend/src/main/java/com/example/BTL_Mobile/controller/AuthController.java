@@ -1,12 +1,15 @@
 package com.example.BTL_Mobile.controller;
 
-import com.example.BTL_Mobile.dto.ApiResponse;
-import com.example.BTL_Mobile.dto.AuthResponse;
-import com.example.BTL_Mobile.dto.LoginRequest;
-import com.example.BTL_Mobile.dto.RefreshTokenRequest;
-import com.example.BTL_Mobile.dto.RegisterRequest;
-import com.example.BTL_Mobile.dto.TokenValidationResponse;
-import com.example.BTL_Mobile.dto.UserResponse;
+import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
+import com.example.BTL_Mobile.dto.request.LoginRequest;
+import com.example.BTL_Mobile.dto.request.RefreshTokenRequest;
+import com.example.BTL_Mobile.dto.request.RegisterRequest;
+import com.example.BTL_Mobile.dto.request.ResetPasswordRequest;
+import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
+import com.example.BTL_Mobile.dto.response.ApiResponse;
+import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
+import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,19 +36,16 @@ public class AuthController {
         response.sendRedirect("/oauth2/authorization/google");
     }
 
-    /**
-     * Bấm "Đăng nhập bằng Facebook" -> redirect tới trang đăng nhập Facebook.
-     * Project này dành cho mobile app: login xong redirect về deep link elearn://login/callback.
-     */
-    @GetMapping("/oauth2/authorize/facebook")
-    public void authorizeFacebook(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/oauth2/authorization/facebook");
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ResponseEntity.ok(ApiResponse.success("Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác thực.", null));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
-        return ResponseEntity.ok(ApiResponse.success("Đăng ký thành công!", response));
+    @PostMapping("/register/verify")
+    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        AuthResponse response = authService.verifyEmail(request);
+        return ResponseEntity.ok(ApiResponse.success("Xác thực email thành công!", response));
     }
 
     @PostMapping("/login")
@@ -71,6 +71,18 @@ public class AuthController {
         
         authService.logout(request.getRefreshToken(), accessToken);
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công!", null));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi.", null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công!", null));
     }
 
     @PostMapping("/validate")

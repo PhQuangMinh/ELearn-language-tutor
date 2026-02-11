@@ -1,9 +1,9 @@
 package com.example.BTL_Mobile.controller;
 
-import com.example.BTL_Mobile.dto.AdminUserCreateRequest;
-import com.example.BTL_Mobile.dto.AdminUserUpdateRequest;
-import com.example.BTL_Mobile.dto.ApiResponse;
-import com.example.BTL_Mobile.dto.UserResponse;
+import com.example.BTL_Mobile.dto.request.AdminUserCreateRequest;
+import com.example.BTL_Mobile.dto.request.AdminUserUpdateRequest;
+import com.example.BTL_Mobile.dto.response.ApiResponse;
+import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.service.AdminUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

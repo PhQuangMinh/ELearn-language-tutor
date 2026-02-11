@@ -80,8 +80,10 @@ public class OpenApiConfig {
 
                 if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) return false;
                 if (path.startsWith("/oauth2") || path.startsWith("/login/oauth2")) return false;
-                if (path.startsWith("/api/public")) return false;
                 if (path.equals("/api/auth/register")) return false;
+                if (path.equals("/api/auth/register/verify")) return false;
+                if (path.equals("/api/auth/forgot-password")) return false;
+                if (path.equals("/api/auth/reset-password")) return false;
                 if (path.equals("/api/auth/login")) return false;
                 if (path.equals("/api/auth/refresh")) return false;
                 if (path.equals("/api/auth/logout")) return false;

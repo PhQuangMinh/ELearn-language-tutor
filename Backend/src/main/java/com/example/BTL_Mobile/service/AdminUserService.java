@@ -1,8 +1,8 @@
 package com.example.BTL_Mobile.service;
 
-import com.example.BTL_Mobile.dto.AdminUserCreateRequest;
-import com.example.BTL_Mobile.dto.AdminUserUpdateRequest;
-import com.example.BTL_Mobile.dto.UserResponse;
+import com.example.BTL_Mobile.dto.request.AdminUserCreateRequest;
+import com.example.BTL_Mobile.dto.request.AdminUserUpdateRequest;
+import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.enums.ERole;
 import com.example.BTL_Mobile.model.User;

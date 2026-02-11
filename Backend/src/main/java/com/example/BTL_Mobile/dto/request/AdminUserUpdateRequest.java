@@ -1,4 +1,4 @@
-package com.example.BTL_Mobile.dto;
+package com.example.BTL_Mobile.dto.request;
 
 import com.example.BTL_Mobile.model.enums.ERole;
 import jakarta.validation.constraints.Email;

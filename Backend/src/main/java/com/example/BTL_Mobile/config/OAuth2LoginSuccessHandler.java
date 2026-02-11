@@ -1,6 +1,6 @@
 package com.example.BTL_Mobile.config;
 
-import com.example.BTL_Mobile.dto.AuthResponse;
+import com.example.BTL_Mobile.dto.response.AuthResponse;
 import com.example.BTL_Mobile.service.OAuth2Service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Sau khi user đăng nhập Google/Facebook xong, Spring OAuth2 đã đổi code lấy thông tin user.
+ * Sau khi user đăng nhập Google xong, Spring OAuth2 đã đổi code lấy thông tin user.
  * Handler này: tìm/tạo user trong DB, phát JWT + refresh token, redirect về frontend kèm token.
  */
 @Component
@@ -49,10 +49,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             providerId = (String) attributes.get("sub");
             email = (String) attributes.get("email");
             name = (String) attributes.get("name");
-        } else if ("facebook".equals(registrationId)) {
-            providerId = String.valueOf(attributes.get("id"));
-            name = (String) attributes.get("name");
-            email = (String) attributes.get("email");
         } else {
             getRedirectStrategy().sendRedirect(request, response, mobileRedirectUrl + "?error=unsupported_provider");
             return;
