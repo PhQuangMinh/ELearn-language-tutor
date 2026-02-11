@@ -4,10 +4,12 @@ import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
 import com.example.BTL_Mobile.dto.request.RefreshTokenRequest;
 import com.example.BTL_Mobile.dto.request.RegisterRequest;
-import com.example.BTL_Mobile.dto.request.ResetPasswordRequest;
+import com.example.BTL_Mobile.dto.request.ResetPasswordWithTokenRequest;
 import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
+import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.ApiResponse;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.service.AuthService;
@@ -79,10 +81,18 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi.", null));
     }
 
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<ApiResponse<ResetPasswordTokenResponse>> verifyForgotPasswordCode(
+            @Valid @RequestBody VerifyForgotPasswordCodeRequest request
+    ) {
+        ResetPasswordTokenResponse response = authService.verifyForgotPasswordCode(request);
+        return ResponseEntity.ok(ApiResponse.success("Verify code successful!", response));
+    }
+
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request);
-        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công!", null));
+    public ResponseEntity<ApiResponse<Object>> resetPassword(@Valid @RequestBody ResetPasswordWithTokenRequest request) {
+        authService.resetPasswordWithToken(request);
+        return ResponseEntity.ok(ApiResponse.success("Reset password successful!", null));
     }
 
     @PostMapping("/validate")
