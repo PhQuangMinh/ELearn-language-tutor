@@ -1,4 +1,4 @@
-package com.example.BTL_Mobile.dto;
+package com.example.BTL_Mobile.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

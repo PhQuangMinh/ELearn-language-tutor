@@ -35,7 +35,7 @@ public class User extends AbstractAuditEntity implements UserDetails {
     private String password;  // Nullable cho OAuth users
 
     @Column(name = "provider", length = 20)
-    private String provider;  // local, google, facebook
+    private String provider;  // local, google
 
     @Column(name = "provider_id", length = 100)
     private String providerId;  // ID từ OAuth provider
@@ -53,6 +53,18 @@ public class User extends AbstractAuditEntity implements UserDetails {
 
     @Builder.Default
     private boolean enabled = true;
+
+    @Column(name = "email_verification_code", length = 6)
+    private String emailVerificationCode;
+
+    @Column(name = "email_verification_expiry")
+    private LocalDateTime emailVerificationExpiry;
+
+    @Column(name = "reset_password_code", length = 6)
+    private String resetPasswordCode;
+
+    @Column(name = "reset_password_expiry")
+    private LocalDateTime resetPasswordExpiry;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

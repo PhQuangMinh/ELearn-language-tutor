@@ -48,6 +48,12 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
+		<!-- Mail for email verification / forgot password -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- Swagger / OpenAPI (springdoc) -->
 		<dependency>
 			<groupId>org.springdoc</groupId>

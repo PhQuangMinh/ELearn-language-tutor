@@ -15,10 +15,6 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class JpaAuditingConfig {
 
-    /**
-     * Resolve current user id for @CreatedBy/@LastModifiedBy.
-     * Falls back to 0 when unauthenticated (e.g. self-register).
-     */
     @Bean
     public AuditorAware<Integer> auditorAware() {
         return () -> {

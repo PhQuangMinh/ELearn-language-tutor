@@ -1,4 +1,4 @@
-package com.example.BTL_Mobile.dto;
+package com.example.BTL_Mobile.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

@@ -60,15 +60,6 @@ public class RefreshTokenService {
         });
         // Nếu token không tồn tại, không throw exception (idempotent)
     }
-    
-    @Transactional
-    public void revokeRefreshTokenOrThrow(String token) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new BusinessException("Refresh token không tồn tại!", "REFRESH_TOKEN_NOT_FOUND"));
-        
-        refreshToken.setRevoked(true);
-        refreshTokenRepository.save(refreshToken);
-    }
 
     @Transactional
     public void revokeAllUserTokens(User user) {
