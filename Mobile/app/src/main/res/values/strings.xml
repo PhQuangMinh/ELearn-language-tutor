@@ -3,4 +3,28 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="back">Back</string>
+    <string name="username">Username</string>
+    <string name="test_gmail_com">test@gmail.com</string>
+    <string name="password">Password</string>
+    <string name="enter_your_user_name_here">Enter your user name here</string>
+    <string name="enter_your_password_here">Enter your password here</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="login">Login</string>
+    <string name="login_with_google">Login with Google</string>
+    <string name="don_t_have_account">Don\'t have account?</string>
+    <string name="register">Register</string>
+    <string name="your_username_or_password_is_incorrect">Your username or password is incorrect</string>
+    <string name="what_is_your_email">What is your email?</string>
+    <string name="your_email">Your email</string>
+    <string name="next">Next</string>
+    <string name="your_verification_code_is_incorrect">Your verification code is incorrect.</string>
+    <string name="enter_the_verification_code_sent_nto_your_email">Enter the verification code sent\nto your email</string>
+    <string name="set_up_your_new_password">Set up your new password</string>
+    <string name="enter_your_new_password_here">Enter your new password here</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="enter_your_confirm_password_here">Enter your confirm password here</string>
+    <string name="email_cannot_be_empty">Email cannot be empty!</string>
+    <string name="email_format_incorrect">Email\'s format is incorrect!</string>
+    <string name="no_account_has_been_associated_with_this_email">No account associated with this email.</string>
 </resources>
