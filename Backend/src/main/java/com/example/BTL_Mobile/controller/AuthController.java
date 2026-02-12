@@ -1,6 +1,7 @@
 package com.example.BTL_Mobile.controller;
 
 import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
+import com.example.BTL_Mobile.dto.request.GoogleIdTokenLoginRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
 import com.example.BTL_Mobile.dto.request.RefreshTokenRequest;
 import com.example.BTL_Mobile.dto.request.RegisterRequest;
@@ -13,6 +14,7 @@ import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.response.UserResponse;
 import com.example.BTL_Mobile.service.AuthService;
+import com.example.BTL_Mobile.service.GoogleIdTokenAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import java.io.IOException;
 public class AuthController {
 
     private final AuthService authService;
+    private final GoogleIdTokenAuthService googleIdTokenAuthService;
 
     /**
      * Bấm "Đăng nhập bằng Google" -> redirect tới trang đăng nhập Google.
@@ -36,6 +39,18 @@ public class AuthController {
     @GetMapping("/oauth2/authorize/google")
     public void authorizeGoogle(HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/google");
+    }
+
+    /**
+     * Mobile "popup chọn tài khoản Google" (Google Sign-In / Credential Manager) -> gửi idToken về BE.
+     * BE verify idToken với Google và phát JWT + refresh token của hệ thống.
+     */
+    @PostMapping("/oauth2/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginGoogleWithIdToken(
+            @Valid @RequestBody GoogleIdTokenLoginRequest request
+    ) {
+        AuthResponse response = googleIdTokenAuthService.loginWithGoogleIdToken(request.getIdToken());
+        return ResponseEntity.ok(ApiResponse.success("Đăng nhập Google thành công!", response));
     }
 
     @PostMapping("/register")
