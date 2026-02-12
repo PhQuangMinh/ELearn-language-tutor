@@ -86,6 +86,7 @@ public class OpenApiConfig {
                 if (path.equals("/api/auth/forgot-password/verify")) return false;
                 if (path.equals("/api/auth/reset-password")) return false;
                 if (path.equals("/api/auth/login")) return false;
+                if (path.equals("/api/auth/oauth2/google")) return false;
                 if (path.equals("/api/auth/refresh")) return false;
                 if (path.equals("/api/auth/logout")) return false;
                 if (path.equals("/api/auth/test")) return false;
