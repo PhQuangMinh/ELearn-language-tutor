@@ -17,6 +17,11 @@ data class LoginRequestDTO (
 )
 
 @Serializable
+data class GoogleLoginRequestDTO (
+    val idToken: String
+)
+
+@Serializable
 data class ForgotPasswordRequestDTO (
     val email: String
 )

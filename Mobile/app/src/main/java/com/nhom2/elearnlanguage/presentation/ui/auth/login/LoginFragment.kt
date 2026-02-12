@@ -3,25 +3,28 @@ package com.nhom2.elearnlanguage.presentation.ui.auth.login
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.nhom2.elearnlanguage.BuildConfig
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentLoginBinding
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.nhom2.elearnlanguage.BuildConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.Locale
-import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -68,7 +71,7 @@ class LoginFragment : Fragment() {
             }
 
             tvGoogle.setOnClickListener {
-                openOAuthLogin("google")
+                startGoogleLogin()
             }
 
             tvCreateAccount.setOnClickListener {
@@ -115,12 +118,36 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun openOAuthLogin(provider: String) {
-        val baseUrl = BuildConfig.API_BASE_URL
-        val normalizedProvider = provider.lowercase(Locale.US)
-        val url = "$baseUrl/api/auth/oauth2/authorize/$normalizedProvider"
-        val customTabsIntent = CustomTabsIntent.Builder().build()
-        customTabsIntent.launchUrl(requireContext(), url.toUri())
+    private fun startGoogleLogin() {
+        val context = requireContext()
+        val credentialManager = CredentialManager.create(context)
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
+            .build()
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context
+                )
+                val credential = result.credential
+                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                val idToken = googleIdTokenCredential.idToken
+                viewModel.googleLogin(idToken)
+            } catch (e: GetCredentialException) {
+                Toast.makeText(
+                    requireContext(),
+                    "Google login failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+                Log.d("GOOGLE LOGIN", e.toString())
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -165,7 +192,14 @@ class LoginFragment : Fragment() {
                             setLoading(false)
                             Toast.makeText(requireContext(), "Login success", Toast.LENGTH_SHORT).show()
 
-                            findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                            val navOptions = androidx.navigation.NavOptions.Builder()
+                                .setPopUpTo(R.id.loginFragment, true)
+                                .build()
+                            findNavController().navigate(
+                                R.id.action_loginFragment_to_homeFragment,
+                                null,
+                                navOptions
+                            )
                             viewModel.resetState()
                         }
                         is LoginUiState.Error -> {

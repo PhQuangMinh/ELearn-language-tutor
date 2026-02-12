@@ -4,6 +4,7 @@ import com.nhom2.elearnlanguage.BuildConfig
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
+import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordTokenResponseDTO
@@ -29,6 +30,13 @@ class AuthDataSource @Inject constructor(
 
     suspend fun register(request: RegisterRequestDTO): ApiResponseDTO<AuthResponseDTO> {
         return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/register") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun googleLogin(request: GoogleLoginRequestDTO): ApiResponseDTO<AuthResponseDTO> {
+        return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/oauth2/google") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

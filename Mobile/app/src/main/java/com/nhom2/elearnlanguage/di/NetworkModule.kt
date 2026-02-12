@@ -50,7 +50,10 @@ object NetworkModule {
                 url(BuildConfig.API_BASE_URL)
                 val token = TokenManager.getAccessToken(context)
                 val url = this.url.build().toString()
-                if (!url.contains("/api/auth/login") && !url.contains("/api/auth/register")) {
+                if (!url.contains("/api/auth/login") &&
+                    !url.contains("/api/auth/register") &&
+                    !url.contains("/api/auth/oauth2/google")
+                ) {
                     token?.let {
                         header("Authorization", "Bearer $it")
                     }

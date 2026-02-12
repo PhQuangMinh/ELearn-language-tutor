@@ -4,6 +4,7 @@ import android.util.Log
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
+import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordWithTokenRequestDTO
@@ -25,6 +26,17 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
         }
 
         Log.d("LOGIN", response.data.toString())
+        return AuthMapper.toAuthSession(response.data)
+    }
+
+    override suspend fun googleLogin(idToken: String): AuthSession {
+        val response = authDataSource.googleLogin(GoogleLoginRequestDTO(idToken))
+
+        if (!response.success || response.data == null) {
+            Log.d("GOOGLE LOGIN", response.toString())
+            throw Exception(response.errorCode ?: response.message)
+        }
+
         return AuthMapper.toAuthSession(response.data)
     }
 

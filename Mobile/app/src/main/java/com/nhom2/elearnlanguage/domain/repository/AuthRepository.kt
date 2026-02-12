@@ -8,6 +8,7 @@ import com.nhom2.elearnlanguage.domain.model.AuthSession
 
 interface AuthRepository {
     suspend fun login(username: String, password: String): AuthSession
+    suspend fun googleLogin(idToken: String): AuthSession
     suspend fun register(
         username: String,
         email: String,

@@ -25,8 +25,10 @@ android {
             file.inputStream().use { properties.load(it) }
         }
         val apiBaseUrl = properties.getProperty("api.base.url")
+        val webClientId = properties.getProperty("WEB_CLIENT_ID")
 
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
     }
 
     buildTypes {
@@ -89,6 +91,7 @@ dependencies {
     implementation("androidx.browser:browser:1.9.0")
 
     //Credential Manager + Google Identity Services
-    implementation("androidx.credentials:credentials:1.2.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
 }
