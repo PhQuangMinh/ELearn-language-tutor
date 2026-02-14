@@ -4,12 +4,14 @@ import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
 import com.example.BTL_Mobile.dto.request.GoogleIdTokenLoginRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
 import com.example.BTL_Mobile.dto.request.RefreshTokenRequest;
-import com.example.BTL_Mobile.dto.request.RegisterRequest;
+import com.example.BTL_Mobile.dto.request.RegisterCompleteRequest;
+import com.example.BTL_Mobile.dto.request.RegisterInitiateRequest;
 import com.example.BTL_Mobile.dto.request.ResetPasswordWithTokenRequest;
 import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
 import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.ApiResponse;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.RegisterTokenResponse;
 import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.response.UserResponse;
@@ -54,15 +56,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request);
-        return ResponseEntity.ok(ApiResponse.success("Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác thực.", null));
+    public ResponseEntity<ApiResponse<Object>> registerInitiate(@Valid @RequestBody RegisterInitiateRequest request) {
+        authService.registerInitiate(request);
+        return ResponseEntity.ok(ApiResponse.success("OTP has been sent to your email.", null));
     }
 
     @PostMapping("/register/verify")
-    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
-        AuthResponse response = authService.verifyEmail(request);
-        return ResponseEntity.ok(ApiResponse.success("Xác thực email thành công!", response));
+    public ResponseEntity<ApiResponse<RegisterTokenResponse>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        RegisterTokenResponse response = authService.verifyEmail(request);
+        return ResponseEntity.ok(ApiResponse.success("Verify code successful!", response));
+    }
+
+    @PostMapping("/register/complete")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerComplete(@Valid @RequestBody RegisterCompleteRequest request) {
+        AuthResponse response = authService.registerComplete(request);
+        return ResponseEntity.ok(ApiResponse.success("Register successful!", response));
     }
 
     @PostMapping("/login")
@@ -93,7 +101,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
-        return ResponseEntity.ok(ApiResponse.success("Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi.", null));
+        return ResponseEntity.ok(ApiResponse.success("OTP has been sent to your email.", null));
     }
 
     @PostMapping("/forgot-password/verify")

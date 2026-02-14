@@ -2,11 +2,13 @@ package com.example.BTL_Mobile.service;
 
 import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
-import com.example.BTL_Mobile.dto.request.RegisterRequest;
+import com.example.BTL_Mobile.dto.request.RegisterCompleteRequest;
+import com.example.BTL_Mobile.dto.request.RegisterInitiateRequest;
 import com.example.BTL_Mobile.dto.request.ResetPasswordWithTokenRequest;
 import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
 import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.RegisterTokenResponse;
 import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
 import com.example.BTL_Mobile.dto.response.UserResponse;
@@ -47,27 +49,31 @@ public class AuthService {
     private final EmailService emailService;
 
     @Transactional
-    public void register(RegisterRequest request) {
-        // Kiểm tra username đã tồn tại
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException("This username has been used. Please choose another username!", "USERNAME_EXISTS");
-        }
-
-        // Kiểm tra email đã tồn tại
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public void registerInitiate(RegisterInitiateRequest request) {
+        // If email is already used by an active account => block
+        User existing = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (existing != null && existing.isEnabled()) {
             throw new BusinessException("This email has been used. Please choose another email!", "EMAIL_EXISTS");
         }
 
-        // Tạo user mới, chưa kích hoạt (chờ xác thực email)
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .provider("local")
-                .role(ERole.USER)
-                .enabled(false)
-                .build();
+        // Create or reuse a pending (disabled) user to allow resend OTP
+        User user = existing;
+        if (user == null) {
+            String username = generateUsernameFromEmail(request.getEmail());
+            user = User.builder()
+                    .username(username)
+                    .email(request.getEmail())
+                    // placeholder password; will be overwritten in complete step
+                    .password(passwordEncoder.encode(generateResetToken()))
+                    .fullName(request.getFullName())
+                    .provider("local")
+                    .role(ERole.USER)
+                    .enabled(false)
+                    .build();
+        } else {
+            // Update name on re-initiate
+            user.setFullName(request.getFullName());
+        }
 
         // Sinh mã OTP 6 chữ số và hạn 10 phút
         String otp = generateOtp();
@@ -77,11 +83,11 @@ public class AuthService {
         userRepository.save(user);
 
         // Gửi email xác thực
-        emailService.sendOtp(user.getEmail(), "Xác thực đăng ký tài khoản", otp);
+        emailService.sendOtp(user.getEmail(), "Verify your registration", otp);
     }
 
     @Transactional
-    public AuthResponse verifyEmail(VerifyEmailRequest request) {
+    public RegisterTokenResponse verifyEmail(VerifyEmailRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
 
@@ -99,16 +105,35 @@ public class AuthService {
             throw new BusinessException("Your verification code is incorrect.", "VERIFICATION_CODE_EXPIRED");
         }
 
-        // Kích hoạt tài khoản
-        user.setEnabled(true);
+        // OTP verified; DO NOT enable account yet (password step comes after)
         user.setEmailVerificationCode(null);
         user.setEmailVerificationExpiry(null);
         userRepository.save(user);
 
-        // Tạo access token và refresh token sau khi xác thực thành công
+        // issue short-lived registerToken for password completion
+        String registerToken = jwtTokenProvider.generateRegisterToken(user.getEmail(), 10 * 60 * 1000L);
+        return new RegisterTokenResponse(registerToken);
+    }
+
+    @Transactional
+    public AuthResponse registerComplete(RegisterCompleteRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException("No account associated with this email.", "USER_NOT_FOUND"));
+
+        if (user.isEnabled()) {
+            throw new BusinessException("This email has been used. Please choose another email!", "EMAIL_EXISTS");
+        }
+
+        if (!jwtTokenProvider.validateRegisterToken(request.getRegisterToken(), request.getEmail())) {
+            throw new BusinessException("Your verification code is incorrect.", "INVALID_REGISTER_TOKEN");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEnabled(true);
+        userRepository.save(user);
+
         String token = jwtTokenProvider.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
-
         return new AuthResponse(
                 token,
                 refreshToken,
@@ -380,5 +405,24 @@ public class AuthService {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    private String generateUsernameFromEmail(String email) {
+        String base = (email != null && email.contains("@")) ? email.substring(0, email.indexOf('@')) : "user";
+        base = base.toLowerCase().replaceAll("[^a-z0-9._-]", "");
+        if (base.length() < 4) {
+            base = (base + "user").substring(0, Math.min(50, base.length() + 4));
+        }
+
+        String username = base;
+        int counter = 1;
+        while (userRepository.existsByUsername(username)) {
+            String suffix = "_" + counter;
+            int maxBaseLen = Math.max(1, 50 - suffix.length());
+            String trimmedBase = base.length() > maxBaseLen ? base.substring(0, maxBaseLen) : base;
+            username = trimmedBase + suffix;
+            counter++;
+        }
+        return username;
     }
 }

@@ -82,6 +82,7 @@ public class OpenApiConfig {
                 if (path.startsWith("/oauth2") || path.startsWith("/login/oauth2")) return false;
                 if (path.equals("/api/auth/register")) return false;
                 if (path.equals("/api/auth/register/verify")) return false;
+                if (path.equals("/api/auth/register/complete")) return false;
                 if (path.equals("/api/auth/forgot-password")) return false;
                 if (path.equals("/api/auth/forgot-password/verify")) return false;
                 if (path.equals("/api/auth/reset-password")) return false;
