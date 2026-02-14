@@ -86,6 +86,27 @@ public class JwtTokenProvider {
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
+    /**
+     * Short-lived token used to complete registration after OTP verification.
+     * Subject is the email. Token has claim: type=register.
+     */
+    public String generateRegisterToken(String email, long expirationMillis) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "register");
+        return createToken(claims, email, expirationMillis);
+    }
+
+    public boolean validateRegisterToken(String token, String email) {
+        try {
+            if (!isValidToken(token)) return false;
+            String type = extractClaim(token, claims -> claims.get("type", String.class));
+            String subject = extractUsername(token);
+            return "register".equals(type) && email != null && email.equals(subject);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private String createToken(Map<String, Object> claims, String subject, Long expirationTime) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
