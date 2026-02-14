@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_nav_auth"
+            app:destination="@id/nav_auth" />
+        <action
+            android:id="@+id/action_loginFragment_to_inputEmailFragment"
+            app:destination="@id/inputEmailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <include app:graph="@navigation/nav_auth" />
+    <fragment
+        android:id="@+id/inputEmailFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.InputEmailFragment"
+        android:label="InputEmailFragment" >
+        <action
+            android:id="@+id/action_inputEmailFragment_to_inputVerificationCodeFragment"
+            app:destination="@id/inputVerificationCodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inputVerificationCodeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.InputVerificationCodeFragment"
+        android:label="InputVerificationCodeFragment" >
+        <action
+            android:id="@+id/action_inputVerificationCodeFragment_to_newPasswordFragment"
+            app:destination="@id/newPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPasswordFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.NewPasswordFragment"
+        android:label="NewPasswordFragment" />
+</navigation>
