@@ -58,13 +58,16 @@ class InputEmailFragment : Fragment() {
                 launch {
                     forgetPasswordViewModel.uiState.collect { state ->
                         when (state) {
-                            is ResetPasswordUIState.Idle -> Unit
-                            is ResetPasswordUIState.Loading -> Unit
+                            is ResetPasswordUIState.Idle -> setLoading(false)
+                            is ResetPasswordUIState.Loading -> setLoading(true)
                             is ResetPasswordUIState.Success -> {
+                                setLoading(false)
                                 forgetPasswordViewModel.resetState()
                                 findNavController().navigate(R.id.action_inputEmailFragment_to_inputVerificationCodeFragment)
                             }
-                            is ResetPasswordUIState.Error -> Unit
+                            is ResetPasswordUIState.Error -> {
+                                setLoading(false)
+                            }
                         }
                     }
                 }
@@ -87,6 +90,12 @@ class InputEmailFragment : Fragment() {
         val email = binding.etEmail.text.toString()
         forgetPasswordViewModel.setEmail(email)
         forgetPasswordViewModel.forgotPassword(email)
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.btnNext.isEnabled = !isLoading
+        binding.btnNext.alpha = if (binding.btnNext.isEnabled) 1f else 0.6f
     }
 
     override fun onDestroyView() {
