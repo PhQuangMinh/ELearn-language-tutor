@@ -1,6 +1,7 @@
 package com.nhom2.elearnlanguage.presentation.ui.auth.forget_password
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -25,6 +26,8 @@ class InputVerificationCodeFragment : Fragment() {
     private var _binding: FragmentInputVerificationCodeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ForgetPasswordViewModel by activityViewModels()
+    private var timer: CountDownTimer? = null
+    private var isResendRequest: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +44,7 @@ class InputVerificationCodeFragment : Fragment() {
         setupListener()
         setupOtpInputs()
         setupObservers()
+        startCountdown(60)
     }
 
     private fun setupListener () {
@@ -54,6 +58,19 @@ class InputVerificationCodeFragment : Fragment() {
 
                 clearOtpError()
                 viewModel.verifyForgotPasswordCode(email, code)
+            }
+
+            tvResend.setOnClickListener {
+                if (!tvResend.isClickable) return@setOnClickListener
+                val email = viewModel.email.value
+                if (email.isBlank()) {
+                    showOtpError("Email khong hop le")
+                    return@setOnClickListener
+                }
+                isResendRequest = true
+                clearOtpError()
+                viewModel.forgotPassword(email)
+                startCountdown(60)
             }
         }
     }
@@ -105,11 +122,20 @@ class InputVerificationCodeFragment : Fragment() {
                         is ResetPasswordUIState.Loading -> setLoading(true)
                         is ResetPasswordUIState.Success -> {
                             setLoading(false)
-                            viewModel.resetState()
-                            findNavController().navigate(R.id.action_inputVerificationCodeFragment_to_newPasswordFragment)
+                            if (isResendRequest) {
+                                isResendRequest = false
+                                viewModel.resetState()
+                                showOtpError("Da gui lai ma xac thuc")
+                            } else {
+                                viewModel.resetState()
+                                findNavController().navigate(R.id.action_inputVerificationCodeFragment_to_newPasswordFragment)
+                            }
                         }
                         is ResetPasswordUIState.Error -> {
                             setLoading(false)
+                            if (isResendRequest) {
+                                isResendRequest = false
+                            }
                             if (state.message.isNullOrBlank()) {
                                 clearOtpError()
                             } else {
@@ -159,12 +185,33 @@ class InputVerificationCodeFragment : Fragment() {
         imm?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
+    private fun startCountdown(seconds: Int) {
+        timer?.cancel()
+        binding.tvResend.isClickable = false
+        binding.tvResend.setTextColor(0xFF9AA7B8.toInt())
+
+        timer = object : CountDownTimer(seconds * 1000L, 1000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                val s = (millisUntilFinished / 1000L).toInt()
+                binding.tvResend.text = "Resend code in: $s"
+            }
+
+            override fun onFinish() {
+                binding.tvResend.text = "Resend code"
+                binding.tvResend.isClickable = true
+                binding.tvResend.setTextColor(resources.getColor(R.color.primary_blue, null))
+            }
+        }.start()
+    }
+
     companion object {
         private const val OTP_LENGTH = 6
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        timer?.cancel()
+        timer = null
         _binding = null
     }
 }

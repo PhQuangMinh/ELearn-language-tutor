@@ -22,7 +22,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
         val response = authDataSource.login(LoginRequestDTO(username, password))
 
         if (!response.success || response.data == null) {
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
 
         Log.d("LOGIN", response.data.toString())
@@ -34,7 +34,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
 
         if (!response.success || response.data == null) {
             Log.d("GOOGLE LOGIN", response.toString())
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
 
         return AuthMapper.toAuthSession(response.data)
@@ -58,7 +58,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
         )
 
         if (!response.success || response.data == null) {
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
 
         return AuthMapper.toAuthSession(response.data)
@@ -70,7 +70,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
 
         if (!response.success) {
             Log.d("FORGOT PASSWORD", response.toString())
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
     }
 
@@ -80,7 +80,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
 
         if (!response.success || response.data == null) {
             Log.d("VERIFY FORGOT CODE", response.toString())
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
 
         return response.data.resetToken
@@ -102,7 +102,7 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
 
         if (!response.success) {
             Log.d("RESET PASSWORD", response.toString())
-            throw Exception(response.errorCode ?: response.message)
+            throw Exception(response.message)
         }
     }
 }
