@@ -6,9 +6,11 @@ import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
-import com.nhom2.elearnlanguage.data.dto.RegisterRequestDTO
+import com.nhom2.elearnlanguage.data.dto.RegisterCompleteRequestDTO
+import com.nhom2.elearnlanguage.data.dto.RegisterInitiateRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordWithTokenRequestDTO
 import com.nhom2.elearnlanguage.data.dto.VerifyForgotPasswordCodeRequestDTO
+import com.nhom2.elearnlanguage.data.dto.VerifyEmailRequestDTO
 import com.nhom2.elearnlanguage.data.mapper.AuthMapper
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.domain.model.AuthSession
@@ -40,20 +42,35 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
         return AuthMapper.toAuthSession(response.data)
     }
 
+    override suspend fun registerInitiate(fullName: String, email: String) {
+        val response = authDataSource.registerInitiate(
+            RegisterInitiateRequestDTO(fullName = fullName, email = email)
+        )
+        if (!response.success) {
+            throw Exception(response.message)
+        }
+    }
 
-    override suspend fun register(
-        username: String,
+    override suspend fun registerVerifyEmail(email: String, code: String): String {
+        val response = authDataSource.registerVerifyEmail(
+            VerifyEmailRequestDTO(email = email, code = code)
+        )
+        if (!response.success || response.data == null) {
+            throw Exception(response.message)
+        }
+        return response.data.registerToken
+    }
+
+    override suspend fun registerComplete(
         email: String,
-        password: String,
-        fullName: String?,
-        phoneNumber: String?
+        registerToken: String,
+        password: String
     ): AuthSession {
-        val response = authDataSource.register(
-            RegisterRequestDTO(
+        val response = authDataSource.registerComplete(
+            RegisterCompleteRequestDTO(
                 email = email,
-                username = username,
-                password = password,
-                fullName = fullName ?: ""
+                registerToken = registerToken,
+                password = password
             )
         )
 
