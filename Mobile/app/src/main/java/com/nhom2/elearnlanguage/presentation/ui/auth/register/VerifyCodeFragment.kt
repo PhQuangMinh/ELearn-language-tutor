@@ -9,16 +9,20 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
 import com.nhom2.elearnlanguage.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class VerifyCodeFragment : Fragment(R.layout.fragment_verify_code) {
 
     private var timer: CountDownTimer? = null
     private var isErrorShown: Boolean = false
+    private val viewModel: RegisterViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,8 +43,11 @@ class VerifyCodeFragment : Fragment(R.layout.fragment_verify_code) {
 
         fun getCode(): String = boxes.joinToString(separator = "") { it.text?.toString().orEmpty() }
 
-        fun setErrorState(show: Boolean) {
+        fun setErrorState(show: Boolean, message: String? = null) {
             isErrorShown = show
+            if (show && !message.isNullOrBlank()) {
+                tvOtpError.text = message
+            }
             tvOtpError.visibility = if (show) View.VISIBLE else View.GONE
             val bg = if (show) R.drawable.bg_otp_box_error else R.drawable.bg_otp_box
             boxes.forEach { it.setBackgroundResource(bg) }
@@ -117,11 +124,19 @@ class VerifyCodeFragment : Fragment(R.layout.fragment_verify_code) {
 
         btnNext.setOnClickListener {
             val code = getCode()
-            if (code == "123456") {
-                setErrorState(false)
-                findNavController().navigate(R.id.action_verify_to_password)
-            } else {
-                setErrorState(true)
+            btnNext.isEnabled = false
+            btnNext.alpha = 0.6f
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    viewModel.verifyEmailCode(code)
+                    setErrorState(false)
+                    findNavController().navigate(R.id.action_verify_to_password)
+                } catch (e: Exception) {
+                    setErrorState(true, e.message ?: "Your verification code is incorrect.")
+                } finally {
+                    updateNextEnabled()
+                }
             }
         }
 
@@ -145,7 +160,18 @@ class VerifyCodeFragment : Fragment(R.layout.fragment_verify_code) {
         }
 
         tvResend.setOnClickListener {
-            if (tvResend.isClickable) startCountdown(60)
+            if (!tvResend.isClickable) return@setOnClickListener
+            tvResend.isClickable = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    viewModel.initiateRegister()
+                    startCountdown(60)
+                } catch (e: Exception) {
+                    tvResend.text = "Resend code"
+                    tvResend.isClickable = true
+                    setErrorState(true, e.message ?: "Failed to resend OTP. Please try again.")
+                }
+            }
         }
 
         // init
