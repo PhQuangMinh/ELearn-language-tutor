@@ -8,10 +8,12 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EmailRegisterFragment : Fragment(R.layout.fragment_email_register) {
@@ -23,13 +25,6 @@ class EmailRegisterFragment : Fragment(R.layout.fragment_email_register) {
         val message: String?,
     )
 
-    // Mock "email already exists in system"
-    private val usedEmails = setOf(
-        "test@gmail.com",
-        "admin@gmail.com",
-        "longhoanghai.work@gmail.com",
-    )
-
     private fun validateEmail(value: String): EmailValidation {
         val email = value.trim()
         if (email.isEmpty()) {
@@ -39,10 +34,6 @@ class EmailRegisterFragment : Fragment(R.layout.fragment_email_register) {
         val gmailRegex = Regex("^[A-Za-z0-9._%+-]+@gmail\\.com$", RegexOption.IGNORE_CASE)
         if (!gmailRegex.matches(email)) {
             return EmailValidation(false, "Your email's format is incorrect!")
-        }
-
-        if (usedEmails.any { it.equals(email, ignoreCase = true) }) {
-            return EmailValidation(false, "This email has been used. Please choose another email!")
         }
 
         return EmailValidation(true, null)
@@ -96,8 +87,27 @@ class EmailRegisterFragment : Fragment(R.layout.fragment_email_register) {
             val result = validateEmail(email)
             applyValidation(result)
             if (result.isValid) {
-                viewModel.setEmail(email.trim())
-                findNavController().navigate(R.id.action_email_to_verify)
+                btnNextRegister.isEnabled = false
+                btnNextRegister.alpha = 0.6f
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        viewModel.setEmail(email.trim())
+                        viewModel.clearRegisterToken()
+                        viewModel.initiateRegister()
+                        findNavController().navigate(R.id.action_email_to_verify)
+                    } catch (e: Exception) {
+                        applyValidation(
+                            EmailValidation(
+                                isValid = false,
+                                message = e.message ?: "Failed to send OTP. Please try again."
+                            )
+                        )
+                    } finally {
+                        btnNextRegister.isEnabled = true
+                        btnNextRegister.alpha = 1f
+                    }
+                }
             }
         }
     }

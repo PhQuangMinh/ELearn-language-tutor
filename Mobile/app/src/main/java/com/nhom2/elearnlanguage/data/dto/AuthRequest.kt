@@ -11,6 +11,25 @@ data class RegisterRequestDTO (
 )
 
 @Serializable
+data class RegisterInitiateRequestDTO(
+    val fullName: String,
+    val email: String
+)
+
+@Serializable
+data class VerifyEmailRequestDTO(
+    val email: String,
+    val code: String
+)
+
+@Serializable
+data class RegisterCompleteRequestDTO(
+    val email: String,
+    val registerToken: String,
+    val password: String
+)
+
+@Serializable
 data class LoginRequestDTO (
     val email: String,
     val password: String

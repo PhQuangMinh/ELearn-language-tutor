@@ -5,15 +5,18 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PasswordRegisterFragment : Fragment(R.layout.fragment_password_register) {
@@ -136,8 +139,33 @@ class PasswordRegisterFragment : Fragment(R.layout.fragment_password_register) {
         }
 
         btnRegister.setOnClickListener {
-            viewModel.setPassword(edtPassword.text?.toString().orEmpty())
-            findNavController().navigate(R.id.action_password_to_register)
+            val password = edtPassword.text?.toString().orEmpty()
+            viewModel.setPassword(password)
+
+            btnRegister.isEnabled = false
+            btnRegister.alpha = 0.6f
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    viewModel.completeRegister(password)
+                    Toast.makeText(requireContext(), "Register successful!", Toast.LENGTH_SHORT).show()
+
+                    val navOptions = androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.nav_auth, true)
+                        .build()
+
+                    findNavController().navigate(R.id.loginFragment, null, navOptions)
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        requireContext(),
+                        e.message ?: "Register failed. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } finally {
+                    btnRegister.isEnabled = true
+                    btnRegister.alpha = 1f
+                }
+            }
         }
     }
 }
