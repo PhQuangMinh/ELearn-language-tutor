@@ -20,8 +20,8 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDataSource) :
     AuthRepository {
-    override suspend fun login(username: String, password: String): AuthSession {
-        val response = authDataSource.login(LoginRequestDTO(username, password))
+    override suspend fun login(email: String, password: String): AuthSession {
+        val response = authDataSource.login(LoginRequestDTO(email, password))
 
         if (!response.success || response.data == null) {
             throw Exception(response.message)

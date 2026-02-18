@@ -1,8 +1,11 @@
 package com.nhom2.elearnlanguage.di
 
 import com.nhom2.elearnlanguage.data.repository.AuthRepositoryImpl
+import com.nhom2.elearnlanguage.data.repository.HomeRepositoryImpl
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
+import com.nhom2.elearnlanguage.data.source.remote.HomeDataSource
 import com.nhom2.elearnlanguage.domain.repository.AuthRepository
+import com.nhom2.elearnlanguage.domain.repository.HomeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,5 +19,11 @@ class RepositoryModule {
     @Singleton
     fun provideAuthRepository(authDataSource: AuthDataSource): AuthRepository {
         return AuthRepositoryImpl(authDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHomeRepository(homeDataSource: HomeDataSource): HomeRepository {
+        return HomeRepositoryImpl(homeDataSource)
     }
 }

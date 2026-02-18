@@ -146,10 +146,17 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Xác thực người dùng
+        // Tìm user theo email được gửi từ client
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(
+                        "Email hoặc mật khẩu không đúng.",
+                        "INVALID_CREDENTIALS"
+                ));
+
+        // Xác thực người dùng bằng username nội bộ (Spring Security vẫn load bằng username)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
+                        user.getUsername(),
                         request.getPassword()
                 )
         );
@@ -161,7 +168,7 @@ public class AuthService {
         if (!(principal instanceof User)) {
             throw new RuntimeException("Authentication principal is not a User instance");
         }
-        User user = (User) principal;
+        user = (User) principal;
         if (!user.isEnabled()) {
             throw new BusinessException("Email is not verified.", "EMAIL_NOT_VERIFIED");
         }
