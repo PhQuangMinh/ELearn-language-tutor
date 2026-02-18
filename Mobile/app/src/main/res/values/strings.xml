@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">ELearnLanguage</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="back">Back</string>
     <string name="username">Username</string>
@@ -13,7 +12,7 @@
     <string name="login_with_google">Login with Google</string>
     <string name="don_t_have_account">Don\'t have account?</string>
     <string name="register">Register</string>
-    <string name="your_username_or_password_is_incorrect">Your username or password is incorrect</string>
+    <string name="your_username_or_password_is_incorrect">Your email or password is incorrect</string>
     <string name="what_is_your_email">What is your email?</string>
     <string name="your_email">Your email</string>
     <string name="next">Next</string>
@@ -27,4 +26,19 @@
     <string name="email_cannot_be_empty">Email cannot be empty!</string>
     <string name="email_format_incorrect">Email\'s format is incorrect!</string>
     <string name="no_account_has_been_associated_with_this_email">No account associated with this email.</string>
+
+    <!-- Home screen -->
+    <string name="home_subtitle">Lets continue learning!</string>
+    <string name="lesson_being_learned">Lesson Being Learned</string>
+    <string name="lesson_label_prefix">LESSON</string>
+    <string name="level_suffix">Level</string>
+    <string name="tab_lesson">Lesson</string>
+    <string name="tab_vocabulary">Vocabulary</string>
+    <string name="tab_speaking">Speaking</string>
+    <string name="tab_profile">Profile</string>
+    <string name="vocabulary_coming_soon">Vocabulary - Coming soon</string>
+    <string name="speaking_coming_soon">Speaking - Coming soon</string>
+    <string name="profile_coming_soon">Profile - Coming soon</string>
+    <string name="error_load_home">Không thể tải dữ liệu</string>
+    <string name="retry">Thử lại</string>
 </resources>

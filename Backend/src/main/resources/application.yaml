@@ -55,8 +55,8 @@ server:
 jwt:
   # Support both JWT_SECRET and legacy JWT_SECRET_KEY
   secret: ${JWT_SECRET:${JWT_SECRET_KEY}}
-  expiration: ${JWT_EXPIRATION:900000}
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  expiration: ${JWT_EXPIRATION}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION}
 
 oauth2:
   # URL cho app Android: scheme elearn:// để app bắt deep link và nhận token

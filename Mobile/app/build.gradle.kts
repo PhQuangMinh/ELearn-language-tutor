@@ -24,8 +24,8 @@ android {
         if (file.exists()) {
             file.inputStream().use { properties.load(it) }
         }
-        val apiBaseUrl = properties.getProperty("api.base.url")
-        val webClientId = properties.getProperty("WEB_CLIENT_ID")
+        val apiBaseUrl = properties.getProperty("api.base.url") ?: "http://10.0.2.2:8080"
+        val webClientId = properties.getProperty("WEB_CLIENT_ID") ?: ""
 
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
@@ -86,6 +86,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:3.0.0")
     implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
+
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
 
     //Custom tabs
     implementation("androidx.browser:browser:1.9.0")

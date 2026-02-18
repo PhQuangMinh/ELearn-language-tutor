@@ -12,7 +12,7 @@ data class RegisterRequestDTO (
 
 @Serializable
 data class LoginRequestDTO (
-    val username: String,
+    val email: String,
     val password: String
 )
 

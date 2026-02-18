@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <!-- Course image (circle placeholder) -->
+    <FrameLayout
+        android:id="@+id/flCourseImage"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_course_image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivCourse"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_lesson" />
+
+    </FrameLayout>
+
+    <!-- Course name -->
+    <TextView
+        android:id="@+id/tvCourseName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/lexend_semibold"
+        android:textColor="@color/neutral_100"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/tvProgressPercent"
+        app:layout_constraintStart_toEndOf="@id/flCourseImage"
+        app:layout_constraintTop_toTopOf="@id/flCourseImage"
+        tools:text="Welcome to school" />
+
+    <!-- Progress bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="6dp"
+        android:max="100"
+        android:progressDrawable="@drawable/bg_progress_bar"
+        app:layout_constraintEnd_toStartOf="@id/tvProgressPercent"
+        app:layout_constraintStart_toEndOf="@id/flCourseImage"
+        app:layout_constraintTop_toBottomOf="@id/tvCourseName"
+        tools:progress="80" />
+
+    <!-- Percentage -->
+    <TextView
+        android:id="@+id/tvProgressPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/neutral_60"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="80%" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

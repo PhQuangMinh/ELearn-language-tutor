@@ -9,8 +9,8 @@ class LoginUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenStorage: TokenStorage
 ) {
-    suspend operator fun invoke(username: String, password: String): AuthSession {
-        val session = authRepository.login(username, password)
+    suspend operator fun invoke(email: String, password: String): AuthSession {
+        val session = authRepository.login(email, password)
         tokenStorage.saveAccessToken(session.accessToken)
         tokenStorage.saveRefreshToken(session.refreshToken)
         return session
