@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -31,6 +33,14 @@ public class Question {
     @Size(max = 50)
     @NotNull
     @Column(name = "type", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private EQuestionType type;
+
+    @OneToMany(mappedBy = "question")
+    private Set<Answer> answers;
+
+    @ManyToOne
+    @JoinColumn(name = "media_id")
+    private Media media;
 
 }

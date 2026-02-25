@@ -39,6 +39,7 @@ public class UserStreak {
     @Size(max = 50)
     @NotNull
     @Column(name = "status", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private EStreakStatus status;
 
 }

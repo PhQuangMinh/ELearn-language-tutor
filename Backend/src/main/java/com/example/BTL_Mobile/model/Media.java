@@ -21,6 +21,7 @@ public class Media {
     @Size(max = 50)
     @NotNull
     @Column(name = "type", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private EMediaType type;
 
     @Size(max = 1000)
