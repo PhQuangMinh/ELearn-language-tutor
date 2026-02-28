@@ -6,7 +6,7 @@ const state = {
   filter: "",
   isLoggedIn: false,
   config: {
-    apiBase: "http://localhost:8080",
+    apiBase: "http://localhost:8090",
     token: "",
   },
 };
@@ -316,7 +316,7 @@ const login = async (username, password, apiBase) => {
     const response = await fetch(`${apiBase}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email: username, password }),
     });
     
     if (!response.ok) {

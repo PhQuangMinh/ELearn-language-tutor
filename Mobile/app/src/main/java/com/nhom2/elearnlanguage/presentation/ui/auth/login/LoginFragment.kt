@@ -206,7 +206,7 @@ class LoginFragment : Fragment() {
                             
                             // Test: Navigate to lesson questions (lessonId = 1)
                             findNavController().navigate(
-                                R.id.action_loginFragment_to_multipleChoiceQuestionFragment,
+                                R.id.action_loginFragment_to_questionFragment,
                                 bundleOf("lessonId" to 1),
                                 navOptions
                             )

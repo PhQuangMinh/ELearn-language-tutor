@@ -27,11 +27,17 @@ class WordChoiceAdapter(
             binding.tvWord.apply {
                 text = item.word
                 isEnabled = !item.isUsed
-                visibility = if (item.isUsed) android.view.View.GONE else android.view.View.VISIBLE
                 setTypeface(null, Typeface.BOLD)
                 textSize = 16f
 
-                setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                // Change background and text color based on usage
+                if (item.isUsed) {
+                    setBackgroundResource(R.drawable.button_with_shadow_disabled)
+                    setTextColor(ContextCompat.getColor(context, R.color.neutral_80))
+                } else {
+                    setBackgroundResource(R.drawable.button_with_shadow)
+                    setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                }
 
                 setOnClickListener {
                     if (!item.isUsed) {
