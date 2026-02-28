@@ -23,4 +23,16 @@ public interface UserLessonResultRepository extends JpaRepository<UserLessonResu
     
     @Query("SELECT DISTINCT ulr.lesson FROM UserLessonResult ulr WHERE ulr.user.id = :userId ORDER BY ulr.startedAt DESC")
     List<Lesson> findRecentLessonsByUser(@Param("userId") Integer userId);
+    @Query("""
+            select distinct ulr.lesson.id
+            from UserLessonResult ulr
+            where ulr.user.id = :userId
+              and ulr.lesson.topic.id = :topicId
+              and ulr.isCompleted = true
+            """)
+    List<Integer> findCompletedLessonIdsInTopic(
+            @Param("userId") Integer userId,
+            @Param("topicId") Integer topicId
+    );
 }
+

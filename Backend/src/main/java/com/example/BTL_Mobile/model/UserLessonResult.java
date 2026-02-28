@@ -40,4 +40,8 @@ public class UserLessonResult {
     @Column(name = "score", nullable = false)
     private Double score;
 
+    @NotNull
+    @Column(name = "is_completed", nullable = false)
+    private Boolean isCompleted = false;
+
 }
