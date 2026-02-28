@@ -6,4 +6,27 @@
     </style>
 
     <style name="Theme.ELearnLanguage" parent="Base.Theme.ELearnLanguage" />
+
+    <!-- Button with shadow style -->
+    <style name="ChoiceButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/button_choice_selector</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:fontFamily">@font/lexend</item>
+    </style>
+
+    <style name="ChoiceButton.Wrong">
+        <item name="android:background">@drawable/button_wrong_with_shadow</item>
+    </style>
+
+    <style name="ChoiceButton.Correct">
+        <item name="android:background">@drawable/button_selected_with_shadow</item>
+    </style>
 </resources>

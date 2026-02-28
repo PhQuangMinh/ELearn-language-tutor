@@ -1,10 +1,11 @@
-package com.nhom2.elearnlanguage.presentation.ui.home
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -93,7 +94,7 @@ class LessonTabFragment : Fragment() {
     private fun setupLoadMoreOnScroll() {
         // Vì rvCourses đang nằm trong NestedScrollView (bottomSheetContent) nên scroll event thực tế là của scrollView.
         binding.bottomSheetContent.setOnScrollChangeListener { v, _, scrollY, _, _ ->
-            val scrollView = v as? androidx.core.widget.NestedScrollView ?: return@setOnScrollChangeListener
+            val scrollView = v as? NestedScrollView ?: return@setOnScrollChangeListener
             val child = scrollView.getChildAt(0) ?: return@setOnScrollChangeListener
 
             val distanceToBottom = child.measuredHeight - scrollView.height - scrollY
