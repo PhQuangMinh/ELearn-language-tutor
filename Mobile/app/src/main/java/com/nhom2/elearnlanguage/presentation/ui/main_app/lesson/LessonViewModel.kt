@@ -3,7 +3,9 @@ package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
+import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
 import com.nhom2.elearnlanguage.domain.usecase.GetLessonQuestionsUseCase
+import com.nhom2.elearnlanguage.domain.usecase.SubmitLessonAnswersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LessonViewModel @Inject constructor(
-    private val getLessonQuestionsUseCase: GetLessonQuestionsUseCase
+    private val getLessonQuestionsUseCase: GetLessonQuestionsUseCase,
+    private val submitLessonAnswersUseCase: SubmitLessonAnswersUseCase
 ): ViewModel() {
 
     private val _questionsState = MutableStateFlow<LessonQuestionsState>(LessonQuestionsState.Initial)
@@ -78,6 +81,10 @@ class LessonViewModel @Inject constructor(
      * For progress bar display
      */
     fun getProgressCount(): Int = _currentQuestionIndex.value + 1
+
+    suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): Result<Boolean> {
+        return submitLessonAnswersUseCase(lessonId, request)
+    }
 }
 
 sealed class LessonQuestionsState {
