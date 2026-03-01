@@ -1,9 +1,7 @@
 package com.example.BTL_Mobile.service;
 
 import com.example.BTL_Mobile.dto.response.CourseProgressResponse;
-import com.example.BTL_Mobile.dto.response.CurrentLessonResponse;
 import com.example.BTL_Mobile.dto.response.HomeResponse;
-import com.example.BTL_Mobile.model.Lesson;
 import com.example.BTL_Mobile.model.Topic;
 import com.example.BTL_Mobile.model.User;
 import com.example.BTL_Mobile.repository.LessonRepository;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,67 +33,11 @@ public class HomeService {
                 ? user.getFullName()
                 : user.getUsername();
 
-        // Lấy lessons gần nhất mà user đã học
-        List<Lesson> recentLessons = userLessonResultRepository.findRecentLessonsByUser(user.getId());
-        List<CurrentLessonResponse> currentLessons = recentLessons.stream()
-                .limit(3)
-                .map(lesson -> {
-                    // Tính progress từ UserLessonResult (nếu có)
-                    int progressPercent = userLessonResultRepository
-                            .findByUserAndLesson(user, lesson)
-                            .map(result -> (int) Math.round(result.getScore() * 10)) // score 0-10 -> percent
-                            .orElse(0);
-                    
-                    // Level tạm thời tính từ id % 20 + 1 (vì Lesson không có level field)
-                    // Có thể thêm field level vào Lesson entity sau nếu cần
-                    String level = String.valueOf((lesson.getId() % 20) + 1);
-                    
-                    // lessonNumber: dùng id hoặc có thể tính từ order trong topic
-                    int lessonNumber = lesson.getId();
-                    
-                    return CurrentLessonResponse.builder()
-                            .id(lesson.getId())
-                            .lessonNumber(lessonNumber)
-                            .title(lesson.getTitle())
-                            .level(level)
-                            .progressPercent(progressPercent)
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        // Nếu user chưa học lesson nào, fallback mock để UI sinh động
-        if (currentLessons.isEmpty()) {
-            currentLessons = Arrays.asList(
-                    CurrentLessonResponse.builder()
-                            .id(1)
-                            .lessonNumber(1)
-                            .title("Welcome to school")
-                            .level("15")
-                            .progressPercent(30)
-                            .build(),
-                    CurrentLessonResponse.builder()
-                            .id(3)
-                            .lessonNumber(3)
-                            .title("Summer festival")
-                            .level("5")
-                            .progressPercent(50)
-                            .build(),
-                    CurrentLessonResponse.builder()
-                            .id(5)
-                            .lessonNumber(5)
-                            .title("Travelling")
-                            .level("8")
-                            .progressPercent(20)
-                            .build()
-            );
-        }
-
         // Lấy page đầu tiên của Topics để hiển thị list khoá học ban đầu
         List<CourseProgressResponse> courses = getCoursesPage(user, 0, DEFAULT_COURSE_PAGE_SIZE);
 
         return HomeResponse.builder()
                 .fullName(displayName)
-                .currentLessons(currentLessons)
                 .courses(courses)
                 .build();
     }

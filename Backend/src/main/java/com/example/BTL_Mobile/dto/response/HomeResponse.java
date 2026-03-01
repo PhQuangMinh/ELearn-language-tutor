@@ -13,6 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class HomeResponse {
     private String fullName;
-    private List<CurrentLessonResponse> currentLessons;
     private List<CourseProgressResponse> courses;
 }
