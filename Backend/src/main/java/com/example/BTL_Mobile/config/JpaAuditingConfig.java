@@ -1,13 +1,10 @@
 package com.example.BTL_Mobile.config;
 
-import com.example.BTL_Mobile.model.User;
+import com.example.BTL_Mobile.security.CurrentUserContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
@@ -15,20 +12,16 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class JpaAuditingConfig {
 
+    private final CurrentUserContext currentUserContext;
+
+    public JpaAuditingConfig(CurrentUserContext currentUserContext) {
+        this.currentUserContext = currentUserContext;
+    }
+
     @Bean
     public AuditorAware<Integer> auditorAware() {
         return () -> {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || auth instanceof AnonymousAuthenticationToken || !auth.isAuthenticated()) {
-                return Optional.of(0);
-            }
-
-            Object principal = auth.getPrincipal();
-            if (principal instanceof User user && user.getId() != null) {
-                return Optional.of(user.getId());
-            }
-
-            return Optional.of(0);
+            return currentUserContext.getCurrentUserId().or(() -> Optional.of(0));
         };
     }
 }

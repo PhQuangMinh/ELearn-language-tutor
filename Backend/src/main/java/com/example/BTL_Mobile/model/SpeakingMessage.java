@@ -30,6 +30,7 @@ public class SpeakingMessage {
     @Size(max = 50)
     @NotNull
     @Column(name = "sender", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private EMessageSender sender;
 
     @Size(max = 255)

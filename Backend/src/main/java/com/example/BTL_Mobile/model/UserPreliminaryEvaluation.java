@@ -27,11 +27,13 @@ public class UserPreliminaryEvaluation {
     @Size(max = 50)
     @NotNull
     @Column(name = "language", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private ELanguage language;
 
     @Size(max = 20)
     @NotNull
     @Column(name = "level", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
     private EEvaluationLevel level;
 
     @Size(max = 255)

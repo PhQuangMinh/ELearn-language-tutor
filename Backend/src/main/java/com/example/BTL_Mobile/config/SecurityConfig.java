@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/test",
-                                "/api/auth/validate"
+                                "/api/auth/validate",
+                                "/api/topics/*/lessons"
                         ).permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/**").authenticated()

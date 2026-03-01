@@ -30,6 +30,6 @@ public class Answer extends AbstractAuditEntity {
 
     @NotNull
     @Column(name = "is_correct", nullable = false)
-    private Boolean isCorrect = false;
+    private boolean correct = false;
 
 }

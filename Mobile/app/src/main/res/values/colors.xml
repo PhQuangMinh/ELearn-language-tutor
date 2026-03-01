@@ -38,10 +38,10 @@
     <color name="neutral_20">#E9E9E9</color>
     <color name="neutral_0">#FFFFFF</color>
 
-    <color name="success_100">#5F845F</color>
-    <color name="success_80">#69D7BF</color>
-    <color name="success_60">#8CB59F</color>
-    <color name="success_40">#B2CEBF</color>
+    <color name="success_100">#16CB16</color>
+    <color name="success_80">#58E66D</color>
+    <color name="success_60">#88D680</color>
+    <color name="success_40">#AADFA0</color>
     <color name="success_20">#D9E6DF</color>
 
     <color name="warning_100">#E4C65B</color>

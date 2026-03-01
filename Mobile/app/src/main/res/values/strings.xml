@@ -41,4 +41,9 @@
     <string name="profile_coming_soon">Profile - Coming soon</string>
     <string name="error_load_home">Không thể tải dữ liệu</string>
     <string name="retry">Thử lại</string>
+
+    <!-- Main screen -->
+    <string name="topic_image">Topic image</string>
+    <string name="open">Open</string>
+    <string name="error_generic">Something went wrong</string>
 </resources>

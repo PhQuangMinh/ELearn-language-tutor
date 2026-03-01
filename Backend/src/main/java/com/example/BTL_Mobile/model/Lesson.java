@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -32,10 +34,18 @@ public class Lesson extends AbstractAuditEntity {
     @Size(max = 255)
     @NotNull
     @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private ELessonType type;
+
+    @Size(max = 1000)
+    @Column(name = "image_url", length = 1000)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Lesson parent;
+
+    @OneToMany(mappedBy = "lesson")
+    private Set<Question> questions;
 
 }
