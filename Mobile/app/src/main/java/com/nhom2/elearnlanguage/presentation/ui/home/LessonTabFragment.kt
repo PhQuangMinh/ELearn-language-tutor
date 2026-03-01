@@ -25,10 +25,6 @@ class LessonTabFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private val lessonAdapter = LessonAdapter { lesson ->
-        Toast.makeText(requireContext(), "${lesson.title} - Level ${lesson.level}", Toast.LENGTH_SHORT).show()
-    }
-
     private val courseAdapter = CourseAdapter { course ->
         Toast.makeText(requireContext(), course.title, Toast.LENGTH_SHORT).show()
     }
@@ -80,10 +76,6 @@ class LessonTabFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        binding.rvCurrentLessons.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            adapter = lessonAdapter
-        }
         binding.rvCourses.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = courseAdapter
@@ -114,7 +106,6 @@ class LessonTabFragment : Fragment() {
                             showLoading(false)
                             val data = state.data
                             binding.tvGreeting.text = "Hi, ${data.fullName}!"
-                            lessonAdapter.submitList(data.currentLessons)
                             courseAdapter.submitList(data.courses)
                         }
                         is HomeUiState.Error -> {
@@ -133,7 +124,6 @@ class LessonTabFragment : Fragment() {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.tvError.visibility = View.GONE
         binding.rvCourses.visibility = if (isLoading) View.GONE else View.VISIBLE
-        binding.rvCurrentLessons.visibility = if (isLoading) View.GONE else View.VISIBLE
     }
 
     override fun onDestroyView() {
