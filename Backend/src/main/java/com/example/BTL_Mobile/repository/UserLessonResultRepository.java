@@ -28,7 +28,6 @@ public interface UserLessonResultRepository extends JpaRepository<UserLessonResu
             from UserLessonResult ulr
             where ulr.user.id = :userId
               and ulr.lesson.topic.id = :topicId
-              and ulr.isCompleted = true
             """)
     List<Integer> findCompletedLessonIdsInTopic(
             @Param("userId") Integer userId,
