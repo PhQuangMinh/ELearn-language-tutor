@@ -42,7 +42,6 @@ class LessonListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = LessonAdapter { lesson ->
-            // Screen-only requirement for now: just show a toast on click
             Toast.makeText(requireContext(), "Lesson: ${lesson.title}", Toast.LENGTH_SHORT).show()
         }
 
@@ -54,8 +53,11 @@ class LessonListFragment : Fragment() {
 
         setUpObservers()
 
-        // Mock topic as requested (defaults are also set in nav args)
-        viewModel.load(topicId = args.topicId, topicName = args.topicName)
+        viewModel.load(
+            topicId = args.topicId,
+            topicName = args.topicName,
+            topicImageUrl = args.topicImageUrl
+        )
     }
 
     private fun setUpObservers() {

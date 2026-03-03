@@ -34,6 +34,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.gson.gson
+import kotlinx.coroutines.CancellationException
 import javax.inject.Singleton
 
 @Module
@@ -118,20 +119,24 @@ object NetworkModule {
                 val refreshRequest = HttpRequestBuilder().apply {
                     method = HttpMethod.Post
                     url.takeFrom("${BuildConfig.API_BASE_URL}/api/auth/refresh")
-                    // Dùng OutgoingContent để tránh lỗi request transformation trong interceptor
-                    setBody(TextContent("""{"refreshToken":"$refreshToken"}""", ContentType.Application.Json))
+                    setBody(TextContent(
+                        org.json.JSONObject().apply { put("refreshToken", refreshToken) }.toString(),
+                        ContentType.Application.Json
+                    ))
                     header(HEADER_SKIP_REFRESH, "1")
                 }
 
                 val refreshCall = execute(refreshRequest)
                 if (refreshCall.response.status != HttpStatusCode.OK) {
-                    Log.e("AUTH_REFRESH", "Refresh failed: ${refreshCall.response.status}")
+                    Log.w("AUTH_REFRESH", "Refresh failed: ${refreshCall.response.status}, clearing tokens")
+                    TokenManager.clearTokens(context)
                     return@intercept call
                 }
 
                 val refreshResponse: ApiResponseDTO<AuthResponseDTO> = refreshCall.body()
                 if (!refreshResponse.success || refreshResponse.data == null) {
-                    Log.e("AUTH_REFRESH", "Refresh failed: ${refreshResponse.message}")
+                    Log.w("AUTH_REFRESH", "Refresh failed: ${refreshResponse.message}, clearing tokens")
+                    TokenManager.clearTokens(context)
                     return@intercept call
                 }
 
@@ -145,9 +150,12 @@ object NetworkModule {
                 request.headers.append(HttpHeaders.Authorization, "Bearer $newAccessToken")
                 request.headers.append(HEADER_REFRESH_RETRY, "1")
                 execute(request)
+            } catch (e: CancellationException) {
+                // User navigated away / ViewModel destroyed - không log error
+                throw e
             } catch (e: Exception) {
                 Log.e("AUTH_REFRESH", "Refresh exception: ${e.message}", e)
-                call
+                return@intercept call
             }
         }
 

@@ -29,6 +29,9 @@ class RepositoryModule {
     fun provideHomeRepository(homeDataSource: HomeDataSource): HomeRepository {
         return HomeRepositoryImpl(homeDataSource)
     }
+
+    @Provides
+    @Singleton
     fun provideLessonRepository(lessonDataSource: LessonDataSource): LessonRepository {
         return LessonRepositoryImpl(lessonDataSource)
     }

@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.nhom2.elearnlanguage.R
@@ -26,7 +26,12 @@ class LessonTabFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
 
     private val courseAdapter = CourseAdapter { course ->
-        Toast.makeText(requireContext(), course.title, Toast.LENGTH_SHORT).show()
+        val action = HomeFragmentDirections.actionHomeFragmentToLessonListFragment(
+            topicId = course.id,
+            topicName = course.title,
+            topicImageUrl = course.imageUrl
+        )
+        requireParentFragment().findNavController().navigate(action)
     }
 
     override fun onCreateView(
