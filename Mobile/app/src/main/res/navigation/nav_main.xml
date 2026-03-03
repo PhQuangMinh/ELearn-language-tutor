@@ -19,10 +19,13 @@
         <action
             android:id="@+id/action_loginFragment_to_inputEmailFragment"
             app:destination="@id/inputEmailFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.nhom2.elearnlanguage.presentation.ui.home.HomeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
 
@@ -61,4 +64,14 @@
         android:id="@+id/newPasswordFragment"
         android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.NewPasswordFragment"
         android:label="NewPasswordFragment" />
+    <fragment
+        android:id="@+id/questionFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.QuestionFragment"
+        android:label="fragment_question"
+        tools:layout="@layout/fragment_question" >
+        <argument
+            android:name="lessonId"
+            app:argType="integer"
+            android:defaultValue="1" />
+    </fragment>
 </navigation>

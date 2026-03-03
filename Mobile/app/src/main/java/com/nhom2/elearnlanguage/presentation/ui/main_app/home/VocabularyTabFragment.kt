@@ -1,22 +1,22 @@
-package com.nhom2.elearnlanguage.presentation.ui.home
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.nhom2.elearnlanguage.databinding.FragmentProfileTabBinding
+import com.nhom2.elearnlanguage.databinding.FragmentVocabularyTabBinding
 
-class ProfileTabFragment : Fragment() {
+class VocabularyTabFragment : Fragment() {
 
-    private var _binding: FragmentProfileTabBinding? = null
+    private var _binding: FragmentVocabularyTabBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProfileTabBinding.inflate(inflater, container, false)
+        _binding = FragmentVocabularyTabBinding.inflate(inflater, container, false)
         return binding.root
     }
 

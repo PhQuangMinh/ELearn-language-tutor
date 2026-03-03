@@ -89,6 +89,9 @@ dependencies {
 
     implementation("androidx.recyclerview:recyclerview:1.4.0")
 
+    //Image loading
+    implementation("io.coil-kt:coil:2.6.0")
+
     //Custom tabs
     implementation("androidx.browser:browser:1.9.0")
 
