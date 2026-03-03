@@ -1,6 +1,5 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.adapters
 
-import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -32,8 +31,6 @@ class AnswerSlotAdapter(
         fun bind(item: AnswerSlotItem) {
             binding.tvSlot.apply {
                 text = item.selectedWord
-                setTypeface(null, Typeface.BOLD)
-                textSize = 16f
 
                 when (item.state) {
                     SlotState.EMPTY -> {
