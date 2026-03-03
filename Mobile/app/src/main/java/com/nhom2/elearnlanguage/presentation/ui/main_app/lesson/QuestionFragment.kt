@@ -613,7 +613,7 @@ class QuestionFragment : Fragment() {
             }
         )
         binding.fbBlankWords.apply {
-            layoutManager = GridLayoutManager(requireContext(), 4)
+            layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = answerSlotAdapter
         }
 

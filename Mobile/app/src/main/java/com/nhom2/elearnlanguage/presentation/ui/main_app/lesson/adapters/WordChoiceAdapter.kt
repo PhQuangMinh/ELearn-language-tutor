@@ -1,6 +1,5 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.adapters
 
-import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -27,8 +26,6 @@ class WordChoiceAdapter(
             binding.tvWord.apply {
                 text = item.word
                 isEnabled = !item.isUsed
-                setTypeface(null, Typeface.BOLD)
-                textSize = 16f
 
                 // Change background and text color based on usage
                 if (item.isUsed) {

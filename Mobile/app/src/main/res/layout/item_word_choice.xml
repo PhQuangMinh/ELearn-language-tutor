@@ -12,9 +12,11 @@
         android:minWidth="100dp"
         android:gravity="center"
         android:background="@drawable/button_with_shadow"
-        android:textSize="16sp"
+        android:textSize="18sp"
+        android:text="day"
         android:textColor="@android:color/white"
         android:maxLines="1"
+        android:fontFamily="@font/lexend"
         android:layout_margin="8dp"
         android:padding="16dp" />
 
