@@ -42,6 +42,11 @@
     <string name="error_load_home">Không thể tải dữ liệu</string>
     <string name="retry">Thử lại</string>
 
+    <!-- Main screen -->
+    <string name="topic_image">Topic image</string>
+    <string name="open">Open</string>
+    <string name="error_generic">Something went wrong</string>
+
     <!-- Multiple Choice Question -->
     <string name="feedback_wrong_title">Ups.. that\'s wrong</string>
     <string name="feedback_correct_title">Amazing!</string>

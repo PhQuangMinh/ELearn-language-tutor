@@ -1,6 +1,8 @@
 package com.nhom2.elearnlanguage.data.source.remote
 
 import com.nhom2.elearnlanguage.BuildConfig
+import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
+import com.nhom2.elearnlanguage.data.dto.LessonInTopicDTO
 import com.nhom2.elearnlanguage.data.dto.lesson.QuestionDetailDTO
 import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
 import io.ktor.client.HttpClient
@@ -16,6 +18,10 @@ import javax.inject.Inject
 class LessonDataSource @Inject constructor(
     private val client: HttpClient
 ) {
+
+    suspend fun getLessonsByTopic(topicId: Int): ApiResponseDTO<List<LessonInTopicDTO>> {
+        return client.get("${BuildConfig.API_BASE_URL}/api/topics/$topicId/lessons").body()
+    }
 
     suspend fun getLessonsQuestions (lessonId: Int): List<QuestionDetailDTO> {
         return client.get("${BuildConfig.API_BASE_URL}/api/lessons/$lessonId/questions").body()

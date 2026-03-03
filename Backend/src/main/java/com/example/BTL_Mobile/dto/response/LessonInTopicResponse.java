@@ -6,13 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CurrentLessonResponse {
+@Builder
+public class LessonInTopicResponse {
     private Integer id;
-    private Integer lessonNumber;
-    private String title;
-    private String level;
-    private Integer progressPercent;
+    private String name;
+    private String imageUrl;
+    private boolean completed;
 }
+

@@ -28,6 +28,21 @@
         android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/lessonListFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.mainscreen.lessonlist.LessonListFragment"
+        android:label="fragment_lesson_list"
+        tools:layout="@layout/fragment_lesson_list">
+        <argument
+            android:name="topicId"
+            android:defaultValue="11"
+            app:argType="integer" />
+        <argument
+            android:name="topicName"
+            android:defaultValue="Minh_TEST"
+            app:argType="string" />
+    </fragment>
     <include app:graph="@navigation/nav_auth" />
     <fragment
         android:id="@+id/inputEmailFragment"

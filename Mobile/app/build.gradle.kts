@@ -99,4 +99,8 @@ dependencies {
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
+
+    // UI - lesson list screen
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("io.coil-kt:coil:2.7.0")
 }

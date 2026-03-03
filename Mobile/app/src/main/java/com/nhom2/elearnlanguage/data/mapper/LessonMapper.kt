@@ -8,6 +8,19 @@ import com.nhom2.elearnlanguage.domain.model.lesson.Media
 import com.nhom2.elearnlanguage.domain.model.lesson.MediaType
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
 import com.nhom2.elearnlanguage.domain.model.lesson.QuestionType
+import com.nhom2.elearnlanguage.data.dto.LessonInTopicDTO
+import com.nhom2.elearnlanguage.domain.model.LessonInTopic
+
+object LessonMapper {
+    fun toLessonInTopic(dto: LessonInTopicDTO): LessonInTopic {
+        return LessonInTopic(
+            id = dto.id,
+            name = dto.name,
+            imageUrl = dto.imageUrl,
+            completed = dto.completed
+        )
+    }
+}
 
 fun AnswerDTO.toDomain(): Answer {
     return Answer(
@@ -45,3 +58,4 @@ fun QuestionDetailDTO.toDomain(): Question {
         answers = answers.map { it.toDomain() }
     )
 }
+

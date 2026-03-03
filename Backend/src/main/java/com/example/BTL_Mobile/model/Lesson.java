@@ -37,6 +37,10 @@ public class Lesson extends AbstractAuditEntity {
     @Enumerated(EnumType.STRING)
     private ELessonType type;
 
+    @Size(max = 1000)
+    @Column(name = "image_url", length = 1000)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Lesson parent;

@@ -7,6 +7,7 @@ import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
+import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +32,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
-import io.ktor.http.contentType
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.gson.gson
 import javax.inject.Singleton
@@ -39,6 +39,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    private const val HEADER_REFRESH_RETRY = "X-Refresh-Retry"
+    private const val HEADER_SKIP_REFRESH = "X-Skip-Refresh"
     @Provides
     @Singleton
     fun provideHttpClient(
@@ -164,7 +166,8 @@ object NetworkModule {
         return com.nhom2.elearnlanguage.data.source.remote.HomeDataSource(client)
     }
 
-}
+    fun provideLessonDataSource(client: HttpClient): LessonDataSource {
+        return LessonDataSource(client)
+    }
 
-private const val HEADER_REFRESH_RETRY = "X-Refresh-Retry"
-private const val HEADER_SKIP_REFRESH = "X-Skip-Refresh"
+}
