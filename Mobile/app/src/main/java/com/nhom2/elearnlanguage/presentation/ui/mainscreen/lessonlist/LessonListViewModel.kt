@@ -18,12 +18,11 @@ class LessonListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<LessonListUiState>(LessonListUiState.Idle)
     val uiState: StateFlow<LessonListUiState> = _uiState.asStateFlow()
 
-    fun load(topicId: Int, topicName: String) {
+    fun load(topicId: Int, topicName: String, topicImageUrl: String?) {
         viewModelScope.launch {
             _uiState.value = LessonListUiState.Loading
             try {
                 val lessons = getLessonsByTopicUseCase(topicId)
-                val topicImageUrl = lessons.firstOrNull()?.imageUrl
                 val items = lessons.map { lesson ->
                     LessonRowUiModel(
                         id = lesson.id,

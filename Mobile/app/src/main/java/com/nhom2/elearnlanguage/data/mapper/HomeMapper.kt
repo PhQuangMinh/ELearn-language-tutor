@@ -8,7 +8,7 @@ import com.nhom2.elearnlanguage.domain.model.HomeData
 fun CourseProgressDTO.toDomain(): CourseProgress = CourseProgress(
     id = id,
     title = title,
-    imageUrl = imageUrl,
+    imageUrl = imageUrl ?: "",
     progressPercent = progressPercent
 )
 

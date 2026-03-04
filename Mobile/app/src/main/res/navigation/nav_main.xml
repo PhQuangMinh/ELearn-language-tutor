@@ -27,7 +27,11 @@
         android:id="@+id/homeFragment"
         android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.HomeFragment"
         android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_lessonListFragment"
+            app:destination="@id/lessonListFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/lessonListFragment"
@@ -36,12 +40,16 @@
         tools:layout="@layout/fragment_lesson_list">
         <argument
             android:name="topicId"
-            android:defaultValue="11"
             app:argType="integer" />
         <argument
             android:name="topicName"
-            android:defaultValue="Minh_TEST"
             app:argType="string" />
+        <argument
+            android:name="topicImageUrl"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_lessonListFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
     </fragment>
     <include app:graph="@navigation/nav_auth" />
     <fragment

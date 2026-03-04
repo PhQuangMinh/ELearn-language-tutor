@@ -3,11 +3,8 @@ package com.example.BTL_Mobile.mapper;
 import com.example.BTL_Mobile.dto.request.lesson.SubmitLessonRequest;
 import com.example.BTL_Mobile.model.*;
 import com.example.BTL_Mobile.model.enums.EQuestionType;
-import org.mapstruct.Mapper;
-import org.mapstruct.NullValueCheckStrategy;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -15,10 +12,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public abstract class UserLessonResultMapper {
+@Component
+public class UserLessonResultMapper {
 
     public UserLessonResult toModel(Lesson lesson, SubmitLessonRequest submitLesson, double score) {
         int userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();

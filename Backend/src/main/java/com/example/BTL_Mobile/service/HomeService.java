@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,9 @@ import java.util.stream.Collectors;
 public class HomeService {
 
     private static final int DEFAULT_COURSE_PAGE_SIZE = 10;
-    private static final int MOCK_COURSE_TOTAL_PAGES = 4;
+    // Số page mock dùng để test trước đây – hiện tại đã tắt mock,
+    // API chỉ trả dữ liệu thật từ database.
+    // private static final int MOCK_COURSE_TOTAL_PAGES = 4;
 
     private final LessonRepository lessonRepository;
     private final TopicRepository topicRepository;
@@ -64,54 +65,13 @@ public class HomeService {
                     return CourseProgressResponse.builder()
                             .id(topic.getId())
                             .title(topic.getName())
-                            .imageUrl("") // Có thể thêm imageUrl vào Topic entity sau
+                            .imageUrl(topic.getImageUrl())
                             .progressPercent(progressPercent)
                             .build();
                 })
                 .collect(Collectors.toList());
 
-        // Bơm thêm mock để có nhiều page test "load more":
-        // - Nếu DB ít topic (ví dụ chỉ 5) thì page 0 vẫn trả DB, page 1+ sẽ trả mock
-        // - Luôn đảm bảo trả tối đa MOCK_COURSE_TOTAL_PAGES page mock (ngoài DB)
-        if (safePage >= MOCK_COURSE_TOTAL_PAGES) {
-            // Ngoài số page mock cho phép thì dừng
-            return courses;
-        }
-
-        if (courses.size() >= safeSize) {
-            return courses;
-        }
-
-        // Fill phần còn thiếu bằng mock để đủ size cho page hiện tại
-        int baseIndex = safePage * safeSize; // 0-based "global index" của page
-        List<CourseProgressResponse> filled = new ArrayList<>(courses);
-
-        for (int i = courses.size(); i < safeSize; i++) {
-            int global = baseIndex + i + 1; // 1-based label
-            int mockId = 100_000 + global;  // tránh trùng id với DB
-            int progress = switch (global % 5) {
-                case 0 -> 10;
-                case 1 -> 30;
-                case 2 -> 50;
-                case 3 -> 65;
-                default -> 80;
-            };
-            String title = switch (global % 5) {
-                case 0 -> "At the airport " + global;
-                case 1 -> "Travelling " + global;
-                case 2 -> "Summer festival " + global;
-                case 3 -> "Ordering food " + global;
-                default -> "Welcome to school " + global;
-            };
-
-            filled.add(CourseProgressResponse.builder()
-                    .id(mockId)
-                    .title(title)
-                    .imageUrl("")
-                    .progressPercent(progress)
-                    .build());
-        }
-
-        return filled;
+        // Trả đúng danh sách topic từ database, không bơm thêm mock.
+        return courses;
     }
 }

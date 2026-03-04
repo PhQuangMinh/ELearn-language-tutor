@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.ItemCourseBinding
 import com.nhom2.elearnlanguage.domain.model.CourseProgress
 
@@ -31,6 +33,18 @@ class CourseAdapter(
             binding.tvCourseName.text = course.title
             binding.progressBar.progress = course.progressPercent
             binding.tvProgressPercent.text = "${course.progressPercent}%"
+
+            // Ưu tiên load ảnh thật từ API, nếu không có thì dùng app_logo mặc định
+            if (course.imageUrl.isNotBlank()) {
+                binding.ivCourse.load(course.imageUrl) {
+                    placeholder(R.drawable.app_logo)
+                    error(R.drawable.app_logo)
+                    crossfade(true)
+                }
+            } else {
+                binding.ivCourse.setImageResource(R.drawable.app_logo)
+            }
+
             binding.root.setOnClickListener { onClickCourse(course) }
         }
     }

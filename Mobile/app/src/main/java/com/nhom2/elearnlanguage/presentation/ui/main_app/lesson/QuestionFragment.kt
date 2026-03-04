@@ -94,15 +94,9 @@ class QuestionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        if (lessonStartedAt == null) {
-            lessonStartedAt = nowIsoLocalDateTime()
-        }
-
-        // Load questions if not already loaded
-        if (viewModel.questionsState.value is LessonQuestionsState.Initial) {
-            viewModel.loadLessonQuestions(args.lessonId)
-        }
+        lessonStartedAt = nowIsoLocalDateTime()
+        // Luôn load lại câu hỏi khi vào lesson để bắt đầu từ câu đầu tiên
+        viewModel.loadLessonQuestions(args.lessonId)
 
         initFeedbackSfx()
         

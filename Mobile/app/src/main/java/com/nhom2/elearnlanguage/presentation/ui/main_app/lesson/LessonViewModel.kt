@@ -26,9 +26,14 @@ class LessonViewModel @Inject constructor(
     val currentQuestionIndex: StateFlow<Int> = _currentQuestionIndex.asStateFlow()
 
     private var allQuestions: List<Question> = emptyList()
+    private var currentLessonId: Int? = null
 
     fun loadLessonQuestions(lessonId: Int) {
         viewModelScope.launch {
+            // Mỗi lần vào lesson (kể cả cùng id), luôn reset state để bắt đầu lại từ câu 1
+            currentLessonId = lessonId
+            allQuestions = emptyList()
+            _currentQuestionIndex.value = 0
             _questionsState.value = LessonQuestionsState.Loading
             
             getLessonQuestionsUseCase(lessonId).fold(

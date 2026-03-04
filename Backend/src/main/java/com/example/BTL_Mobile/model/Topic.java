@@ -27,4 +27,8 @@ public class Topic {
     @Column(name = "description", nullable = false, length = 500)
     private String description;
 
+    @Size(max = 1000)
+    @Column(name = "image_url")
+    private String imageUrl;
+
 }
