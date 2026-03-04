@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_80"
-    tools:context=".presentation.ui.home.LessonTabFragment">
+    tools:context=".presentation.ui.main_app.home.LessonTabFragment">
 
     <!-- Header: greeting + illustration (luôn hiển thị phía sau sheet) -->
     <androidx.constraintlayout.widget.ConstraintLayout

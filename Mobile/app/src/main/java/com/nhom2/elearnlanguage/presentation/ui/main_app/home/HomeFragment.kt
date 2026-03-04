@@ -1,4 +1,4 @@
-package com.nhom2.elearnlanguage.presentation.ui.home
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home
 
 import android.os.Bundle
 import android.view.LayoutInflater

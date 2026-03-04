@@ -2,12 +2,12 @@ package com.nhom2.elearnlanguage.di
 
 import com.nhom2.elearnlanguage.data.repository.AuthRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.HomeRepositoryImpl
+import com.nhom2.elearnlanguage.data.repository.LessonRepositoryImpl
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.HomeDataSource
+import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.HomeRepository
-import com.nhom2.elearnlanguage.data.repository.LessonRepositoryImpl
-import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import com.nhom2.elearnlanguage.domain.repository.LessonRepository
 import dagger.Module
 import dagger.Provides

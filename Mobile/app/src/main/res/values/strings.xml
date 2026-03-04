@@ -46,4 +46,17 @@
     <string name="topic_image">Topic image</string>
     <string name="open">Open</string>
     <string name="error_generic">Something went wrong</string>
+
+    <!-- Multiple Choice Question -->
+    <string name="feedback_wrong_title">Ups.. that\'s wrong</string>
+    <string name="feedback_correct_title">Amazing!</string>
+    <string name="feedback_answer_prefix">Answer:</string>
+    <string name="next_question">Next Question</string>
+    <string name="complete">Complete</string>
+
+    <!-- Arrange Words Question -->
+    <string name="check_answer">Check Answer</string>
+    <string name="feedback_not_quite_right">Ups.. That not quite right</string>
+    <string name="answer">Answer:</string>
+    <string name="arrange_question_title">What\'s the meaning of this sentence?</string>
 </resources>

@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -195,6 +196,8 @@ class LoginFragment : Fragment() {
                             val navOptions = androidx.navigation.NavOptions.Builder()
                                 .setPopUpTo(R.id.loginFragment, true)
                                 .build()
+
+                            // Sau khi đăng nhập thành công, điều hướng về Home
                             findNavController().navigate(
                                 R.id.action_loginFragment_to_homeFragment,
                                 null,

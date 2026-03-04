@@ -1,9 +1,9 @@
 package com.example.BTL_Mobile.service.facade.impl;
 
+import com.example.BTL_Mobile.dto.request.lesson.SubmitLessonRequest;
 import com.example.BTL_Mobile.dto.response.lesson.QuestionDetailDTO;
 import com.example.BTL_Mobile.mapper.QuestionMapper;
-import com.example.BTL_Mobile.model.Lesson;
-import com.example.BTL_Mobile.model.Question;
+import com.example.BTL_Mobile.model.*;
 import com.example.BTL_Mobile.service.LessonService;
 import com.example.BTL_Mobile.service.facade.LessonFacadeService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,11 @@ public class LessonFacadeServiceImpl implements LessonFacadeService {
         Set<Question> questions = lesson.getQuestions();
         return questions.stream().map(questionMapper::toQuestionDetailDTO)
                 .toList();
+    }
+
+    @Override
+    public void submit(int lessonId, SubmitLessonRequest submitLesson) {
+        lessonService.submitLesson(lessonId, submitLesson);
     }
 
 }

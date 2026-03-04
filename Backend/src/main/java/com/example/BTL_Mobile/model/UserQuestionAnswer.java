@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.model;
 
+import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "user_question_answers", schema = "btl_mobile")
-public class UserQuestionAnswer {
+public class UserQuestionAnswer extends AbstractAuditEntity {
 
     @Id
     @Column(name = "id", nullable = false)

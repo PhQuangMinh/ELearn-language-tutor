@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +65,7 @@ public class HomeService {
                     return CourseProgressResponse.builder()
                             .id(topic.getId())
                             .title(topic.getName())
-                            .imageUrl("") // Có thể thêm imageUrl vào Topic entity sau
+                            .imageUrl(topic.getImageUrl())
                             .progressPercent(progressPercent)
                             .build();
                 })
