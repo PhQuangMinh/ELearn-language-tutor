@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -30,5 +32,11 @@ public class Topic {
     @Size(max = 1000)
     @Column(name = "image_url")
     private String imageUrl;
+
+    @ManyToMany
+    @JoinTable(name = "topic_vocabulary",
+        joinColumns = @JoinColumn(name = "topic_id"),
+        inverseJoinColumns = @JoinColumn(name = "word_id"))
+    private Set<DictionaryWord> vocabulary;
 
 }
