@@ -1,11 +1,14 @@
 package com.example.BTL_Mobile.config;
 
+import com.example.BTL_Mobile.dto.response.ApiResponse;
 import com.example.BTL_Mobile.security.JwtAuthenticationFilter;
-import com.example.BTL_Mobile.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,8 +20,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,24 +31,35 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Value("${oauth2.mobile-redirect-url:elearn://login/callback}")
     private String mobileRedirectUrl;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource,
+                AuthenticationProvider authenticationProvider
+        ) throws Exception {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            RequestMatcher apiMatcher = request -> {
+                String uri = request.getRequestURI();
+                return uri != null && uri.startsWith("/api/");
+            };
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(
@@ -71,6 +87,34 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(ex -> ex
+                    .defaultAuthenticationEntryPointFor(
+                        (request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+                            ApiResponse<Object> body = ApiResponse.error(
+                                    "Bạn cần đăng nhập để truy cập tài nguyên này",
+                                    "UNAUTHORIZED"
+                            );
+                            objectMapper.writeValue(response.getOutputStream(), body);
+                        },
+                        apiMatcher
+                    )
+                    .defaultAccessDeniedHandlerFor(
+                        (request, response, accessDeniedException) -> {
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+                            ApiResponse<Object> body = ApiResponse.error(
+                                    "Bạn không có quyền truy cập tài nguyên này",
+                                    "FORBIDDEN"
+                            );
+                            objectMapper.writeValue(response.getOutputStream(), body);
+                        },
+                        apiMatcher
+                    )
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler((request, response, exception) -> {
@@ -79,7 +123,7 @@ public class SecurityConfig {
                             response.sendRedirect(redirectUrl);
                         })
                 )
-                .authenticationProvider(authenticationProvider())
+            .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
