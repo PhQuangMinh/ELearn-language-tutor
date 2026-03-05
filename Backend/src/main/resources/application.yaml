@@ -2,6 +2,10 @@ spring:
   application:
     name: BTL_Mobile
 
+  devtools:
+    restart:
+      enabled: ${DEVTOOLS_RESTART_ENABLED:true}
+
   # Load .env for local runs (supports running from repo root or Backend/)
   config:
     import:
