@@ -8,6 +8,7 @@ import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
+import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -178,4 +179,9 @@ object NetworkModule {
         return LessonDataSource(client)
     }
 
+    @Provides
+    @Singleton
+    fun provideVocabularyDataSource(client: HttpClient): VocabularyDataSource {
+        return VocabularyDataSource(client)
+    }
 }
