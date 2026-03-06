@@ -12,5 +12,4 @@ import java.util.ArrayList;
         imports = {ArrayList.class})
 public abstract class QuestionMapper {
     public abstract QuestionDetailDTO toQuestionDetailDTO(Question question);
-
 }
