@@ -27,7 +27,10 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupBottomNav()
         if (savedInstanceState == null) {
-            showTab(R.id.tab_lesson)
+//            showTab(R.id.tab_lesson)
+            showTab(R.id.tab_vocabulary)
+            // optional (để bottom nav highlight đúng tab):
+            binding.bottomNav.selectedItemId = R.id.tab_vocabulary
         }
     }
 

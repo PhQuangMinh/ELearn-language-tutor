@@ -6,8 +6,6 @@ import com.example.BTL_Mobile.service.FlashCardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,14 +21,12 @@ public class FlashCardController {
     private final FlashCardService flashCardService;
 
     @GetMapping
-    @Operation(summary = "Lấy danh sách flashcard (phân trang)",
-            description = "Trả về danh sách flashcard với từ, phiên âm, nghĩa, ví dụ và ảnh minh hoạ, hỗ trợ phân trang")
-    public ResponseEntity<ApiResponse<Page<FlashCardResponse>>> getFlashCards(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    @Operation(summary = "Lấy danh sách flashcard",
+            description = "Trả về danh sách flashcard, có thể lọc theo topic")
+    public ResponseEntity<ApiResponse<List<FlashCardResponse>>> getFlashCards(
+            @RequestParam(required = false) Integer topicId
     ) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<FlashCardResponse> flashCards = flashCardService.getFlashCards(pageable);
+        List<FlashCardResponse> flashCards = flashCardService.getFlashCards(topicId);
         return ResponseEntity.ok(ApiResponse.success(flashCards));
     }
 

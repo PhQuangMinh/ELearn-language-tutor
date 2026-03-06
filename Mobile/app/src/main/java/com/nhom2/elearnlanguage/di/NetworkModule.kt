@@ -8,6 +8,7 @@ import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
+import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -68,6 +69,7 @@ object NetworkModule {
             }
             defaultRequest {
                 url(BuildConfig.API_BASE_URL)
+                header(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 val token = TokenManager.getAccessToken(context)
                 val url = this.url.build().toString()
                 if (!url.contains("/api/auth/login") &&
@@ -174,8 +176,15 @@ object NetworkModule {
         return com.nhom2.elearnlanguage.data.source.remote.HomeDataSource(client)
     }
 
-    fun provideLessonDataSource(client: HttpClient): LessonDataSource {
+        @Provides
+        @Singleton
+        fun provideLessonDataSource(client: HttpClient): LessonDataSource {
         return LessonDataSource(client)
     }
 
+    @Provides
+    @Singleton
+    fun provideVocabularyDataSource(client: HttpClient): VocabularyDataSource {
+        return VocabularyDataSource(client)
+    }
 }

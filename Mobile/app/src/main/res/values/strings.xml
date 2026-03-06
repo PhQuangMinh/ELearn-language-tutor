@@ -59,5 +59,13 @@
     <string name="feedback_not_quite_right">Ups.. That not quite right</string>
     <string name="answer">Answer:</string>
     <string name="arrange_question_title">What\'s the meaning of this sentence?</string>
+<<<<<<< HEAD
     <string name="lesson_no_questions">Lesson này hiện chưa có câu hỏi</string>
+=======
+
+    <!-- Vocabulary topic -->
+    <string name="noun">Noun</string>
+    <string name="verb">Verb</string>
+    <string name="adjective">Adjective</string>
+>>>>>>> f49c9152cf940604513815005358979f84464cca
 </resources>

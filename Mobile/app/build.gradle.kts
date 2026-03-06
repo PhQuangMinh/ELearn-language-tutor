@@ -87,10 +87,13 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
 
+    // Needed for Ktor TypeInfo (avoid: Kotlin reflection is not available)
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.21")
+
     implementation("androidx.recyclerview:recyclerview:1.4.0")
 
     //Image loading
-    implementation("io.coil-kt:coil:2.6.0")
+    implementation("io.coil-kt:coil:2.7.0")
 
     //Custom tabs
     implementation("androidx.browser:browser:1.9.0")
@@ -99,8 +102,4 @@ dependencies {
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
-
-    // UI - lesson list screen
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("io.coil-kt:coil:2.7.0")
 }

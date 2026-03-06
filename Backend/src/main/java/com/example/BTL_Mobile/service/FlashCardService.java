@@ -5,8 +5,6 @@ import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.FlashCard;
 import com.example.BTL_Mobile.repository.FlashCardRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,13 +15,12 @@ public class FlashCardService {
 
     private final FlashCardRepository flashCardRepository;
 
-    public Page<FlashCardResponse> getFlashCards(Pageable pageable) {
-        return flashCardRepository.findAll(pageable)
-                .map(this::mapToResponse);
-    }
+    public List<FlashCardResponse> getFlashCards(Integer topicId) {
+        List<FlashCard> flashCards = topicId == null
+                ? flashCardRepository.findAll()
+                : flashCardRepository.findByTopicId(topicId);
 
-    public List<FlashCardResponse> getAllFlashCards() {
-        return flashCardRepository.findAll().stream()
+        return flashCards.stream()
                 .map(this::mapToResponse)
                 .toList();
     }
