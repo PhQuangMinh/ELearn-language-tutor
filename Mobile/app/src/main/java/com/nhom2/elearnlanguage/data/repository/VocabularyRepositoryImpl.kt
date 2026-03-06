@@ -3,8 +3,9 @@ package com.nhom2.elearnlanguage.data.repository
 import com.nhom2.elearnlanguage.data.mapper.toDomain
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import com.nhom2.elearnlanguage.domain.model.Flashcard
-import com.nhom2.elearnlanguage.domain.repository.VocabularyRepository
 import java.lang.Exception
+import com.nhom2.elearnlanguage.domain.model.vocabulary.Vocabulary
+import com.nhom2.elearnlanguage.domain.repository.VocabularyRepository
 import javax.inject.Inject
 
 class VocabularyRepositoryImpl @Inject constructor(
@@ -29,4 +30,10 @@ class VocabularyRepositoryImpl @Inject constructor(
 
         return response.data.toDomain()
     }
+
+    override suspend fun getTopicVocabularies(topicId: Int): List<Vocabulary> {
+        val response = vocabularyDataSource.getTopicVocabularies(topicId)
+        return response.vocabulary.map { it.toDomain() }
+    }
 }
+
