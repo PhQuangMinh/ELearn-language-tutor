@@ -74,6 +74,8 @@ class QuestionFragment : Fragment() {
     private var sfxCorrectLoaded: Boolean = false
     private var sfxIncorrectLoaded: Boolean = false
     private var isSubmitting: Boolean = false
+    private var hasHandledNoQuestionsState: Boolean = false
+    private var hasHandledLoadErrorState: Boolean = false
 
     private val lessonAudioCacheDir: File by lazy {
         File(requireContext().cacheDir, "audio_cache/lesson_${args.lessonId}")
@@ -95,6 +97,7 @@ class QuestionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lessonStartedAt = nowIsoLocalDateTime()
+        renderLoadingState(isLoading = true)
         // Luôn load lại câu hỏi khi vào lesson để bắt đầu từ câu đầu tiên
         viewModel.loadLessonQuestions(args.lessonId)
 
@@ -107,20 +110,37 @@ class QuestionFragment : Fragment() {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.questionsState.collect { state ->
-                if (state is LessonQuestionsState.Success) {
-                    if (!hasPrefetchedAudio) {
-                        hasPrefetchedAudio = true
-                        prefetchLessonAudio(state.questions)
+                when (state) {
+                    is LessonQuestionsState.Initial -> Unit
+                    is LessonQuestionsState.Loading -> {
+                        renderLoadingState(isLoading = true)
                     }
-                    val currentQuestion = viewModel.getCurrentQuestion() ?: return@collect
-                    // Setup progress bar on initial load
-                    if (!hasInitialized) {
-                        hasInitialized = true
-                        if (!::progressAdapter.isInitialized) {
-                            setupProgressBar()
+                    is LessonQuestionsState.Error -> {
+                        renderLoadingState(isLoading = false)
+                        handleLoadErrorState(state.message)
+                    }
+                    is LessonQuestionsState.Success -> {
+                        if (state.questions.isEmpty()) {
+                            handleNoQuestionsState()
+                            return@collect
                         }
+
+                        val currentQuestion = viewModel.getCurrentQuestion() ?: return@collect
+                        renderLoadingState(isLoading = false)
+
+                        if (!hasPrefetchedAudio) {
+                            hasPrefetchedAudio = true
+                            prefetchLessonAudio(state.questions)
+                        }
+                        // Setup progress bar on initial load
+                        if (!hasInitialized) {
+                            hasInitialized = true
+                            if (!::progressAdapter.isInitialized) {
+                                setupProgressBar()
+                            }
+                        }
+                        displayCurrentQuestion(currentQuestion)
                     }
-                    displayCurrentQuestion(currentQuestion)
                 }
             }
         }
@@ -128,6 +148,10 @@ class QuestionFragment : Fragment() {
         // Observe progress changes
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.currentQuestionIndex.collect {
+                val questionState = viewModel.questionsState.value
+                if (questionState !is LessonQuestionsState.Success || questionState.questions.isEmpty()) {
+                    return@collect
+                }
                 val currentQuestion = viewModel.getCurrentQuestion() ?: return@collect
                 // Ensure progress bar is setup when returning to this fragment
                 if (!::progressAdapter.isInitialized) {
@@ -137,6 +161,27 @@ class QuestionFragment : Fragment() {
                 displayCurrentQuestion(currentQuestion)
             }
         }
+    }
+
+    private fun renderLoadingState(isLoading: Boolean) {
+        if (_binding == null) return
+        binding.pbQuestionLoading.isVisible = isLoading
+        binding.scrollQuestionContent.isVisible = !isLoading
+        binding.bottomPanel.isVisible = !isLoading
+    }
+
+    private fun handleNoQuestionsState() {
+        if (hasHandledNoQuestionsState || _binding == null) return
+        hasHandledNoQuestionsState = true
+        Toast.makeText(requireContext(), getString(R.string.lesson_no_questions), Toast.LENGTH_SHORT).show()
+        findNavController().popBackStack()
+    }
+
+    private fun handleLoadErrorState(message: String) {
+        if (hasHandledLoadErrorState || _binding == null) return
+        hasHandledLoadErrorState = true
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        findNavController().popBackStack()
     }
 
     private fun setupListeners() {
