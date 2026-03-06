@@ -3,7 +3,7 @@ package com.nhom2.elearnlanguage.data.source.remote
 import com.nhom2.elearnlanguage.BuildConfig
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.FlashCardDTO
-import com.nhom2.elearnlanguage.domain.model.Flashcard
+import com.nhom2.elearnlanguage.data.dto.vocabulary.TopicVocabularyResponseDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -31,4 +31,13 @@ class VocabularyDataSource @Inject constructor(
     suspend fun getFlashcardById(id: Int): ApiResponseDTO<FlashCardDTO> {
         return httpClient.get("${BuildConfig.API_BASE_URL}/api/flashcards/$id").body()
     }
+
+    /**
+     * API doc:
+     * GET /api/topic/{topicId}/vocabularies
+     */
+    suspend fun getTopicVocabularies(topicId: Int): TopicVocabularyResponseDTO {
+        return httpClient.get("${BuildConfig.API_BASE_URL}/api/topic/$topicId/vocabularies").body()
+    }
 }
+

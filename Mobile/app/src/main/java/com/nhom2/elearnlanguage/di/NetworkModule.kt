@@ -69,6 +69,7 @@ object NetworkModule {
             }
             defaultRequest {
                 url(BuildConfig.API_BASE_URL)
+                header(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 val token = TokenManager.getAccessToken(context)
                 val url = this.url.build().toString()
                 if (!url.contains("/api/auth/login") &&
@@ -175,7 +176,9 @@ object NetworkModule {
         return com.nhom2.elearnlanguage.data.source.remote.HomeDataSource(client)
     }
 
-    fun provideLessonDataSource(client: HttpClient): LessonDataSource {
+        @Provides
+        @Singleton
+        fun provideLessonDataSource(client: HttpClient): LessonDataSource {
         return LessonDataSource(client)
     }
 

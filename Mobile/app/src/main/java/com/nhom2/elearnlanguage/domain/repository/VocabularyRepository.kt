@@ -1,6 +1,7 @@
 package com.nhom2.elearnlanguage.domain.repository
 
 import com.nhom2.elearnlanguage.domain.model.Flashcard
+import com.nhom2.elearnlanguage.domain.model.vocabulary.Vocabulary
 
 interface VocabularyRepository {
     /**
@@ -13,4 +14,7 @@ interface VocabularyRepository {
      * Get a single flashcard by ID
      */
     suspend fun getFlashcardById(id: Int): Flashcard
+
+    suspend fun getTopicVocabularies(topicId: Int): List<Vocabulary>
 }
+

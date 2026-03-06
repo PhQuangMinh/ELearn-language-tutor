@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="8dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="false">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp">
+
+        <TextView
+            android:id="@+id/tvWord"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lexend_bold"
+            android:textColor="@color/neutral_100"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@id/ivChevron"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <ImageView
+            android:id="@+id/ivChevron"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/open"
+            android:src="@drawable/baseline_keyboard_arrow_down_24"
+            app:layout_constraintBottom_toBottomOf="@id/tvWord"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvWord" />
+
+        <TextView
+            android:id="@+id/tvMeaning"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/lexend_medium"
+            android:textColor="@color/neutral_80"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWord" />
+
+        <LinearLayout
+            android:id="@+id/llExpandedContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvMeaning">
+
+            <TextView
+                android:id="@+id/tvDefinition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lexend_light"
+                android:textColor="@color/neutral_80"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvExample"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/lexend_light"
+                android:gravity="center_horizontal"
+                android:textColor="@color/neutral_80"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
+
