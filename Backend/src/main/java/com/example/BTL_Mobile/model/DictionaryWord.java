@@ -1,6 +1,7 @@
 package com.example.BTL_Mobile.model;
 
 import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
+import com.example.BTL_Mobile.model.enums.EWordType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,6 +28,10 @@ public class DictionaryWord extends AbstractAuditEntity {
     @NotNull
     @Column(name = "pronunciation", nullable = false, length = 50)
     private String pronunciation;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private EWordType type;
 
     @Size(max = 255)
     @NotNull
