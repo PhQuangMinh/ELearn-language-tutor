@@ -37,6 +37,10 @@
     <string name="tab_speaking">Speaking</string>
     <string name="tab_profile">Profile</string>
     <string name="vocabulary_coming_soon">Vocabulary - Coming soon</string>
+    <string name="learning_vocabulary">Learning Vocabulary</string>
+    <string name="section_topic">TOPIC</string>
+    <string name="section_flashcard">Flashcard</string>
+    <string name="lesson_no_questions">Lesson No Question</string>
     <string name="speaking_coming_soon">Speaking - Coming soon</string>
     <string name="profile_coming_soon">Profile - Coming soon</string>
     <string name="error_load_home">Không thể tải dữ liệu</string>
@@ -59,13 +63,11 @@
     <string name="feedback_not_quite_right">Ups.. That not quite right</string>
     <string name="answer">Answer:</string>
     <string name="arrange_question_title">What\'s the meaning of this sentence?</string>
-<<<<<<< HEAD
-    <string name="lesson_no_questions">Lesson này hiện chưa có câu hỏi</string>
-=======
 
-    <!-- Vocabulary topic -->
-    <string name="noun">Noun</string>
-    <string name="verb">Verb</string>
-    <string name="adjective">Adjective</string>
->>>>>>> f49c9152cf940604513815005358979f84464cca
+    <!-- Lesson complete -->
+    <string name="lesson_complete_celebration">Lesson complete celebration</string>
+    <string name="lesson_complete_title">Lesson complete!</string>
+    <string name="correct">Correct</string>
+    <string name="lesson_complete_continue">Continue</string>
+    <string name="lesson_complete_score">%1$d/%2$d Correct</string>
 </resources>
