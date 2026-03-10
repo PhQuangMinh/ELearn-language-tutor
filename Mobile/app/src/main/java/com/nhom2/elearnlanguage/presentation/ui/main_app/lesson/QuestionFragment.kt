@@ -6,6 +6,7 @@ import android.widget.Toast
 import android.media.MediaPlayer
 import android.media.AudioAttributes
 import android.media.SoundPool
+import android.os.Build
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.QuestionFragmentDirections
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
@@ -34,6 +36,7 @@ import androidx.core.view.isVisible
 import com.nhom2.elearnlanguage.presentation.utils.dpToPx
 import androidx.core.content.ContextCompat
 import android.view.animation.OvershootInterpolator
+import androidx.annotation.RequiresApi
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -76,6 +79,7 @@ class QuestionFragment : Fragment() {
     private var isSubmitting: Boolean = false
     private var hasHandledNoQuestionsState: Boolean = false
     private var hasHandledLoadErrorState: Boolean = false
+    private var correctAnswerCount: Int = 0
 
     private val lessonAudioCacheDir: File by lazy {
         File(requireContext().cacheDir, "audio_cache/lesson_${args.lessonId}")
@@ -94,6 +98,7 @@ class QuestionFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lessonStartedAt = nowIsoLocalDateTime()
@@ -184,6 +189,7 @@ class QuestionFragment : Fragment() {
         findNavController().popBackStack()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupListeners() {
         binding.btnBack.root.setOnClickListener {
             findNavController().popBackStack()
@@ -262,6 +268,7 @@ class QuestionFragment : Fragment() {
         }
 
         Log.d(TAG, "checkAnswer result=${if (isCorrect) "CORRECT" else "WRONG"} questionId=${currentQuestion.id} type=${currentQuestion.type}")
+        if (isCorrect) correctAnswerCount++
         saveUserAnswer(question = currentQuestion)
         if (currentQuestion.type == QuestionType.ONE_SELECTION) {
             applyOneSelectionCheckedStyle(isCorrect)
@@ -308,6 +315,7 @@ class QuestionFragment : Fragment() {
             .replace(Regex("\\s+"), " ")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun onNextQuestionClicked() {
         if (viewModel.isLastQuestion()) {
             if (isSubmitting) return
@@ -326,7 +334,12 @@ class QuestionFragment : Fragment() {
                     val result = viewModel.submitLessonAnswers(args.lessonId, payload)
                     if (result.isSuccess && result.getOrNull() == true) {
                         submittedOk = true
-                        Toast.makeText(requireContext(), "oke", Toast.LENGTH_SHORT).show()
+                        val total = viewModel.getTotalQuestions()
+                        val action = QuestionFragmentDirections.actionQuestionFragmentToLessonCompleteFragment(
+                            correctCount = correctAnswerCount,
+                            totalCount = total
+                        )
+                        findNavController().navigate(action)
                     } else {
                         Log.d(TAG, "submitLessonAnswers failed: ${result.exceptionOrNull()?.message}")
                     }
@@ -350,6 +363,7 @@ class QuestionFragment : Fragment() {
         moveNextQuestion()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun buildAggregatedAnswersPayload(): LessonSubmitRequest {
         val startedAt = lessonStartedAt ?: nowIsoLocalDateTime().also { lessonStartedAt = it }
         val endedAt = nowIsoLocalDateTime()
@@ -360,6 +374,7 @@ class QuestionFragment : Fragment() {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun nowIsoLocalDateTime(): String {
         // Parseable by Java LocalDateTime.parse(...), e.g. 2026-03-01T15:04:05.123
         return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

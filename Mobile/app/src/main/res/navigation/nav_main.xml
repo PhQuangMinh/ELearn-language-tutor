@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_main"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/loginFragment">
 
     <fragment
         android:id="@+id/loginFragment"
@@ -81,5 +81,20 @@
             android:name="lessonId"
             app:argType="integer"
             android:defaultValue="1" />
+        <action
+            android:id="@+id/action_questionFragment_to_lessonCompleteFragment"
+            app:destination="@id/lessonCompleteFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonCompleteFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.LessonCompleteFragment"
+        android:label="Lesson complete"
+        tools:layout="@layout/fragment_lesson_complete">
+        <argument
+            android:name="correctCount"
+            app:argType="integer" />
+        <argument
+            android:name="totalCount"
+            app:argType="integer" />
     </fragment>
 </navigation>

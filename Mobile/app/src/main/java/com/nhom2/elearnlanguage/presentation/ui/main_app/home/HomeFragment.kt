@@ -15,6 +15,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private var currentTabId: Int = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -27,16 +29,25 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupBottomNav()
         if (savedInstanceState == null) {
-//            showTab(R.id.tab_lesson)
-            showTab(R.id.tab_vocabulary)
-            // optional (để bottom nav highlight đúng tab):
-            binding.bottomNav.selectedItemId = R.id.tab_vocabulary
+            binding.root.post {
+                showTab(R.id.tab_lesson)
+                binding.bottomNav.selectedItemId = R.id.tab_lesson
+            }
         }
     }
 
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
-            showTab(item.itemId)
+            val itemId = item.itemId
+            if (itemId == currentTabId) {
+                return@setOnItemSelectedListener true
+            }
+            if (itemId == R.id.tab_lesson || itemId == R.id.tab_vocabulary ||
+                itemId == R.id.tab_speaking || itemId == R.id.tab_profile
+            ) {
+                showTab(itemId)
+                currentTabId = itemId
+            }
             true
         }
     }
@@ -49,6 +60,7 @@ class HomeFragment : Fragment() {
             R.id.tab_profile -> ProfileTabFragment()
             else -> return
         }
+        currentTabId = itemId
         childFragmentManager.beginTransaction()
             .replace(R.id.flTabContainer, fragment)
             .commit()
