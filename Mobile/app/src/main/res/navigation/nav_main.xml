@@ -31,6 +31,40 @@
         <action
             android:id="@+id/action_homeFragment_to_lessonListFragment"
             app:destination="@id/lessonListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_topicVocabularyFragment"
+            app:destination="@id/topicVocabularyFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_flashcardFragment"
+            app:destination="@id/flashcardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/topicVocabularyFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.vocabulary.TopicVocabularyFragment"
+        android:label="fragment_topic_vocabulary"
+        tools:layout="@layout/fragment_topic_vocabulary">
+        <argument
+            android:name="topicId"
+            app:argType="integer" />
+        <argument
+            android:name="topicName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/flashcardFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.vocabulary.FlashcardFragment"
+        android:label="fragment_flashcard"
+        tools:layout="@layout/fragment_flash_card">
+        <argument
+            android:name="topicId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="topicTitle"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment

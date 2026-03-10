@@ -36,8 +36,7 @@ class TopicVocabularyViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = TopicVocabularyUiState.Loading
             try {
-                all = getTopicVocabulariesUseCase(1)
-                //all = getTopicVocabulariesUseCase(topicId)
+                all = getTopicVocabulariesUseCase(topicId)
                 emitSuccess()
             } catch (e: Exception) {
                 _uiState.value = TopicVocabularyUiState.Error(e.message)
@@ -91,7 +90,8 @@ class TopicVocabularyViewModel @Inject constructor(
     )
 
     private fun calculateTotalPages(filteredSize: Int, pageSize: Int): Int {
-        if (filteredSize <= 0) return 0
+        // Keep pagination stable even when there are 0 items (UI can show 1/1 with empty list).
+        if (filteredSize <= 0) return 1
         return ceil(filteredSize / pageSize.toDouble()).toInt()
     }
 

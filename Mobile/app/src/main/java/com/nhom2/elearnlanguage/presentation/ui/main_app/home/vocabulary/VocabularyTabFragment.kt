@@ -26,19 +26,17 @@ class VocabularyTabFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
 
     private val topicAdapter = VocabularyTopicAdapter { course ->
-        val action = HomeFragmentDirections.actionHomeFragmentToLessonListFragment(
+        val action = HomeFragmentDirections.actionHomeFragmentToTopicVocabularyFragment(
             topicId = course.id,
-            topicName = course.title,
-            topicImageUrl = course.imageUrl
+            topicName = course.title
         )
         requireParentFragment().findNavController().navigate(action)
     }
 
     private val flashcardAdapter = VocabularyTopicAdapter { course ->
-        val action = HomeFragmentDirections.actionHomeFragmentToLessonListFragment(
+        val action = HomeFragmentDirections.actionHomeFragmentToFlashcardFragment(
             topicId = course.id,
-            topicName = course.title,
-            topicImageUrl = course.imageUrl
+            topicTitle = course.title
         )
         requireParentFragment().findNavController().navigate(action)
     }
