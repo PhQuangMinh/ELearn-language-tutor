@@ -32,6 +32,8 @@ public class GeminiServiceImpl implements GeminiService {
 
   @Override
   public Object callGemini(String prompt) {
+    log.info("gemini key: {}", geminiKey);
+    log.info("gemini model: {}", geminiModel);
     if (prompt == null || prompt.isBlank()) {
       throw new IllegalArgumentException("prompt must not be blank");
     }
