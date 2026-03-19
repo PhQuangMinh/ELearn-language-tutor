@@ -22,16 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "AI", description = "API phản hồi người dùng bằng Gemini")
 public class AiResponseController {
 
-    private final AiResponseService aiResponseService;
+  private final AiResponseService aiResponseService;
 
-    @PostMapping("/respond")
-    @Operation(summary = "Phản hồi người dùng bằng AI",
-            description = "Nhận mô tả cuộc hội thoại, nhiệm vụ và tin nhắn mới, trả về ai_message + translation + user_hints")
-    public ResponseEntity<ApiResponse<AiRespondResponse>> respond(
-            @Valid @RequestBody AiRespondRequest request
-    ) {
-        AiRespondResponse data = aiResponseService.respond(request);
-        return ResponseEntity.ok(ApiResponse.success(data));
-    }
+  @PostMapping("/respond")
+  @Operation(summary = "Phản hồi người dùng bằng AI",
+      description = "Nhận mô tả cuộc hội thoại, nhiệm vụ và tin nhắn mới, trả về ai_message + translation + user_hints")
+  public ResponseEntity<ApiResponse<AiRespondResponse>> respond(
+      @Valid @RequestBody AiRespondRequest request
+  ) {
+    AiRespondResponse data = aiResponseService.respond(request);
+    return ResponseEntity.ok(ApiResponse.success(data));
+  }
 }
 

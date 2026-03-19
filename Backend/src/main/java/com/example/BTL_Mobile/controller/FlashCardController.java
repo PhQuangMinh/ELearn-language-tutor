@@ -18,23 +18,23 @@ import java.util.List;
 @Tag(name = "Flashcards", description = "API flashcard từ vựng")
 public class FlashCardController {
 
-    private final FlashCardService flashCardService;
+  private final FlashCardService flashCardService;
 
-    @GetMapping
-    @Operation(summary = "Lấy danh sách flashcard",
-            description = "Trả về danh sách flashcard, có thể lọc theo topic")
-    public ResponseEntity<ApiResponse<List<FlashCardResponse>>> getFlashCards(
-            @RequestParam(required = false) Integer topicId
-    ) {
-        List<FlashCardResponse> flashCards = flashCardService.getFlashCards(topicId);
-        return ResponseEntity.ok(ApiResponse.success(flashCards));
-    }
+  @GetMapping
+  @Operation(summary = "Lấy danh sách flashcard",
+      description = "Trả về danh sách flashcard, có thể lọc theo topic")
+  public ResponseEntity<ApiResponse<List<FlashCardResponse>>> getFlashCards(
+      @RequestParam(required = false) Integer topicId
+  ) {
+    List<FlashCardResponse> flashCards = flashCardService.getFlashCards(topicId);
+    return ResponseEntity.ok(ApiResponse.success(flashCards));
+  }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Lấy chi tiết 1 flashcard")
-    public ResponseEntity<ApiResponse<FlashCardResponse>> getFlashCardById(@PathVariable Integer id) {
-        FlashCardResponse flashCard = flashCardService.getById(id);
-        return ResponseEntity.ok(ApiResponse.success(flashCard));
-    }
+  @GetMapping("/{id}")
+  @Operation(summary = "Lấy chi tiết 1 flashcard")
+  public ResponseEntity<ApiResponse<FlashCardResponse>> getFlashCardById(@PathVariable Integer id) {
+    FlashCardResponse flashCard = flashCardService.getById(id);
+    return ResponseEntity.ok(ApiResponse.success(flashCard));
+  }
 }
 
