@@ -25,33 +25,36 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LessonController {
 
-    private final LessonFacadeService lessonFacadeService;
-    private final LessonService lessonService;
+  private final LessonFacadeService lessonFacadeService;
+  private final LessonService lessonService;
 
-    @GetMapping("/lessons/{lessonId}/questions")
-    @Operation(summary = "Lấy danh sách câu hỏi của lesson khi người dùng bắt đầu làm bài",
-            description = "Trả về thông tin câu hỏi kèm các câu trả lời để xử lý ở client")
-    public ResponseEntity<List<QuestionDetailDTO>> getQuestions(@PathVariable int lessonId){
-        List<QuestionDetailDTO> questions = lessonFacadeService.getQuestions(lessonId);
-        return ResponseEntity.ok(questions);
-    }
+  @GetMapping("/lessons/{lessonId}/questions")
+  @Operation(summary = "Lấy danh sách câu hỏi của lesson khi người dùng bắt đầu làm bài",
+      description = "Trả về thông tin câu hỏi kèm các câu trả lời để xử lý ở client")
+  public ResponseEntity<List<QuestionDetailDTO>> getQuestions(@PathVariable int lessonId) {
+    List<QuestionDetailDTO> questions = lessonFacadeService.getQuestions(lessonId);
+    return ResponseEntity.ok(questions);
+  }
 
-    @GetMapping("/topics/{topicId}/lessons")
-    public ResponseEntity<ApiResponse<List<LessonInTopicResponse>>> getLessonsByTopic(
-            @PathVariable Integer topicId
-    ) {
-        List<LessonInTopicResponse> data = lessonService.getLessonsByTopic(topicId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài học theo topic thành công!", data));
-    }
-    @RequestMapping(path = "/lessons/{lessonId}/submit", method = {RequestMethod.POST, RequestMethod.PUT})
-    @Operation(summary = "Submit bài làm lesson của người dùng",
-            description = "Gửi các câu trả lời của câu hỏi trong lesson")
-    public ResponseEntity<Void> submit(@PathVariable int lessonId,
-                                       @RequestBody SubmitLessonRequest submitLesson,
-                                       @AuthenticationPrincipal User user){
-        lessonFacadeService.submit(lessonId, submitLesson);
-        return ResponseEntity.ok().build();
-    }
+  @GetMapping("/topics/{topicId}/lessons")
+  public ResponseEntity<ApiResponse<List<LessonInTopicResponse>>> getLessonsByTopic(
+      @PathVariable Integer topicId
+  ) {
+    List<LessonInTopicResponse> data = lessonService.getLessonsByTopic(topicId);
+    return ResponseEntity.ok(
+        ApiResponse.success("Lấy danh sách bài học theo topic thành công!", data));
+  }
+
+  @RequestMapping(path = "/lessons/{lessonId}/submit", method = {RequestMethod.POST,
+      RequestMethod.PUT})
+  @Operation(summary = "Submit bài làm lesson của người dùng",
+      description = "Gửi các câu trả lời của câu hỏi trong lesson")
+  public ResponseEntity<Void> submit(@PathVariable int lessonId,
+      @RequestBody SubmitLessonRequest submitLesson,
+      @AuthenticationPrincipal User user) {
+    lessonFacadeService.submit(lessonId, submitLesson);
+    return ResponseEntity.ok().build();
+  }
 
 }
 

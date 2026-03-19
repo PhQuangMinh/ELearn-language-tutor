@@ -36,6 +36,10 @@ jwt:
 oauth2:
   mobile-redirect-url: ${OAUTH2_MOBILE_REDIRECT_URL}
 
+gemini:
+  model: ${GEMINI_MODEL:gemini-1.5-flash-latest}
+  api-key: ${GEMINI_API_KEY:}
+
 logging:
   level:
     org.springframework.web: INFO

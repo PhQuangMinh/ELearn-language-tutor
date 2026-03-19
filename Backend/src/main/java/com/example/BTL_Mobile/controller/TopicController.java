@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/topic")
 public class TopicController {
 
-    private final TopicService topicService;
+  private final TopicService topicService;
 
-    @GetMapping("/{topicId}/vocabularies")
-    public ResponseEntity<TopicVocabularyDTO> getVocabularies(@PathVariable int topicId) {
-        return ResponseEntity.ok(topicService.getVocabulary(topicId));
-    }
+  @GetMapping("/{topicId}/vocabularies")
+  public ResponseEntity<TopicVocabularyDTO> getVocabularies(@PathVariable int topicId) {
+    return ResponseEntity.ok(topicService.getVocabulary(topicId));
+  }
 
 }

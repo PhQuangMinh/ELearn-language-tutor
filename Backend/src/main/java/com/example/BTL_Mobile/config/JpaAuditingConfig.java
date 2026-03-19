@@ -12,17 +12,17 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class JpaAuditingConfig {
 
-    private final CurrentUserContext currentUserContext;
+  private final CurrentUserContext currentUserContext;
 
-    public JpaAuditingConfig(CurrentUserContext currentUserContext) {
-        this.currentUserContext = currentUserContext;
-    }
+  public JpaAuditingConfig(CurrentUserContext currentUserContext) {
+    this.currentUserContext = currentUserContext;
+  }
 
-    @Bean
-    public AuditorAware<Integer> auditorAware() {
-        return () -> {
-            return currentUserContext.getCurrentUserId().or(() -> Optional.of(0));
-        };
-    }
+  @Bean
+  public AuditorAware<Integer> auditorAware() {
+    return () -> {
+      return currentUserContext.getCurrentUserId().or(() -> Optional.of(0));
+    };
+  }
 }
 
