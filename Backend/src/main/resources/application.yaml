@@ -66,6 +66,11 @@ oauth2:
   # URL cho app Android: scheme elearn:// để app bắt deep link và nhận token
   mobile-redirect-url: ${OAUTH2_MOBILE_REDIRECT_URL:${MOBILE_REDIRECT_URL:elearn://login/callback}}
 
+gemini:
+  # Default model if GEMINI_MODEL isn't set in .env
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  api-key: ${GEMINI_API_KEY:}
+
 app:
   mail:
     # Only changes the display name. Email address still uses spring.mail.username

@@ -77,7 +77,8 @@ public class SecurityConfig {
                 "/api/auth/test",
                 "/api/auth/validate",
                 "/api/topics/*/lessons",
-                "/api/topic/*/vocabularies"
+                "/api/topic/*/vocabularies",
+                "/api/scenarios/by-lesson/*"
             ).permitAll()
             .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
             .requestMatchers("/api/auth/**").authenticated()

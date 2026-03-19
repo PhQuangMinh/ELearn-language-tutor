@@ -19,43 +19,44 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*", maxAge = 3600, allowedHeaders = "*", exposedHeaders = "*")
 public class AdminUserController {
 
-    private final AdminUserService adminUserService;
+  private final AdminUserService adminUserService;
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<UserResponse>>> list(Pageable pageable) {
-        Page<UserResponse> users = adminUserService.list(pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách user thành công!", users));
-    }
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> list(Pageable pageable) {
+    Page<UserResponse> users = adminUserService.list(pageable);
+    return ResponseEntity.ok(ApiResponse.success("Lấy danh sách user thành công!", users));
+  }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Integer id) {
-        UserResponse user = adminUserService.getById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin user thành công!", user));
-    }
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Integer id) {
+    UserResponse user = adminUserService.getById(id);
+    return ResponseEntity.ok(ApiResponse.success("Lấy thông tin user thành công!", user));
+  }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponse>> create(@Valid @RequestBody AdminUserCreateRequest request) {
-        UserResponse user = adminUserService.create(request);
-        return ResponseEntity.ok(ApiResponse.success("Tạo user thành công!", user));
-    }
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<UserResponse>> create(
+      @Valid @RequestBody AdminUserCreateRequest request) {
+    UserResponse user = adminUserService.create(request);
+    return ResponseEntity.ok(ApiResponse.success("Tạo user thành công!", user));
+  }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserResponse>> update(
-            @PathVariable Integer id,
-            @Valid @RequestBody AdminUserUpdateRequest request
-    ) {
-        UserResponse user = adminUserService.update(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật user thành công!", user));
-    }
+  @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<UserResponse>> update(
+      @PathVariable Integer id,
+      @Valid @RequestBody AdminUserUpdateRequest request
+  ) {
+    UserResponse user = adminUserService.update(id, request);
+    return ResponseEntity.ok(ApiResponse.success("Cập nhật user thành công!", user));
+  }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
-        adminUserService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa user thành công!", null));
-    }
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
+    adminUserService.delete(id);
+    return ResponseEntity.ok(ApiResponse.success("Xóa user thành công!", null));
+  }
 }

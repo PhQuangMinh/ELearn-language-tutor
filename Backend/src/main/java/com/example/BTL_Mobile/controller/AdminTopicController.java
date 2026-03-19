@@ -19,43 +19,44 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*", maxAge = 3600, allowedHeaders = "*", exposedHeaders = "*")
 public class AdminTopicController {
 
-    private final AdminTopicService adminTopicService;
+  private final AdminTopicService adminTopicService;
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<TopicResponse>>> list(Pageable pageable) {
-        Page<TopicResponse> topics = adminTopicService.list(pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách topic thành công!", topics));
-    }
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<Page<TopicResponse>>> list(Pageable pageable) {
+    Page<TopicResponse> topics = adminTopicService.list(pageable);
+    return ResponseEntity.ok(ApiResponse.success("Lấy danh sách topic thành công!", topics));
+  }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<TopicResponse>> getById(@PathVariable Integer id) {
-        TopicResponse topic = adminTopicService.getById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin topic thành công!", topic));
-    }
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<TopicResponse>> getById(@PathVariable Integer id) {
+    TopicResponse topic = adminTopicService.getById(id);
+    return ResponseEntity.ok(ApiResponse.success("Lấy thông tin topic thành công!", topic));
+  }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<TopicResponse>> create(@Valid @RequestBody AdminTopicCreateRequest request) {
-        TopicResponse topic = adminTopicService.create(request);
-        return ResponseEntity.ok(ApiResponse.success("Tạo topic thành công!", topic));
-    }
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<TopicResponse>> create(
+      @Valid @RequestBody AdminTopicCreateRequest request) {
+    TopicResponse topic = adminTopicService.create(request);
+    return ResponseEntity.ok(ApiResponse.success("Tạo topic thành công!", topic));
+  }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<TopicResponse>> update(
-            @PathVariable Integer id,
-            @Valid @RequestBody AdminTopicUpdateRequest request
-    ) {
-        TopicResponse topic = adminTopicService.update(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật topic thành công!", topic));
-    }
+  @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<TopicResponse>> update(
+      @PathVariable Integer id,
+      @Valid @RequestBody AdminTopicUpdateRequest request
+  ) {
+    TopicResponse topic = adminTopicService.update(id, request);
+    return ResponseEntity.ok(ApiResponse.success("Cập nhật topic thành công!", topic));
+  }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
-        adminTopicService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa topic thành công!", null));
-    }
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
+    adminTopicService.delete(id);
+    return ResponseEntity.ok(ApiResponse.success("Xóa topic thành công!", null));
+  }
 }
