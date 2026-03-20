@@ -3,14 +3,17 @@ package com.nhom2.elearnlanguage.di
 import com.nhom2.elearnlanguage.data.repository.AuthRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.HomeRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.LessonRepositoryImpl
+import com.nhom2.elearnlanguage.data.repository.SpeakingRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.VocabularyRepositoryImpl
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.HomeDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
+import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.HomeRepository
 import com.nhom2.elearnlanguage.domain.repository.LessonRepository
+import com.nhom2.elearnlanguage.domain.repository.SpeakingRepository
 import com.nhom2.elearnlanguage.domain.repository.VocabularyRepository
 import dagger.Module
 import dagger.Provides
@@ -43,5 +46,11 @@ class RepositoryModule {
     @Singleton
     fun provideVocabularyRepository(vocabularyDataSource: VocabularyDataSource): VocabularyRepository {
         return VocabularyRepositoryImpl(vocabularyDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSpeakingRepository(speakingDataSource: SpeakingDataSource): SpeakingRepository {
+        return SpeakingRepositoryImpl(speakingDataSource)
     }
 }
