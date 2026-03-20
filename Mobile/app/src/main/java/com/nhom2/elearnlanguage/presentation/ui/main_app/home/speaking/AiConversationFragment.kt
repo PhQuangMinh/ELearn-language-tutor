@@ -68,6 +68,14 @@ class AiConversationFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        binding.conversationInput.btnSend.setOnClickListener {
+            val text = binding.conversationInput.etMessage.text?.toString()?.trim().orEmpty()
+            if (text.isNotBlank()) {
+                viewModel.addUserMessage(text)
+                binding.conversationInput.etMessage.setText("")
+            }
+        }
+
         val lessonId = arguments?.getInt("lessonId", 1) ?: 1
         viewModel.start(lessonId)
 

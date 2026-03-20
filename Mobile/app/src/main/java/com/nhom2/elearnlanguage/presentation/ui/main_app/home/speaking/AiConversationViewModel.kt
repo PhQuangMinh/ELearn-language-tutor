@@ -6,9 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.nhom2.elearnlanguage.domain.model.speaking.AiRespondRequest
 import com.nhom2.elearnlanguage.domain.model.speaking.LessonScenario
-import com.nhom2.elearnlanguage.domain.usecase.AiRespondUseCase
 import com.nhom2.elearnlanguage.domain.usecase.GetScenarioByLessonUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,7 +14,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AiConversationViewModel @Inject constructor(
     private val getScenarioByLessonUseCase: GetScenarioByLessonUseCase,
-    private val aiRespondUseCase: AiRespondUseCase
 ) : ViewModel() {
 
     private val initialContext = ConversationContext(
@@ -44,9 +41,9 @@ class AiConversationViewModel @Inject constructor(
 
         viewModelScope.launch {
             val scenario = try {
+                // API1: lấy scenario theo lesson (start hội thoại phần trên)
                 getScenarioByLessonUseCase(lessonId)
-            } catch (e: Exception) {
-                // Nếu không lấy được scenario thì mới làm UI rỗng.
+            } catch (_: Exception) {
                 _context.value = initialContext
                 _uiState.value = ConversationUiState(
                     messages = emptyList(),
@@ -55,15 +52,7 @@ class AiConversationViewModel @Inject constructor(
                 return@launch
             }
 
-            // Lấy scenario xong thì UI context + phần "NHIỆM VỤ" sẽ được giữ lại
-            // ngay cả khi call AI respond thất bại.
             applyScenario(scenario)
-
-            try {
-                sendAiRespond(userMessage = "Hello.")
-            } catch (_: Exception) {
-                // Nếu AI respond lỗi thì vẫn giữ opening message + nhiệm vụ.
-            }
         }
     }
 
@@ -107,55 +96,47 @@ class AiConversationViewModel @Inject constructor(
         )
     }
 
-    private suspend fun sendAiRespond(userMessage: String) {
-        val currentContext = _context.value
-        val currentMessages = _uiState.value.messages
-
-        val conversationHistory = buildConversationHistory(currentMessages)
-        val taskDescription = currentContext.mission.joinToString(separator = "\n")
-
-        val request = AiRespondRequest(
-            scenarioDescription = currentContext.scenario,
-            taskDescription = taskDescription,
-            conversationHistory = conversationHistory,
-            userMessage = userMessage
-        )
-
-        val result = aiRespondUseCase(request)
+    /**
+     * Bottom UI (bạn ghép sau) sẽ call API2 và sau đó đẩy message vào UI thông qua các hàm này.
+     * Top UI của bạn chỉ gọi API1 nên ViewModel ở đây không tự gọi aiRespond nữa.
+     */
+    fun addUserMessage(text: String) {
+        val trimmed = text.trim()
+        if (trimmed.isBlank()) return
 
         val userBubble = Message(
             id = genId("u"),
-            text = userMessage,
+            text = trimmed,
             translation = null,
             isFromAI = false,
             hint = null
         )
 
-        val hint = Hint(
-            analysis = result.userHints.analysis,
-            suggestion = result.userHints.suggestion,
-            example = result.userHints.example
-        )
-
-        val aiBubble = Message(
-            id = genId("ai"),
-            text = result.aiMessage,
-            translation = result.aiMessageTranslation,
-            isFromAI = true,
-            hint = hint
-        )
-
         _uiState.update { state ->
             state.copy(
-                messages = state.messages + userBubble + aiBubble,
+                messages = state.messages + userBubble,
                 expandedHintMessageId = null
             )
         }
     }
 
-    private fun buildConversationHistory(messages: List<Message>): String {
-        return messages.joinToString(separator = "\n") { m ->
-            if (m.isFromAI) "AI: ${m.text}" else "User: ${m.text}"
+    fun addAiMessage(aiMessage: String, aiTranslation: String?, userHint: Hint?) {
+        val trimmed = aiMessage.trim()
+        if (trimmed.isBlank()) return
+
+        val aiBubble = Message(
+            id = genId("ai"),
+            text = trimmed,
+            translation = aiTranslation,
+            isFromAI = true,
+            hint = userHint
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                messages = state.messages + aiBubble,
+                expandedHintMessageId = null
+            )
         }
     }
 
