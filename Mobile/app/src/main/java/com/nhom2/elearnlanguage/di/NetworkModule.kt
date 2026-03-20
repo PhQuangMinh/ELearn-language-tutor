@@ -7,6 +7,7 @@ import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
+import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import dagger.Module
@@ -186,5 +187,11 @@ object NetworkModule {
     @Singleton
     fun provideVocabularyDataSource(client: HttpClient): VocabularyDataSource {
         return VocabularyDataSource(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImproveDataSource(client: HttpClient): ImproveDataSource {
+        return ImproveDataSource(client)
     }
 }
