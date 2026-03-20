@@ -4,7 +4,9 @@ import com.example.BTL_Mobile.dto.request.AiRespondRequest;
 import com.example.BTL_Mobile.dto.response.AiRespondResponse;
 import com.example.BTL_Mobile.service.AiResponseService;
 import com.example.BTL_Mobile.service.GeminiService;
+import com.example.BTL_Mobile.service.ScenarioService;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,8 @@ public class AiResponseServiceImpl implements AiResponseService {
 
   private final GeminiService geminiService;
   private final ResourceLoader loader;
+
+  private final ScenarioService scenarioService;
 
   private String systemPrompt;
 
@@ -43,11 +47,14 @@ public class AiResponseServiceImpl implements AiResponseService {
   }
 
   @Override
+  @Transactional
   public AiRespondResponse respond(AiRespondRequest request) {
     String fullPrompt = buildFullPrompt(request);
     log.info("AiResponse prompt size={}", fullPrompt);
 
-    return geminiService.callGemini(fullPrompt, AiRespondResponse.class);
+    AiRespondResponse response = geminiService.callGemini(fullPrompt, AiRespondResponse.class);
+    scenarioService.saveMessages(request, response);
+    return response;
   }
 
   private String buildFullPrompt(AiRespondRequest request) {

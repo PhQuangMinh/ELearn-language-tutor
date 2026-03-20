@@ -1,16 +1,13 @@
 package com.example.BTL_Mobile.controller;
 
 import com.example.BTL_Mobile.dto.response.ApiResponse;
+import com.example.BTL_Mobile.dto.response.InitSpeakingSessionResponse;
 import com.example.BTL_Mobile.dto.response.ScenarioDetailResponse;
 import com.example.BTL_Mobile.service.ScenarioService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/scenarios")
@@ -28,5 +25,18 @@ public class ScenarioController {
     ScenarioDetailResponse data = scenarioService.getScenarioByLessonId(lessonId);
     return ResponseEntity.ok(ApiResponse.success(data));
   }
+
+  @PostMapping("/{scenarioId}/speaking-session/init")
+  public ResponseEntity<ApiResponse<InitSpeakingSessionResponse>> initSession(@PathVariable int scenarioId){
+    InitSpeakingSessionResponse response = scenarioService.initSpeakingSession(scenarioId);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @PostMapping("/speaking-session/{sessionId}/end")
+  public ResponseEntity<Void> endSpeakingSession(@PathVariable int sessionId){
+    scenarioService.endSpeakingSession(sessionId);
+    return ResponseEntity.ok().build();
+  }
+
 }
 

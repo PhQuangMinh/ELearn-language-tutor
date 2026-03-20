@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AiRespondRequest {
 
+    private int speakingSessionId;
+
     @NotBlank
     private String scenarioDescription;
 
