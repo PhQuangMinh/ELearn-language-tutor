@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_rounded"
+    tools:context=".presentation.ui.main_app.chatbot.ImproveFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="20dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_drag_handle" />
+
+    <TextView
+        android:id="@+id/tvImproveTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lexend_semibold"
+        android:text="@string/improve_title"
+        android:textColor="@color/neutral_100"
+        android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvImproveSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/lexend"
+            android:text="@string/improve_subtitle"
+            android:textColor="@color/neutral_80"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvOriginalTextLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/lexend_semibold"
+            android:text="@string/improve_original_text"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvOriginalText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_edittext"
+            android:fontFamily="@font/lexend"
+            android:minHeight="72dp"
+            android:padding="14dp"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp"
+            tools:text="Hello" />
+
+        <TextView
+            android:id="@+id/tvImprovedTextLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/lexend_semibold"
+            android:text="@string/improve_result"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvImprovedText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_edittext"
+            android:fontFamily="@font/lexend"
+            android:minHeight="72dp"
+            android:padding="14dp"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp"
+            tools:text="Hello, my name is Dung." />
+
+        <TextView
+            android:id="@+id/tvExplanationLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/lexend_semibold"
+            android:text="@string/improve_explanation"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvExplanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_edittext"
+            android:fontFamily="@font/lexend"
+            android:minHeight="72dp"
+            android:padding="14dp"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp"
+            tools:text="Trong phỏng vấn bạn nên giới thiệu tên khi bắt đầu." />
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/lexend"
+            android:textColor="@color/error_100"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:text="Something went wrong" />
+
+        <ProgressBar
+            android:id="@+id/pbImprove"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>

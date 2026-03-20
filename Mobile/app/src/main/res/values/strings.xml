@@ -73,4 +73,15 @@
     <string name="correct">Correct</string>
     <string name="lesson_complete_continue">Continue</string>
     <string name="lesson_complete_score">%1$d/%2$d Correct</string>
+    <string name="speak_or_type_a_message">Speak or type a message</string>
+    <string name="improve_title">Improve message</string>
+    <string name="improve_subtitle">AI suggested a better version for your message.</string>
+    <string name="improve_original_text">Original text</string>
+    <string name="improve_result">Improved text</string>
+    <string name="improve_result_placeholder">Improved text will appear here.</string>
+    <string name="improve_explanation">Explanation</string>
+    <string name="improve_explanation_placeholder">Explanation will appear here.</string>
+    <string name="improve_error_empty_input">Please enter a sentence to improve.</string>
+    <string name="improve_error_generic">Cannot improve text right now. Please try again.</string>
+    <string name="you_need_to_grand_permission_to_speak">You need to grand permission to speak</string>
 </resources>
