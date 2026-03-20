@@ -131,4 +131,18 @@
             android:name="totalCount"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/chatbotFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.chatbot.ChatbotFragment"
+        android:label="fragment_chatbot"
+        tools:layout="@layout/fragment_chatbot" >
+        <action
+            android:id="@+id/action_chatbotFragment_to_improveFragment"
+            app:destination="@id/improveFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/improveFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.chatbot.ImproveFragment"
+        android:label="fragment_improve"
+        tools:layout="@layout/fragment_improve" />
 </navigation>
