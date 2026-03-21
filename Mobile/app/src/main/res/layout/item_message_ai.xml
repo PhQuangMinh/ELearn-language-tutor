@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="2dp"
+        android:src="@drawable/ic_bot"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/speech_bubble_background"
+            android:padding="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAiText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/neutral_100"
+                android:textSize="14sp"
+                android:lineSpacingExtra="2dp"
+                android:text="AI message..." />
+
+            <TextView
+                android:id="@+id/tvAiTranslation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/neutral_80"
+                android:textSize="13sp"
+                android:lineSpacingExtra="2dp"
+                android:text="Translation..." />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_hint_button"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:fontFamily="@font/lexend_semibold"
+                android:textColor="@color/primary_100"
+                android:textSize="12sp"
+                android:text="Gợi ý" />
+
+            <TextView
+                android:id="@+id/btnTranslate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_hint_button"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:fontFamily="@font/lexend_semibold"
+                android:textColor="@color/primary_100"
+                android:textSize="12sp"
+                android:text="Dịch" />
+
+            <ImageView
+                android:id="@+id/ivSpeaker"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_icon_circle_primary_80"
+                android:padding="6dp"
+                android:src="@drawable/volume_up_24px"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/hintPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_hint_panel"
+            android:padding="12dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvHintAnalysis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/neutral_100"
+                android:textSize="13sp"
+                android:text="Phân tích: ..." />
+
+            <TextView
+                android:id="@+id/tvHintSuggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/neutral_100"
+                android:textSize="13sp"
+                android:text="Gợi ý: ..." />
+
+            <TextView
+                android:id="@+id/tvHintExample"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/neutral_100"
+                android:textSize="13sp"
+                android:text="Ví dụ: ..." />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+
