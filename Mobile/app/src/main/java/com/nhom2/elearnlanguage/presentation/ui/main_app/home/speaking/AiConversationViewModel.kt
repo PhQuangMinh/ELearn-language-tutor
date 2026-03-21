@@ -2,19 +2,72 @@ package com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nhom2.elearnlanguage.domain.model.speaking.AiRespondRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.nhom2.elearnlanguage.domain.model.speaking.LessonScenario
+import com.nhom2.elearnlanguage.domain.usecase.AiRespondUseCase
+import com.nhom2.elearnlanguage.domain.usecase.EndSpeakingSessionUseCase
 import com.nhom2.elearnlanguage.domain.usecase.GetScenarioByLessonUseCase
+import com.nhom2.elearnlanguage.domain.usecase.InitSpeakingSessionUseCase
+import com.nhom2.elearnlanguage.domain.usecase.ObserveSpeechUseCase
+import com.nhom2.elearnlanguage.domain.usecase.StartListeningUseCase
+import com.nhom2.elearnlanguage.domain.usecase.StopListeningUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class AiConversationViewModel @Inject constructor(
     private val getScenarioByLessonUseCase: GetScenarioByLessonUseCase,
+    private val initSpeakingSessionUseCase: InitSpeakingSessionUseCase,
+    private val endSpeakingSessionUseCase: EndSpeakingSessionUseCase,
+    private val aiRespondUseCase: AiRespondUseCase,
+    private val startListeningUseCase: StartListeningUseCase,
+    private val stopListeningUseCase: StopListeningUseCase,
+    private val observeSpeechUseCase: ObserveSpeechUseCase
 ) : ViewModel() {
+
+    private val _text = MutableStateFlow("")
+    val text: StateFlow<String> = _text.asStateFlow()
+
+    private val _isListening = MutableStateFlow(false)
+    val isListening: StateFlow<Boolean> = _isListening.asStateFlow()
+
+    private val _isSending = MutableStateFlow(false)
+    val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            observeSpeechUseCase().collect {
+                _text.value = it
+            }
+        }
+    }
+
+    fun toggleListening() {
+        if (_isListening.value) {
+            stopListening()
+        } else {
+            startListening()
+        }
+    }
+
+    fun startListening() {
+        _isListening.value = true
+        startListeningUseCase()
+    }
+
+    fun stopListening() {
+        _isListening.value = false
+        stopListeningUseCase()
+    }
+
+    fun clearText() {
+        _text.value = ""
+    }
 
     private val initialContext = ConversationContext(
         title = "",
@@ -34,6 +87,8 @@ class AiConversationViewModel @Inject constructor(
     val uiState: StateFlow<ConversationUiState> = _uiState
 
     private var hasStarted = false
+    private var scenarioId: Int? = null
+    private var speakingSessionId: Int? = null
 
     fun start(lessonId: Int) {
         if (hasStarted) return
@@ -52,7 +107,81 @@ class AiConversationViewModel @Inject constructor(
                 return@launch
             }
 
+            scenarioId = scenario.id
+            speakingSessionId = try {
+                initSpeakingSessionUseCase(scenario.id)
+            } catch (_: Exception) {
+                null
+            }
+
             applyScenario(scenario)
+        }
+    }
+
+    fun sendMessage(text: String) {
+        val trimmed = text.trim()
+        if (trimmed.isBlank() || _isSending.value) return
+
+        _isSending.value = true
+
+        val currentState = _uiState.value
+        val conversationHistory = buildConversationHistory(currentState.messages)
+
+        addUserMessage(trimmed)
+        clearText()
+
+        viewModelScope.launch {
+            val sessionId = speakingSessionId
+            if (sessionId == null) {
+                addAiMessage(
+                    aiMessage = "I can't start the speaking session right now. Please try again.",
+                    aiTranslation = "Mình chưa khởi tạo được phiên nói. Bạn thử lại giúp mình nhé.",
+                    userHint = null
+                )
+                _isSending.value = false
+                return@launch
+            }
+
+            try {
+                val result = aiRespondUseCase(
+                    AiRespondRequest(
+                        speakingSessionId = sessionId,
+                        scenarioDescription = _context.value.scenario,
+                        taskDescription = _context.value.mission.joinToString(separator = "\n"),
+                        conversationHistory = conversationHistory,
+                        userMessage = trimmed
+                    )
+                )
+
+                addAiMessage(
+                    aiMessage = result.aiMessage,
+                    aiTranslation = result.aiMessageTranslation,
+                    userHint = Hint(
+                        analysis = result.userHints.analysis,
+                        suggestion = result.userHints.suggestion,
+                        example = result.userHints.example
+                    )
+                )
+            } catch (_: Exception) {
+                addAiMessage(
+                    aiMessage = "I’m having trouble responding right now. Please try again.",
+                    aiTranslation = "Mình đang gặp lỗi khi phản hồi. Bạn thử lại nhé.",
+                    userHint = null
+                )
+            } finally {
+                _isSending.value = false
+            }
+        }
+    }
+
+    fun endSession() {
+        val sessionId = speakingSessionId ?: return
+        speakingSessionId = null
+        viewModelScope.launch {
+            try {
+                endSpeakingSessionUseCase(sessionId)
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -163,6 +292,13 @@ class AiConversationViewModel @Inject constructor(
 
     private fun genId(prefix: String): String {
         return "${prefix}_${System.nanoTime()}"
+    }
+
+    private fun buildConversationHistory(messages: List<Message>): String {
+        return messages.joinToString(separator = "\n") { message ->
+            val role = if (message.isFromAI) "AI" else "USER"
+            "$role: ${message.text}"
+        }
     }
 }
 

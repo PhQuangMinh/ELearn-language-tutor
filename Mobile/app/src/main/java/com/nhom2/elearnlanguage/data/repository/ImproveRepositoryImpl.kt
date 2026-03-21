@@ -1,7 +1,7 @@
 package com.nhom2.elearnlanguage.data.repository
 
 import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
-import com.nhom2.elearnlanguage.domain.model.ImproveTextResult
+import com.nhom2.elearnlanguage.domain.model.speaking.ImproveTextResult
 import com.nhom2.elearnlanguage.domain.repository.ImproveRepository
 import javax.inject.Inject
 

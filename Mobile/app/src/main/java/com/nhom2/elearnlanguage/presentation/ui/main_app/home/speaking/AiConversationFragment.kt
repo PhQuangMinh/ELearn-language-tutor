@@ -1,11 +1,16 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.speech.tts.TextToSpeech
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -29,6 +34,19 @@ class AiConversationFragment : Fragment() {
 
     private var textToSpeech: TextToSpeech? = null
     private var isTtsReady: Boolean = false
+
+    private val requestMicPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                viewModel.toggleListening()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.you_need_to_grand_permission_to_speak),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,8 +74,6 @@ class AiConversationFragment : Fragment() {
 
         binding.rvMessages.apply {
             layoutManager = LinearLayoutManager(requireContext()).apply {
-                // Hiển thị message theo chiều từ trên xuống.
-                // Nếu stackFromEnd=true thì với ít message (hoặc 1 message) sẽ bị “dồn xuống đáy”.
                 stackFromEnd = false
             }
             adapter = this@AiConversationFragment.adapter
@@ -68,11 +84,18 @@ class AiConversationFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        binding.conversationInput.btnListen.setOnClickListener {
+            if (hasMicPermission()) {
+                viewModel.toggleListening()
+            } else {
+                requestMicPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+
         binding.conversationInput.btnSend.setOnClickListener {
             val text = binding.conversationInput.etMessage.text?.toString()?.trim().orEmpty()
             if (text.isNotBlank()) {
-                viewModel.addUserMessage(text)
-                binding.conversationInput.etMessage.setText("")
+                viewModel.sendMessage(text)
             }
         }
 
@@ -96,6 +119,24 @@ class AiConversationFragment : Fragment() {
                 }
 
                 launch {
+                    viewModel.text.collect { text ->
+                        binding.conversationInput.etMessage.setText(text)
+                    }
+                }
+
+                launch {
+                    viewModel.isListening.collect { isListening ->
+                        if (isListening) {
+                            binding.conversationInput.btnListen
+                                .setBackgroundResource(R.drawable.button_rounded_primary_active)
+                        } else {
+                            binding.conversationInput.btnListen
+                                .setBackgroundResource(R.drawable.rounded_button)
+                        }
+                    }
+                }
+
+                launch {
                     viewModel.uiState.collect { state ->
                         adapter.submit(state.messages, state.expandedHintMessageId) {
                             if (state.messages.isNotEmpty()) {
@@ -104,17 +145,34 @@ class AiConversationFragment : Fragment() {
                         }
                     }
                 }
+
+                launch {
+                    viewModel.isSending.collect { isSending ->
+                        binding.conversationInput.btnSend.isEnabled = !isSending
+                        binding.conversationInput.etMessage.isEnabled = !isSending
+                        binding.conversationInput.btnSend.alpha = if (isSending) 0.6f else 1f
+                    }
+                }
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        viewModel.endSession()
+        viewModel.stopListening()
         textToSpeech?.stop()
         textToSpeech?.shutdown()
         textToSpeech = null
         isTtsReady = false
         _binding = null
+    }
+
+    private fun hasMicPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun speakAiText(text: String) {

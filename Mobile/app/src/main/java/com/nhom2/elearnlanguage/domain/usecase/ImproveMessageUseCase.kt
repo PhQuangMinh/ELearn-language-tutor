@@ -1,6 +1,6 @@
 package com.nhom2.elearnlanguage.domain.usecase
 
-import com.nhom2.elearnlanguage.domain.model.ImproveTextResult
+import com.nhom2.elearnlanguage.domain.model.speaking.ImproveTextResult
 import com.nhom2.elearnlanguage.domain.repository.ImproveRepository
 import javax.inject.Inject
 

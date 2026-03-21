@@ -1,4 +1,4 @@
-package com.nhom2.elearnlanguage.presentation.ui.main_app.chatbot
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -56,15 +56,11 @@ class ImproveFragment : BottomSheetDialogFragment() {
             viewModel.uiState.collect { state ->
                 binding.pbImprove.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                 binding.tvOriginalText.text = state.originalText
-                binding.tvImprovedText.text = if (state.improvedText.isBlank()) {
+                binding.tvImprovedText.text = state.improvedText.ifBlank {
                     getString(R.string.improve_result_placeholder)
-                } else {
-                    state.improvedText
                 }
-                binding.tvExplanation.text = if (state.explanation.isBlank()) {
+                binding.tvExplanation.text = state.explanation.ifBlank {
                     getString(R.string.improve_explanation_placeholder)
-                } else {
-                    state.explanation
                 }
 
                 if (state.errorMessageRes != null) {
