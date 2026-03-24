@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import java.util.Locale
 import com.nhom2.elearnlanguage.R
@@ -30,6 +31,7 @@ class AiConversationFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AiConversationViewModel by viewModels()
+    private val args: AiConversationFragmentArgs by navArgs()
     private lateinit var adapter: AiConversationAdapter
 
     private var textToSpeech: TextToSpeech? = null
@@ -99,8 +101,7 @@ class AiConversationFragment : Fragment() {
             }
         }
 
-        val lessonId = arguments?.getInt("lessonId", 1) ?: 1
-        viewModel.start(lessonId)
+        viewModel.start(args.lessonId)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {

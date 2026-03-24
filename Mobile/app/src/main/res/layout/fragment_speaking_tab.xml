@@ -1,16 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="@color/white"
+    android:paddingStart="20dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="12dp">
 
     <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lexend_semibold"
+        android:text="@string/tab_speaking"
+        android:textColor="@color/neutral_100"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvSection"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/lexend"
+        android:text="@string/section_topic"
+        android:textColor="@color/neutral_60"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="@font/lexend_semibold"
-        android:text="@string/speaking_coming_soon"
-        android:textColor="@color/neutral_60"
-        android:textSize="18sp" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rvCourses"
+        app:layout_constraintEnd_toEndOf="@id/rvCourses"
+        app:layout_constraintStart_toStartOf="@id/rvCourses"
+        app:layout_constraintTop_toTopOf="@id/rvCourses" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tvError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/error_100"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rvCourses"
+        app:layout_constraintEnd_toEndOf="@id/rvCourses"
+        app:layout_constraintStart_toStartOf="@id/rvCourses"
+        app:layout_constraintTop_toTopOf="@id/rvCourses"
+        tools:text="Không thể tải dữ liệu" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCourses"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSection"
+        tools:listitem="@layout/item_vocabulary_topic" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
