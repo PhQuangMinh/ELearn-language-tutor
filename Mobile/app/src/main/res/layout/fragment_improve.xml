@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet_rounded"
-    tools:context=".presentation.ui.main_app.chatbot.ImproveFragment">
+    tools:context=".presentation.ui.main_app.home.speaking.ImproveFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package com.nhom2.elearnlanguage.presentation.ui.main_app.chatbot
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

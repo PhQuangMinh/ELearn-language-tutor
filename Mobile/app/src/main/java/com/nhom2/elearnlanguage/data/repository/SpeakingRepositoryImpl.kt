@@ -20,6 +20,21 @@ class SpeakingRepositoryImpl @Inject constructor(
         return response.data.toDomain()
     }
 
+    override suspend fun initSpeakingSession(scenarioId: Int): Int {
+        val response = speakingDataSource.initSpeakingSession(scenarioId)
+        if (!response.success || response.data == null) {
+            throw Exception(response.message)
+        }
+        return response.data.sessionId
+    }
+
+    override suspend fun endSpeakingSession(sessionId: Int) {
+        val response = speakingDataSource.endSpeakingSession(sessionId)
+        if (!response.success) {
+            throw Exception(response.message)
+        }
+    }
+
     override suspend fun aiRespond(request: AiRespondRequest): AiRespondResult {
         val response = speakingDataSource.aiRespond(request.toDto())
         if (!response.success || response.data == null) {
@@ -30,6 +45,7 @@ class SpeakingRepositoryImpl @Inject constructor(
 }
 
 private fun AiRespondRequest.toDto() = com.nhom2.elearnlanguage.data.dto.AiRespondRequestDTO(
+    speakingSessionId = speakingSessionId,
     scenarioDescription = scenarioDescription,
     taskDescription = taskDescription,
     conversationHistory = conversationHistory,
