@@ -83,5 +83,9 @@
     <string name="improve_explanation_placeholder">Explanation will appear here.</string>
     <string name="improve_error_empty_input">Please enter a sentence to improve.</string>
     <string name="improve_error_generic">Cannot improve text right now. Please try again.</string>
+    <string name="improve_action">Improve</string>
+    <string name="improve_open_action">Open</string>
+    <string name="improve_retry_action">Retry</string>
+    <string name="improve_loading_action">...</string>
     <string name="you_need_to_grand_permission_to_speak">You need to grand permission to speak</string>
 </resources>

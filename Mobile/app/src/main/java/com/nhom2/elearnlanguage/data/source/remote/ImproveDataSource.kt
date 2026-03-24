@@ -1,7 +1,6 @@
 package com.nhom2.elearnlanguage.data.source.remote
 
 import com.nhom2.elearnlanguage.BuildConfig
-import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ImproveRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ImproveResponseDTO
 import io.ktor.client.HttpClient
@@ -16,10 +15,15 @@ class ImproveDataSource @Inject constructor(
     private val client: HttpClient
 ) {
 
-    suspend fun improveMessage(message: String): ApiResponseDTO<ImproveResponseDTO> {
-        return client.post("${BuildConfig.API_BASE_URL}/api/chat/improve") {
+    suspend fun improveMessage(text: String, context: String): ImproveResponseDTO {
+        return client.post("${BuildConfig.API_BASE_URL}/api/conversation/improve") {
             contentType(ContentType.Application.Json)
-            setBody(ImproveRequestDTO(message = message))
+            setBody(
+                ImproveRequestDTO(
+                    text = text,
+                    context = context
+                )
+            )
         }.body()
     }
 }

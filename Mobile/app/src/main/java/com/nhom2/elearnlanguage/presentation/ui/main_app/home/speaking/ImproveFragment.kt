@@ -22,10 +22,14 @@ class ImproveFragment : BottomSheetDialogFragment() {
 
     private val viewModel: ImproveViewModel by viewModels()
     private var originalTextArg: String = ""
+    private var improvedTextArg: String = ""
+    private var explanationArg: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         originalTextArg = arguments?.getString(ARG_ORIGINAL_TEXT).orEmpty()
+        improvedTextArg = arguments?.getString(ARG_IMPROVED_TEXT).orEmpty()
+        explanationArg = arguments?.getString(ARG_EXPLANATION).orEmpty()
     }
 
     override fun onCreateView(
@@ -38,8 +42,12 @@ class ImproveFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        observeUiState()
-        viewModel.loadImprovement(originalTextArg)
+        if (improvedTextArg.isNotBlank() && explanationArg.isNotBlank()) {
+            renderPrecomputed()
+        } else {
+            observeUiState()
+            viewModel.loadImprovement(originalTextArg)
+        }
     }
 
     override fun onStart() {
@@ -73,6 +81,14 @@ class ImproveFragment : BottomSheetDialogFragment() {
         }
     }
 
+    private fun renderPrecomputed() {
+        binding.pbImprove.visibility = View.GONE
+        binding.tvError.visibility = View.GONE
+        binding.tvOriginalText.text = originalTextArg
+        binding.tvImprovedText.text = improvedTextArg
+        binding.tvExplanation.text = explanationArg
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -80,11 +96,19 @@ class ImproveFragment : BottomSheetDialogFragment() {
 
     companion object {
         private const val ARG_ORIGINAL_TEXT = "arg_original_text"
+        private const val ARG_IMPROVED_TEXT = "arg_improved_text"
+        private const val ARG_EXPLANATION = "arg_explanation"
 
-        fun newInstance(originalText: String): ImproveFragment {
+        fun newInstance(
+            originalText: String,
+            improvedText: String = "",
+            explanation: String = ""
+        ): ImproveFragment {
             return ImproveFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_ORIGINAL_TEXT, originalText)
+                    putString(ARG_IMPROVED_TEXT, improvedText)
+                    putString(ARG_EXPLANATION, explanation)
                 }
             }
         }

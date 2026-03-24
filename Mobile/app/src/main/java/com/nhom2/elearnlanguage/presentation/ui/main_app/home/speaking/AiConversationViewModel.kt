@@ -11,12 +11,15 @@ import com.nhom2.elearnlanguage.domain.model.speaking.LessonScenario
 import com.nhom2.elearnlanguage.domain.usecase.AiRespondUseCase
 import com.nhom2.elearnlanguage.domain.usecase.EndSpeakingSessionUseCase
 import com.nhom2.elearnlanguage.domain.usecase.GetScenarioByLessonUseCase
+import com.nhom2.elearnlanguage.domain.usecase.ImproveMessageUseCase
 import com.nhom2.elearnlanguage.domain.usecase.InitSpeakingSessionUseCase
 import com.nhom2.elearnlanguage.domain.usecase.ObserveSpeechUseCase
 import com.nhom2.elearnlanguage.domain.usecase.StartListeningUseCase
 import com.nhom2.elearnlanguage.domain.usecase.StopListeningUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,6 +28,7 @@ class AiConversationViewModel @Inject constructor(
     private val initSpeakingSessionUseCase: InitSpeakingSessionUseCase,
     private val endSpeakingSessionUseCase: EndSpeakingSessionUseCase,
     private val aiRespondUseCase: AiRespondUseCase,
+    private val improveMessageUseCase: ImproveMessageUseCase,
     private val startListeningUseCase: StartListeningUseCase,
     private val stopListeningUseCase: StopListeningUseCase,
     private val observeSpeechUseCase: ObserveSpeechUseCase
@@ -86,6 +90,9 @@ class AiConversationViewModel @Inject constructor(
     )
     val uiState: StateFlow<ConversationUiState> = _uiState
 
+    private val _openImproveSheet = MutableSharedFlow<ImproveResult>(extraBufferCapacity = 1)
+    val openImproveSheet: SharedFlow<ImproveResult> = _openImproveSheet
+
     private var hasStarted = false
     private var scenarioId: Int? = null
     private var speakingSessionId: Int? = null
@@ -127,8 +134,11 @@ class AiConversationViewModel @Inject constructor(
         val currentState = _uiState.value
         val conversationHistory = buildConversationHistory(currentState.messages)
 
-        addUserMessage(trimmed)
+        val userMessageId = addUserMessage(trimmed)
         clearText()
+        userMessageId?.let { messageId ->
+            requestImproveForMessage(messageId = messageId, originalText = trimmed)
+        }
 
         viewModelScope.launch {
             val sessionId = speakingSessionId
@@ -229,9 +239,9 @@ class AiConversationViewModel @Inject constructor(
      * Bottom UI (bạn ghép sau) sẽ call API2 và sau đó đẩy message vào UI thông qua các hàm này.
      * Top UI của bạn chỉ gọi API1 nên ViewModel ở đây không tự gọi aiRespond nữa.
      */
-    fun addUserMessage(text: String) {
+    fun addUserMessage(text: String): String? {
         val trimmed = text.trim()
-        if (trimmed.isBlank()) return
+        if (trimmed.isBlank()) return null
 
         val userBubble = Message(
             id = genId("u"),
@@ -247,6 +257,7 @@ class AiConversationViewModel @Inject constructor(
                 expandedHintMessageId = null
             )
         }
+        return userBubble.id
     }
 
     fun addAiMessage(aiMessage: String, aiTranslation: String?, userHint: Hint?) {
@@ -269,12 +280,91 @@ class AiConversationViewModel @Inject constructor(
         }
     }
 
+    fun onImproveClick(messageId: String) {
+        val message = _uiState.value.messages.firstOrNull { it.id == messageId } ?: return
+        if (message.isFromAI) return
+
+        when (message.improveState) {
+            ImproveState.READY -> {
+                message.improveResult?.let { _openImproveSheet.tryEmit(it) }
+            }
+            ImproveState.ERROR, ImproveState.NONE -> {
+                requestImproveForMessage(
+                    messageId = message.id,
+                    originalText = message.text
+                )
+            }
+            ImproveState.LOADING -> Unit
+        }
+    }
+
+    private fun requestImproveForMessage(messageId: String, originalText: String) {
+        updateMessageImproveState(messageId, ImproveState.LOADING, null)
+        viewModelScope.launch {
+            val result = runCatching {
+                improveMessageUseCase(
+                    text = originalText,
+                    context = buildImproveContext()
+                )
+            }.getOrNull()
+
+            if (result == null) {
+                updateMessageImproveState(messageId, ImproveState.ERROR, null)
+                return@launch
+            }
+
+            val mapped = ImproveResult(
+                original = result.original,
+                improved = result.improved,
+                explanation = result.explanation
+            )
+            updateMessageImproveState(messageId, ImproveState.READY, mapped)
+        }
+    }
+
+    private fun updateMessageImproveState(
+        messageId: String,
+        state: ImproveState,
+        result: ImproveResult?
+    ) {
+        _uiState.update { current ->
+            current.copy(
+                messages = current.messages.map { message ->
+                    if (message.id == messageId && !message.isFromAI) {
+                        message.copy(improveState = state, improveResult = result)
+                    } else {
+                        message
+                    }
+                }
+            )
+        }
+    }
+
     private fun parseTasksToMissionList(tasks: String): List<String> {
         val normalized = tasks
             .replace("\r\n", "\n")
             .replace("\r", "\n")
             .trim()
         if (normalized.isBlank()) return emptyList()
+
+        // Handle JSON-like array string:
+        // ["Where is your hometown","What is it famous for","Do you like it"]
+        if (normalized.startsWith("[") && normalized.endsWith("]")) {
+            val quotedItems = Regex("\"([^\"]+)\"")
+                .findAll(normalized)
+                .map { it.groupValues[1].trim() }
+                .filter { it.isNotBlank() }
+                .toList()
+            if (quotedItems.isNotEmpty()) return quotedItems
+
+            val csvItems = normalized
+                .removePrefix("[")
+                .removeSuffix("]")
+                .split(",")
+                .map { it.trim().trim('"') }
+                .filter { it.isNotBlank() }
+            if (csvItems.isNotEmpty()) return csvItems
+        }
 
         val byLines = normalized
             .split("\n")
@@ -292,6 +382,16 @@ class AiConversationViewModel @Inject constructor(
 
     private fun genId(prefix: String): String {
         return "${prefix}_${System.nanoTime()}"
+    }
+
+    private fun buildImproveContext(): String {
+        val ctx = _context.value
+        val mission = ctx.mission.joinToString(separator = "; ")
+        val merged = listOf(ctx.title, ctx.scenario, mission)
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .joinToString(separator = " | ")
+        return merged.ifBlank { "General English conversation practice." }
     }
 
     private fun buildConversationHistory(messages: List<Message>): String {

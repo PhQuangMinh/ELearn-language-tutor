@@ -17,7 +17,22 @@ data class Message(
     val text: String,
     val translation: String?,
     val isFromAI: Boolean,
-    val hint: Hint?
+    val hint: Hint?,
+    val improveState: ImproveState = ImproveState.NONE,
+    val improveResult: ImproveResult? = null
+)
+
+enum class ImproveState {
+    NONE,
+    LOADING,
+    READY,
+    ERROR
+}
+
+data class ImproveResult(
+    val original: String,
+    val improved: String,
+    val explanation: String
 )
 
 data class ConversationUiState(
