@@ -40,11 +40,21 @@ class LessonListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = LessonAdapter { lesson ->
-            val action = LessonListFragmentDirections.actionLessonListFragmentToQuestionFragment(
-                lessonId = lesson.id
-            )
-            findNavController().navigate(action)
+        adapter = LessonAdapter(
+            showCompletionState = !args.fromSpeaking
+        ) { lesson ->
+            if (args.fromSpeaking) {
+                val action = LessonListFragmentDirections
+                    .actionLessonListFragmentToAiConversationFragment(
+                        lessonId = lesson.id
+                    )
+                findNavController().navigate(action)
+            } else {
+                val action = LessonListFragmentDirections.actionLessonListFragmentToQuestionFragment(
+                    lessonId = lesson.id
+                )
+                findNavController().navigate(action)
+            }
         }
 
         binding.rvLessons.adapter = adapter

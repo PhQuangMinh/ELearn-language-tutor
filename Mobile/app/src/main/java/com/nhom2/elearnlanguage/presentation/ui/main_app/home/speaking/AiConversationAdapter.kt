@@ -15,7 +15,8 @@ import com.nhom2.elearnlanguage.R
 
 class AiConversationAdapter(
     private val onHintClick: (String) -> Unit,
-    private val onSpeakerClick: (String) -> Unit
+    private val onSpeakerClick: (String) -> Unit,
+    private val onImproveClick: (String) -> Unit
 ) : ListAdapter<Message, RecyclerView.ViewHolder>(Diff) {
 
     private var expandedHintMessageId: String? = null
@@ -55,7 +56,7 @@ class AiConversationAdapter(
                 onHintClick = onHintClick,
                 onSpeakerClick = onSpeakerClick
             )
-            is UserMessageVH -> holder.bind(item)
+            is UserMessageVH -> holder.bind(item, onImproveClick)
         }
     }
 
@@ -123,8 +124,35 @@ class AiConversationAdapter(
 
     class UserMessageVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvText: TextView = itemView.findViewById(R.id.tvUserText)
-        fun bind(message: Message) {
+        private val btnImprove: TextView = itemView.findViewById(R.id.btnUserImprove)
+
+        fun bind(message: Message, onImproveClick: (String) -> Unit) {
             tvText.text = message.text
+
+            btnImprove.visibility = View.VISIBLE
+            when (message.improveState) {
+                ImproveState.NONE -> {
+                    btnImprove.isEnabled = true
+                    btnImprove.alpha = 1f
+                    btnImprove.text = itemView.context.getString(R.string.improve_action)
+                }
+                ImproveState.LOADING -> {
+                    btnImprove.isEnabled = false
+                    btnImprove.alpha = 0.7f
+                    btnImprove.text = itemView.context.getString(R.string.improve_loading_action)
+                }
+                ImproveState.READY -> {
+                    btnImprove.isEnabled = true
+                    btnImprove.alpha = 1f
+                    btnImprove.text = itemView.context.getString(R.string.improve_action)
+                }
+                ImproveState.ERROR -> {
+                    btnImprove.isEnabled = true
+                    btnImprove.alpha = 1f
+                    btnImprove.text = itemView.context.getString(R.string.improve_retry_action)
+                }
+            }
+            btnImprove.setOnClickListener { onImproveClick(message.id) }
         }
     }
 

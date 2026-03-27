@@ -81,9 +81,26 @@
         <argument
             android:name="topicImageUrl"
             app:argType="string" />
+        <argument
+            android:name="fromSpeaking"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/action_lessonListFragment_to_questionFragment"
             app:destination="@id/questionFragment" />
+        <action
+            android:id="@+id/action_lessonListFragment_to_aiConversationFragment"
+            app:destination="@id/aiConversationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/aiConversationFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking.AiConversationFragment"
+        android:label="fragment_ai_conversation"
+        tools:layout="@layout/fragment_ai_conversation">
+        <argument
+            android:name="lessonId"
+            app:argType="integer"
+            android:defaultValue="1" />
     </fragment>
     <include app:graph="@navigation/nav_auth" />
     <fragment

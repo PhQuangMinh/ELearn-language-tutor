@@ -7,7 +7,7 @@ import javax.inject.Inject
 class ImproveMessageUseCase @Inject constructor(
     private val improveRepository: ImproveRepository
 ) {
-    suspend operator fun invoke(message: String): ImproveTextResult {
-        return improveRepository.improveMessage(message)
+    suspend operator fun invoke(text: String, context: String): ImproveTextResult {
+        return improveRepository.improveMessage(text, context)
     }
 }

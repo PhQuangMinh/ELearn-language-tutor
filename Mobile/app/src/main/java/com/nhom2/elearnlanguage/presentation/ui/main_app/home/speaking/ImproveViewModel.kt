@@ -48,7 +48,10 @@ class ImproveViewModel @Inject constructor(
             )
 
             val improveResult = runCatching {
-                improveMessageUseCase(originalText)
+                improveMessageUseCase(
+                    text = originalText,
+                    context = DEFAULT_IMPROVE_CONTEXT
+                )
             }.getOrNull()
 
             if (improveResult == null) {
@@ -69,6 +72,8 @@ class ImproveViewModel @Inject constructor(
         }
     }
 }
+
+private const val DEFAULT_IMPROVE_CONTEXT = "General English conversation practice."
 
 data class ImproveUiState(
     val originalText: String = "",

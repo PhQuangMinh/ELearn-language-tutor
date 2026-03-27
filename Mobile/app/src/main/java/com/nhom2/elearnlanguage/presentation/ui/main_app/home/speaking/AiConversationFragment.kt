@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import java.util.Locale
 import com.nhom2.elearnlanguage.R
@@ -30,6 +31,7 @@ class AiConversationFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AiConversationViewModel by viewModels()
+    private val args: AiConversationFragmentArgs by navArgs()
     private lateinit var adapter: AiConversationAdapter
 
     private var textToSpeech: TextToSpeech? = null
@@ -69,6 +71,9 @@ class AiConversationFragment : Fragment() {
             onHintClick = { messageId -> viewModel.toggleHint(messageId) },
             onSpeakerClick = { aiText ->
                 speakAiText(aiText)
+            },
+            onImproveClick = { messageId ->
+                viewModel.onImproveClick(messageId)
             }
         )
 
@@ -95,12 +100,12 @@ class AiConversationFragment : Fragment() {
         binding.conversationInput.btnSend.setOnClickListener {
             val text = binding.conversationInput.etMessage.text?.toString()?.trim().orEmpty()
             if (text.isNotBlank()) {
+                binding.conversationInput.etMessage.setText("")
                 viewModel.sendMessage(text)
             }
         }
 
-        val lessonId = arguments?.getInt("lessonId", 1) ?: 1
-        viewModel.start(lessonId)
+        viewModel.start(args.lessonId)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -151,6 +156,19 @@ class AiConversationFragment : Fragment() {
                         binding.conversationInput.btnSend.isEnabled = !isSending
                         binding.conversationInput.etMessage.isEnabled = !isSending
                         binding.conversationInput.btnSend.alpha = if (isSending) 0.6f else 1f
+                    }
+                }
+
+                launch {
+                    viewModel.openImproveSheet.collect { improveResult ->
+                        val tag = ImproveFragment::class.java.simpleName
+                        if (childFragmentManager.findFragmentByTag(tag) == null) {
+                            ImproveFragment.newInstance(
+                                originalText = improveResult.original,
+                                improvedText = improveResult.improved,
+                                explanation = improveResult.explanation
+                            ).show(childFragmentManager, tag)
+                        }
                     }
                 }
             }

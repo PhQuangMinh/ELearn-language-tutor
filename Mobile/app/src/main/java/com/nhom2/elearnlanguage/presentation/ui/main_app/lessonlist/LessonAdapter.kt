@@ -12,12 +12,13 @@ import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.ItemLessonBinding
 
 class LessonAdapter(
+    private val showCompletionState: Boolean = true,
     private val onClick: (LessonRowUiModel) -> Unit
 ) : ListAdapter<LessonRowUiModel, LessonAdapter.LessonVH>(Diff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LessonVH {
         val binding = ItemLessonBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return LessonVH(binding, onClick)
+        return LessonVH(binding, showCompletionState, onClick)
     }
 
     override fun onBindViewHolder(holder: LessonVH, position: Int) {
@@ -26,6 +27,7 @@ class LessonAdapter(
 
     class LessonVH(
         private val binding: ItemLessonBinding,
+        private val showCompletionState: Boolean,
         private val onClick: (LessonRowUiModel) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -41,8 +43,8 @@ class LessonAdapter(
                 crossfade(true)
             }
 
-            // Completed state: light-green background
-            if (item.completed) {
+            // Speaking flow uses a simple lesson list, so completion styling is optional.
+            if (showCompletionState && item.completed) {
                 binding.root.setCardBackgroundColor(
                     ContextCompat.getColor(ctx, R.color.success_80)
                 )
