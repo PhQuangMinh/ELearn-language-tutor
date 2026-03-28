@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.controller;
 
+import com.example.BTL_Mobile.dto.response.ApiResponse;
 import com.example.BTL_Mobile.dto.response.streak.UserStreakInfoDTO;
 import com.example.BTL_Mobile.service.UserStreakService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,8 @@ public class UserStreakController {
     private final UserStreakService userStreakService;
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<UserStreakInfoDTO> getStreakInfoOfUser(@PathVariable int userId){
-        return ResponseEntity.ok(userStreakService.getUserStreakInfo(userId));
+    public ResponseEntity<ApiResponse<UserStreakInfoDTO>> getStreakInfoOfUser(@PathVariable int userId){
+        return ResponseEntity.ok(ApiResponse.success(userStreakService.getUserStreakInfo(userId)));
     }
 
 }
