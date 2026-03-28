@@ -1,11 +1,9 @@
 package com.example.BTL_Mobile.model;
 
-import com.example.BTL_Mobile.model.enums.EStreakStatus;
+import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +11,10 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "user_streak", schema = "btl_mobile")
-public class UserStreak {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserStreak extends AbstractAuditEntity {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -35,11 +36,5 @@ public class UserStreak {
     @NotNull
     @Column(name = "longest_streak", nullable = false)
     private Integer longestStreak;
-
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "status", nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
-    private EStreakStatus status;
 
 }
