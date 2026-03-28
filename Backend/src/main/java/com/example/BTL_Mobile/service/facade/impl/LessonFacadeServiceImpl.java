@@ -1,6 +1,7 @@
 package com.example.BTL_Mobile.service.facade.impl;
 
 import com.example.BTL_Mobile.dto.request.lesson.SubmitLessonRequest;
+import com.example.BTL_Mobile.dto.response.lesson.LessonSubmittedDTO;
 import com.example.BTL_Mobile.dto.response.lesson.QuestionDetailDTO;
 import com.example.BTL_Mobile.mapper.QuestionMapper;
 import com.example.BTL_Mobile.model.*;
@@ -30,8 +31,8 @@ public class LessonFacadeServiceImpl implements LessonFacadeService {
     }
 
     @Override
-    public void submit(int lessonId, SubmitLessonRequest submitLesson) {
-        lessonService.submitLesson(lessonId, submitLesson);
+    public LessonSubmittedDTO submit(int lessonId, SubmitLessonRequest submitLesson) {
+        return lessonService.submitLesson(lessonId, submitLesson);
     }
 
 }

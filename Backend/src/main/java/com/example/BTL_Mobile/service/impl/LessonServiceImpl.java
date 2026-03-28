@@ -1,6 +1,8 @@
 package com.example.BTL_Mobile.service.impl;
 
 import com.example.BTL_Mobile.dto.response.LessonInTopicResponse;
+import com.example.BTL_Mobile.dto.response.lesson.LessonSubmittedDTO;
+import com.example.BTL_Mobile.dto.response.streak.StreakExtendedDTO;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.Lesson;
 import com.example.BTL_Mobile.dto.request.lesson.SubmitLessonRequest;
@@ -13,6 +15,7 @@ import com.example.BTL_Mobile.repository.UserLessonResultRepository;
 import com.example.BTL_Mobile.repository.TopicRepository;
 import com.example.BTL_Mobile.security.CurrentUserContext;
 import com.example.BTL_Mobile.service.LessonService;
+import com.example.BTL_Mobile.service.UserStreakService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,8 @@ public class LessonServiceImpl implements LessonService {
     private final UserLessonResultRepository lessonResultRepository;
 
     private final UserLessonResultMapper lessonResultMapper;
+
+    private final UserStreakService userStreakService;
 
     @Override
     public Optional<Lesson> getLessonById(int id) {
@@ -70,7 +75,7 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void submitLesson(int lessonId, SubmitLessonRequest submitLesson) {
+    public LessonSubmittedDTO submitLesson(int lessonId, SubmitLessonRequest submitLesson) {
         Lesson lesson = getLessonById(lessonId)
                 .orElseThrow(() -> new BusinessException("Lesson not found"));
         validateSubmittedLesson(lesson, submitLesson);
@@ -79,6 +84,12 @@ public class LessonServiceImpl implements LessonService {
         double score = calculateLessonScore(lesson, submitLesson);
         if(existedResult == null) saveNewResult(lesson, submitLesson, score);
         else if(existedResult.getScore() < score) updateResult(existedResult, submitLesson, score);
+
+        StreakExtendedDTO streakExtended = userStreakService.extendStreak(userId);
+        return LessonSubmittedDTO.builder()
+                .streakExtended(streakExtended.isExtended())
+                .currentStreak(streakExtended.getCurrentStreak())
+                .build();
     }
 
     private void validateSubmittedLesson(Lesson lesson, SubmitLessonRequest submitLesson) {
