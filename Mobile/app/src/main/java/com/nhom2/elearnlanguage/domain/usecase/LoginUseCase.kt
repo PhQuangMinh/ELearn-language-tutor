@@ -13,6 +13,7 @@ class LoginUseCase @Inject constructor(
         val session = authRepository.login(email, password)
         tokenStorage.saveAccessToken(session.accessToken)
         tokenStorage.saveRefreshToken(session.refreshToken)
+        tokenStorage.saveUserId(session.user?.id)
         return session
     }
 }
