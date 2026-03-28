@@ -18,6 +18,14 @@ class TokenStorageImpl @Inject constructor(
         TokenManager.saveRefreshToken(context, token)
     }
 
+    override fun saveUserId(userId: Long?) {
+        TokenManager.saveUserId(context, userId)
+    }
+
+    override fun getUserId(): Long? {
+        return TokenManager.getUserId(context)
+    }
+
     override fun clearTokens() {
         TokenManager.clearTokens(context)
     }

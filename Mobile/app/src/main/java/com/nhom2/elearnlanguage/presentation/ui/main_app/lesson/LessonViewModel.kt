@@ -3,6 +3,7 @@ package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
+import com.nhom2.elearnlanguage.domain.model.lesson.LessonSubmitResult
 import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
 import com.nhom2.elearnlanguage.domain.usecase.GetLessonQuestionsUseCase
 import com.nhom2.elearnlanguage.domain.usecase.SubmitLessonAnswersUseCase
@@ -87,7 +88,7 @@ class LessonViewModel @Inject constructor(
      */
     fun getProgressCount(): Int = _currentQuestionIndex.value + 1
 
-    suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): Result<Boolean> {
+    suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): Result<LessonSubmitResult> {
         return submitLessonAnswersUseCase(lessonId, request)
     }
 }

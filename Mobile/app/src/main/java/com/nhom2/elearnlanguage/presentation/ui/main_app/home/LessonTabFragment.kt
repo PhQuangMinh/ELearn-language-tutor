@@ -52,6 +52,12 @@ class LessonTabFragment : Fragment() {
         observeViewModel()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Re-read streak from shared in-memory cache when user returns to Home.
+        viewModel.refreshCurrentStreak()
+    }
+
     private fun setupBottomSheet() {
         val behavior = BottomSheetBehavior.from(binding.bottomSheetContent)
         // Trạng thái ban đầu: COLLAPSED (như trong ảnh mẫu)
@@ -106,25 +112,55 @@ class LessonTabFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is HomeUiState.Loading -> showLoading(true)
-                        is HomeUiState.Success -> {
-                            showLoading(false)
-                            val data = state.data
-                            binding.tvGreeting.text = "Hi, ${data.fullName}!"
-                            courseAdapter.submitList(data.courses)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        when (state) {
+                            is HomeUiState.Loading -> showLoading(true)
+                            is HomeUiState.Success -> {
+                                showLoading(false)
+                                val data = state.data
+                                binding.tvGreeting.text = "Hi, ${data.fullName}!"
+                                courseAdapter.submitList(data.courses)
+                            }
+                            is HomeUiState.Error -> {
+                                showLoading(false)
+                                binding.tvError.visibility = View.VISIBLE
+                                binding.tvError.text = state.message
+                                    ?: getString(R.string.error_load_home)
+                            }
                         }
-                        is HomeUiState.Error -> {
-                            showLoading(false)
-                            binding.tvError.visibility = View.VISIBLE
-                            binding.tvError.text = state.message
-                                ?: getString(R.string.error_load_home)
-                        }
+                    }
+                }
+
+                launch {
+                    viewModel.currentStreak.collect { streak ->
+                        binding.tvCurrentStreak.text = (streak ?: 0).toString()
+                    }
+                }
+
+                launch {
+                    viewModel.streakStatus.collect { status ->
+                        binding.ivIllustration.setImageResource(resolveStreakImageRes(status))
                     }
                 }
             }
         }
+    }
+
+    private fun resolveStreakImageRes(status: StreakStatus): Int {
+        val packageName = requireContext().packageName
+        val candidateNames = when (status) {
+            StreakStatus.ACTIVE -> listOf("streak-active", "streak_active")
+            StreakStatus.INACTIVE, StreakStatus.UNKNOWN -> listOf("streak-inactive", "streak_inactive")
+        }
+
+        for (name in candidateNames) {
+            val resId = resources.getIdentifier(name, "drawable", packageName)
+            if (resId != 0) {
+                return resId
+            }
+        }
+        return R.drawable.main
     }
 
     private fun showLoading(isLoading: Boolean) {

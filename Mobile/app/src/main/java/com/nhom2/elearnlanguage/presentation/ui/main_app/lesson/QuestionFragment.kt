@@ -332,12 +332,19 @@ class QuestionFragment : Fragment() {
                 var submittedOk = false
                 try {
                     val result = viewModel.submitLessonAnswers(args.lessonId, payload)
-                    if (result.isSuccess && result.getOrNull() == true) {
+                    val submitResult = result.getOrNull()
+                    if (result.isSuccess && submitResult != null) {
+                        Log.d(
+                            TAG,
+                            "submitLesson success: currentStreak=${submitResult.currentStreak}, streakExtended=${submitResult.streakExtended}"
+                        )
                         submittedOk = true
                         val total = viewModel.getTotalQuestions()
                         val action = QuestionFragmentDirections.actionQuestionFragmentToLessonCompleteFragment(
                             correctCount = correctAnswerCount,
-                            totalCount = total
+                            totalCount = total,
+                            currentStreak = submitResult.currentStreak,
+                            streakExtended = submitResult.streakExtended
                         )
                         findNavController().navigate(action)
                     } else {

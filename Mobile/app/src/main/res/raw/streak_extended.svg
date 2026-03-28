@@ -1,0 +1,68 @@
+<svg width="140" height="180" viewBox="-15 -15 150 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .flame-outer {
+      transform-origin: 56px 90px;
+      animation: sway 1.2s ease-in-out infinite;
+    }
+
+    .flame-inner {
+      transform-origin: 56px 90px;
+      animation: swayInner 0.9s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%   { transform: scaleY(1) scaleX(1) rotate(0deg); }
+      20%  { transform: scaleY(1.12) scaleX(0.92) rotate(-2deg); }
+      40%  { transform: scaleY(0.9) scaleX(1.08) rotate(2deg); }
+      60%  { transform: scaleY(1.15) scaleX(0.9) rotate(-1.5deg); }
+      80%  { transform: scaleY(0.95) scaleX(1.05) rotate(1deg); }
+      100% { transform: scaleY(1) scaleX(1) rotate(0deg); }
+    }
+
+    @keyframes swayInner {
+      0%   { transform: scaleY(1) scaleX(1); opacity: 0.9; }
+      25%  { transform: scaleY(1.2) scaleX(0.85); opacity: 1; }
+      50%  { transform: scaleY(0.85) scaleX(1.15); opacity: 0.85; }
+      75%  { transform: scaleY(1.15) scaleX(0.9); opacity: 1; }
+      100% { transform: scaleY(1) scaleX(1); opacity: 0.9; }
+    }
+  </style>
+
+  <!-- group để dịch toàn bộ flame vào giữa -->
+  <g transform="translate(0, 5)">
+    
+    <!-- Shadow -->
+    <ellipse cx="56" cy="126.5" rx="42" ry="22.5" fill="#FFEDAB">
+      <animate attributeName="rx" values="42;48;38;44;42" dur="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.8;0.5;0.7;0.6" dur="1.2s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Outer flame -->
+    <path class="flame-outer"
+      d="M0 86.1768V31.7617C0 20.306 9.16216 20.3058 15.2703 23.1698L27.4865 28.8977C32.5766 22.2152 43.9784 7.70452 48.8649 3.12219C54.973 -2.60571 61.0811 0.258242 67.1892 5.98614C73.2973 11.714 91.6216 34.6257 100.784 46.0815C109.946 57.5373 113 68.9931 113 86.1768C113 103.36 91.6216 132 54.973 132C18.3243 132 0 100.497 0 86.1768Z"
+      fill="#FF9600">
+
+      <animate attributeName="fill"
+        values="#FF9600;#FFB000;#FF7A00;#FFA500;#FF9600"
+        dur="1.2s"
+        repeatCount="indefinite"/>
+    </path>
+
+    <!-- Inner flame -->
+    <path class="flame-inner"
+      d="M36.6486 77.5851C41.5351 70.7116 48.8648 61.3561 51.9189 57.5375C52.937 55.6282 56.1948 52.9551 61.0813 57.5375C67.1894 63.2654 73.2975 74.7212 76.3515 77.5851C79.4056 80.4491 82.4597 91.9049 76.3515 100.497C70.2434 109.089 61.0813 111.953 54.9732 111.953C48.8651 111.953 39.7026 106.225 36.6486 100.497C33.5945 94.7688 30.5405 86.177 36.6486 77.5851Z"
+      fill="#FFC800">
+
+      <animate attributeName="fill"
+        values="#FFC800;#FFE066;#FFB800;#FFD54F;#FFC800"
+        dur="0.9s"
+        repeatCount="indefinite"/>
+
+      <animate attributeName="opacity"
+        values="0.85;1;0.8;1;0.9"
+        dur="0.9s"
+        repeatCount="indefinite"/>
+    </path>
+
+  </g>
+</svg>

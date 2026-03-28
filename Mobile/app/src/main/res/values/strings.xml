@@ -73,6 +73,9 @@
     <string name="correct">Correct</string>
     <string name="lesson_complete_continue">Continue</string>
     <string name="lesson_complete_score">%1$d/%2$d Correct</string>
+    <string name="streak_image">Streak illustration</string>
+    <string name="streak_extended_title">Streak Increased!</string>
+    <string name="streak_extended_hint">Keep learning every day.</string>
     <string name="speak_or_type_a_message">Speak or type a message</string>
     <string name="improve_title">Improve message</string>
     <string name="improve_subtitle">AI suggested a better version for your message.</string>

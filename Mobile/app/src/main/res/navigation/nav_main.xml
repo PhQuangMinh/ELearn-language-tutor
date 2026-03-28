@@ -147,5 +147,25 @@
         <argument
             android:name="totalCount"
             app:argType="integer" />
+        <argument
+            android:name="currentStreak"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="streakExtended"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/action_lessonCompleteFragment_to_lessonStreakFragment"
+            app:destination="@id/lessonStreakFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonStreakFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.LessonStreakFragment"
+        android:label="Lesson streak"
+        tools:layout="@layout/fragment_lesson_streak">
+        <argument
+            android:name="currentStreak"
+            app:argType="integer" />
     </fragment>
 </navigation>

@@ -7,12 +7,14 @@ import com.nhom2.elearnlanguage.data.repository.ImproveRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.LessonRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.SpeechToTextRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.SpeakingRepositoryImpl
+import com.nhom2.elearnlanguage.data.repository.StreakRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.VocabularyRepositoryImpl
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.HomeDataSource
 import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
+import com.nhom2.elearnlanguage.data.source.remote.StreakDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.HomeRepository
@@ -20,6 +22,7 @@ import com.nhom2.elearnlanguage.domain.repository.ImproveRepository
 import com.nhom2.elearnlanguage.domain.repository.LessonRepository
 import com.nhom2.elearnlanguage.domain.repository.SpeechToTextRepository
 import com.nhom2.elearnlanguage.domain.repository.SpeakingRepository
+import com.nhom2.elearnlanguage.domain.repository.StreakRepository
 import com.nhom2.elearnlanguage.domain.repository.VocabularyRepository
 import dagger.Module
 import dagger.Provides
@@ -71,5 +74,11 @@ class RepositoryModule {
     @Singleton
     fun provideSpeakingRepository(speakingDataSource: SpeakingDataSource): SpeakingRepository {
         return SpeakingRepositoryImpl(speakingDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideStreakRepository(streakDataSource: StreakDataSource): StreakRepository {
+        return StreakRepositoryImpl(streakDataSource)
     }
 }

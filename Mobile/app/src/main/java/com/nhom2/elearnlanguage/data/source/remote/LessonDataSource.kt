@@ -3,8 +3,9 @@ package com.nhom2.elearnlanguage.data.source.remote
 import com.nhom2.elearnlanguage.BuildConfig
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.LessonInTopicDTO
-import com.nhom2.elearnlanguage.data.dto.lesson.QuestionDetailDTO
 import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
+import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitResultDTO
+import com.nhom2.elearnlanguage.data.dto.lesson.QuestionDetailDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -12,7 +13,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import javax.inject.Inject
 
 class LessonDataSource @Inject constructor(
@@ -27,11 +27,10 @@ class LessonDataSource @Inject constructor(
         return client.get("${BuildConfig.API_BASE_URL}/api/lessons/$lessonId/questions").body()
     }
 
-    suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): Boolean {
-        val response = client.post("${BuildConfig.API_BASE_URL}/api/lessons/$lessonId/submit") {
+    suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): LessonSubmitResultDTO {
+        return client.post("${BuildConfig.API_BASE_URL}/api/lessons/$lessonId/submit") {
             contentType(ContentType.Application.Json)
             setBody(request)
-        }
-        return response.status.isSuccess()
+        }.body()
     }
 }

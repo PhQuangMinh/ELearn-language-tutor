@@ -1,9 +1,11 @@
 package com.nhom2.elearnlanguage.data.mapper
 
 import com.nhom2.elearnlanguage.data.dto.lesson.AnswerDTO
+import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitResultDTO
 import com.nhom2.elearnlanguage.data.dto.lesson.MediaDTO
 import com.nhom2.elearnlanguage.data.dto.lesson.QuestionDetailDTO
 import com.nhom2.elearnlanguage.domain.model.lesson.Answer
+import com.nhom2.elearnlanguage.domain.model.lesson.LessonSubmitResult
 import com.nhom2.elearnlanguage.domain.model.lesson.Media
 import com.nhom2.elearnlanguage.domain.model.lesson.MediaType
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
@@ -56,6 +58,13 @@ fun QuestionDetailDTO.toDomain(): Question {
         content = content,
         media = media?.toDomain(media),
         answers = answers.map { it.toDomain() }
+    )
+}
+
+fun LessonSubmitResultDTO.toDomain(): LessonSubmitResult {
+    return LessonSubmitResult(
+        currentStreak = currentStreak,
+        streakExtended = streakExtended
     )
 }
 

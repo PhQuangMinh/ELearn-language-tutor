@@ -63,5 +63,6 @@ class RegisterViewModel @Inject constructor(
         )
         tokenStorage.saveAccessToken(session.accessToken)
         tokenStorage.saveRefreshToken(session.refreshToken)
+        tokenStorage.saveUserId(session.user?.id)
     }
 }

@@ -1,6 +1,7 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +14,14 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LessonCompleteFragment : Fragment() {
+    companion object {
+        private const val TAG = "LessonCompleteFragment"
+    }
 
     private var _binding: FragmentLessonCompleteBinding? = null
     private val binding get() = _binding!!
 
     private val args: LessonCompleteFragmentArgs by navArgs()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,9 +41,16 @@ class LessonCompleteFragment : Fragment() {
         binding.tvScoreText.text = getString(R.string.lesson_complete_score, correct, total)
         binding.progressScore.max = 100
         binding.progressScore.progress = percent
+        Log.d(TAG, "onViewCreated streakExtended=${args.streakExtended}, currentStreak=${args.currentStreak}")
 
         binding.btnContinue.setOnClickListener {
-            findNavController().popBackStack(R.id.lessonListFragment, false)
+            if (args.streakExtended) {
+                val action = LessonCompleteFragmentDirections
+                    .actionLessonCompleteFragmentToLessonStreakFragment(args.currentStreak)
+                findNavController().navigate(action)
+            } else {
+                findNavController().popBackStack(R.id.lessonListFragment, false)
+            }
         }
     }
 
