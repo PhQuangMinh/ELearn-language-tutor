@@ -43,6 +43,9 @@ public class User extends AbstractAuditEntity implements UserDetails {
     @Column(length = 100)
     private String fullName;
 
+    @Column(name = "avatar_url", length = 1000)
+    private String avatarUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

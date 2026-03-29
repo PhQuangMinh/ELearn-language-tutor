@@ -13,6 +13,7 @@ import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
+import com.nhom2.elearnlanguage.data.source.remote.ProfileDataSource
 import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
 import com.nhom2.elearnlanguage.data.source.remote.StreakDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
@@ -235,5 +236,11 @@ object NetworkModule {
     @Singleton
     fun provideStreakDataSource(client: HttpClient): StreakDataSource {
         return StreakDataSource(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfileDataSource(client: HttpClient): ProfileDataSource {
+        return ProfileDataSource(client)
     }
 }

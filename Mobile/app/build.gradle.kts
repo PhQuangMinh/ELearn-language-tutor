@@ -24,7 +24,7 @@ android {
         if (file.exists()) {
             file.inputStream().use { properties.load(it) }
         }
-        val apiBaseUrl = properties.getProperty("api.base.url") ?: "http://10.0.2.2:8080"
+        val apiBaseUrl = properties.getProperty("api.base.url") ?: "http://10.0.2.2:9000"
         val webClientId = properties.getProperty("WEB_CLIENT_ID") ?: ""
 
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")

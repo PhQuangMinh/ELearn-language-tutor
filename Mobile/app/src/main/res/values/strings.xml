@@ -91,4 +91,21 @@
     <string name="improve_retry_action">Retry</string>
     <string name="improve_loading_action">...</string>
     <string name="you_need_to_grand_permission_to_speak">You need to grand permission to speak</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">My Profile</string>
+    <string name="profile_avatar">Profile avatar</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_name_value">Long Hoang</string>
+    <string name="profile_email_value">John.doe@mail.com</string>
+    <string name="profile_change_avatar">Change avatar</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_my_account">My Account</string>
+    <string name="profile_change_password">Change password</string>
+    <string name="profile_logout_account">Logout Account</string>
+    <string name="profile_name_empty_error">Your name cannot be empty!</string>
+    <string name="profile_name_too_short_error">Your name\'s length must be &gt;= 4 characters.</string>
+    <string name="profile_avatar_read_failed">Cannot read selected image. Please choose another one.</string>
+    <string name="profile_avatar_too_large">Avatar is too large. Please choose an image &lt;= 10MB.</string>
 </resources>
