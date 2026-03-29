@@ -9,6 +9,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import lombok.extern.slf4j.Slf4j;
 
 import com.example.BTL_Mobile.dto.response.ApiResponse;
 
@@ -16,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -69,6 +73,25 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> response = ApiResponse.error(
                 ex.getMessage(),
                 ex.getErrorCode()
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                "File avatar quá lớn. Vui lòng chọn ảnh <= 10MB.",
+                "MULTIPART_FILE_TOO_LARGE"
+        );
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMultipartException(MultipartException ex) {
+        log.warn("Multipart parse error: {}", ex.getMessage(), ex);
+        ApiResponse<Object> response = ApiResponse.error(
+                "Không thể xử lý dữ liệu upload. Vui lòng kiểm tra kích thước và định dạng ảnh.",
+                "MULTIPART_PARSE_ERROR"
         );
         return ResponseEntity.badRequest().body(response);
     }

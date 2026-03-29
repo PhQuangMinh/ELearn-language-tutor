@@ -5,6 +5,7 @@ import com.nhom2.elearnlanguage.data.repository.AuthRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.HomeRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.ImproveRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.LessonRepositoryImpl
+import com.nhom2.elearnlanguage.data.repository.ProfileRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.SpeechToTextRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.SpeakingRepositoryImpl
 import com.nhom2.elearnlanguage.data.repository.StreakRepositoryImpl
@@ -13,6 +14,7 @@ import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.HomeDataSource
 import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
+import com.nhom2.elearnlanguage.data.source.remote.ProfileDataSource
 import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
 import com.nhom2.elearnlanguage.data.source.remote.StreakDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
@@ -20,6 +22,7 @@ import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.HomeRepository
 import com.nhom2.elearnlanguage.domain.repository.ImproveRepository
 import com.nhom2.elearnlanguage.domain.repository.LessonRepository
+import com.nhom2.elearnlanguage.domain.repository.ProfileRepository
 import com.nhom2.elearnlanguage.domain.repository.SpeechToTextRepository
 import com.nhom2.elearnlanguage.domain.repository.SpeakingRepository
 import com.nhom2.elearnlanguage.domain.repository.StreakRepository
@@ -80,5 +83,11 @@ class RepositoryModule {
     @Singleton
     fun provideStreakRepository(streakDataSource: StreakDataSource): StreakRepository {
         return StreakRepositoryImpl(streakDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfileRepository(profileDataSource: ProfileDataSource): ProfileRepository {
+        return ProfileRepositoryImpl(profileDataSource)
     }
 }

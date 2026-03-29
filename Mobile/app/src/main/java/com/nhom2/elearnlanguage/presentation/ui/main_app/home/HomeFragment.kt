@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentHomeBinding
+import com.nhom2.elearnlanguage.presentation.ui.main_app.home.profile.ProfileFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -57,7 +58,7 @@ class HomeFragment : Fragment() {
             R.id.tab_lesson -> LessonTabFragment()
             R.id.tab_vocabulary -> VocabularyTabFragment()
             R.id.tab_speaking -> SpeakingTabFragment()
-            R.id.tab_profile -> ProfileTabFragment()
+            R.id.tab_profile -> ProfileFragment()
             else -> return
         }
         currentTabId = itemId

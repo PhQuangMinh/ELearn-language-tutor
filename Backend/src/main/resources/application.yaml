@@ -51,6 +51,12 @@ spring:
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:10MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:12MB}
+
 server:
   port: ${SERVER_PORT:8080}
   servlet:
@@ -75,3 +81,9 @@ app:
   mail:
     # Only changes the display name. Email address still uses spring.mail.username
     from-name: ${MAIL_FROM_NAME:ELearn}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}
+  folder: ${CLOUDINARY_FOLDER:elearn/avatars}
