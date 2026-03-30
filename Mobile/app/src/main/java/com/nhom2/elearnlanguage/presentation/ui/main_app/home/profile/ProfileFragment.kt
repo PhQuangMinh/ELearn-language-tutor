@@ -80,6 +80,7 @@ class ProfileFragment : Fragment() {
                         bindProfile(profile)
                         lastRenderedProfile = profile
                     }
+                    bindStreak(state.currentStreak, state.longestStreak)
 
                     state.errorMessage?.let { message ->
                         handleErrorMessage(message)
@@ -110,6 +111,13 @@ class ProfileFragment : Fragment() {
                 renderAvatar(profile.avatarUrl)
             }
         }
+    }
+
+    private fun bindStreak(currentStreak: Int?, longestStreak: Int?) {
+        binding.tvCurrentStreakValue.text = currentStreak?.toString()
+            ?: getString(R.string.profile_streak_default_value)
+        binding.tvLongestStreakValue.text = longestStreak?.toString()
+            ?: getString(R.string.profile_streak_default_value)
     }
 
     private fun onSaveClicked() {
