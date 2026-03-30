@@ -70,6 +70,7 @@ public class SecurityConfig {
                 "/api/auth/forgot-password",
                 "/api/auth/forgot-password/verify",
                 "/api/auth/reset-password",
+                "/api/auth/password-strength",
                 "/api/auth/oauth2/authorize/google",
                 "/api/auth/refresh",
                 "/api/auth/refresh/",

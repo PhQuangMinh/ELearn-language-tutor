@@ -1,8 +1,10 @@
 package com.example.BTL_Mobile.controller;
 
 import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
+import com.example.BTL_Mobile.dto.request.ChangePasswordRequest;
 import com.example.BTL_Mobile.dto.request.GoogleIdTokenLoginRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
+import com.example.BTL_Mobile.dto.request.PasswordStrengthRequest;
 import com.example.BTL_Mobile.dto.request.RefreshTokenRequest;
 import com.example.BTL_Mobile.dto.request.RegisterCompleteRequest;
 import com.example.BTL_Mobile.dto.request.RegisterInitiateRequest;
@@ -11,6 +13,7 @@ import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
 import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.ApiResponse;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.PasswordStrengthResponse;
 import com.example.BTL_Mobile.dto.response.RegisterTokenResponse;
 import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
@@ -122,6 +125,20 @@ public class AuthController {
       @Valid @RequestBody ResetPasswordWithTokenRequest request) {
     authService.resetPasswordWithToken(request);
     return ResponseEntity.ok(ApiResponse.success("Reset password successful!", null));
+  }
+
+  @PostMapping("/change-password")
+  public ResponseEntity<ApiResponse<Object>> changePassword(
+      @Valid @RequestBody ChangePasswordRequest request) {
+    authService.changePassword(request);
+    return ResponseEntity.ok(ApiResponse.success("Change password successful!", null));
+  }
+
+  @PostMapping("/password-strength")
+  public ResponseEntity<ApiResponse<PasswordStrengthResponse>> validatePasswordStrength(
+      @Valid @RequestBody PasswordStrengthRequest request) {
+    PasswordStrengthResponse response = authService.validatePasswordStrength(request.getPassword());
+    return ResponseEntity.ok(ApiResponse.success("Validate password successful!", response));
   }
 
   @PostMapping("/validate")

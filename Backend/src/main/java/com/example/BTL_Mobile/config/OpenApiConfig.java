@@ -81,6 +81,9 @@ public class OpenApiConfig {
           if (path.equals("/api/auth/reset-password")) {
                   return false;
           }
+          if (path.equals("/api/auth/password-strength")) {
+                  return false;
+          }
           if (path.equals("/api/auth/login")) {
                   return false;
           }

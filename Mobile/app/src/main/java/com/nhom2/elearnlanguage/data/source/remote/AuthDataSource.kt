@@ -9,6 +9,7 @@ import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterCompleteRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterInitiateRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterTokenResponseDTO
+import com.nhom2.elearnlanguage.data.dto.ChangePasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.VerifyEmailRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordTokenResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordWithTokenRequestDTO
@@ -77,6 +78,13 @@ class AuthDataSource @Inject constructor(
 
     suspend fun resetPassword(request: ResetPasswordWithTokenRequestDTO): ApiResponseDTO<Unit> {
         return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/reset-password") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun changePassword(request: ChangePasswordRequestDTO): ApiResponseDTO<Unit> {
+        return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/change-password") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

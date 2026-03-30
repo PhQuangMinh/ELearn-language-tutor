@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserProfileResponse {
-    private String fullName;
-    private String email;
-    private String avatarUrl;
-    private String provider;
+public class PasswordStrengthResponse {
+    private boolean pass;
+    private String level;
+    private String message;
+    private String color;
 }

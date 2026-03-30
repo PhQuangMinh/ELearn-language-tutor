@@ -2,10 +2,6 @@ package com.nhom2.elearnlanguage.di
 
 import android.content.Context
 import android.util.Log
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonParseException
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializer
 import com.nhom2.elearnlanguage.BuildConfig
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
@@ -13,9 +9,7 @@ import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.data.source.remote.AuthDataSource
 import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
-import com.nhom2.elearnlanguage.data.source.remote.ProfileDataSource
 import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
-import com.nhom2.elearnlanguage.data.source.remote.StreakDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
 import dagger.Module
 import dagger.Provides
@@ -44,7 +38,6 @@ import io.ktor.http.takeFrom
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.gson.gson
 import kotlinx.coroutines.CancellationException
-import java.time.LocalDateTime
 import javax.inject.Singleton
 
 @Module
@@ -63,29 +56,6 @@ object NetworkModule {
 
             install(ContentNegotiation) {
                 gson {
-                    registerTypeAdapter(
-                        LocalDateTime::class.java,
-                        JsonDeserializer<LocalDateTime> { json, _, _ ->
-                            if (json == null || json.isJsonNull) {
-                                return@JsonDeserializer null
-                            }
-                            val value = json.asString
-                            if (value.isBlank()) {
-                                return@JsonDeserializer null
-                            }
-                            try {
-                                LocalDateTime.parse(value)
-                            } catch (e: Exception) {
-                                throw JsonParseException("Invalid LocalDateTime: $value", e)
-                            }
-                        }
-                    )
-                    registerTypeAdapter(
-                        LocalDateTime::class.java,
-                        JsonSerializer<LocalDateTime> { src, _, _ ->
-                            JsonPrimitive(src.toString())
-                        }
-                    )
                     setPrettyPrinting()
                     setLenient()
                 }
@@ -230,17 +200,5 @@ object NetworkModule {
     @Singleton
     fun provideSpeakingDataSource(client: HttpClient): SpeakingDataSource {
         return SpeakingDataSource(client)
-    }
-
-    @Provides
-    @Singleton
-    fun provideStreakDataSource(client: HttpClient): StreakDataSource {
-        return StreakDataSource(client)
-    }
-
-    @Provides
-    @Singleton
-    fun provideProfileDataSource(client: HttpClient): ProfileDataSource {
-        return ProfileDataSource(client)
     }
 }

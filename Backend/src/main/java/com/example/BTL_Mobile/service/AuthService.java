@@ -2,12 +2,14 @@ package com.example.BTL_Mobile.service;
 
 import com.example.BTL_Mobile.dto.request.ForgotPasswordRequest;
 import com.example.BTL_Mobile.dto.request.LoginRequest;
+import com.example.BTL_Mobile.dto.request.ChangePasswordRequest;
 import com.example.BTL_Mobile.dto.request.RegisterCompleteRequest;
 import com.example.BTL_Mobile.dto.request.RegisterInitiateRequest;
 import com.example.BTL_Mobile.dto.request.ResetPasswordWithTokenRequest;
 import com.example.BTL_Mobile.dto.request.VerifyEmailRequest;
 import com.example.BTL_Mobile.dto.request.VerifyForgotPasswordCodeRequest;
 import com.example.BTL_Mobile.dto.response.AuthResponse;
+import com.example.BTL_Mobile.dto.response.PasswordStrengthResponse;
 import com.example.BTL_Mobile.dto.response.RegisterTokenResponse;
 import com.example.BTL_Mobile.dto.response.ResetPasswordTokenResponse;
 import com.example.BTL_Mobile.dto.response.TokenValidationResponse;
@@ -127,6 +129,8 @@ public class AuthService {
         if (!jwtTokenProvider.validateRegisterToken(request.getRegisterToken(), request.getEmail())) {
             throw new BusinessException("Your verification code is incorrect.", "INVALID_REGISTER_TOKEN");
         }
+
+        validatePasswordPolicy(request.getPassword());
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);
@@ -378,6 +382,8 @@ public class AuthService {
             throw new BusinessException("Confirm password does not match!", "CONFIRM_PASSWORD_MISMATCH");
         }
 
+        validatePasswordPolicy(request.getNewPassword());
+
         if (user.getResetPasswordToken() == null ||
                 user.getResetPasswordTokenExpiry() == null ||
                 !user.getResetPasswordToken().equals(request.getResetToken())) {
@@ -396,6 +402,43 @@ public class AuthService {
 
         // Revoke toàn bộ refresh tokens hiện tại
         refreshTokenService.revokeAllUserTokens(user);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            throw new BusinessException("Người dùng chưa đăng nhập!", "UNAUTHORIZED");
+        }
+
+        User user = (User) authentication.getPrincipal();
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException("Current password is incorrect!", "INVALID_CURRENT_PASSWORD");
+        }
+
+        if (request.getConfirmPassword() == null || !request.getConfirmPassword().equals(request.getNewPassword())) {
+            throw new BusinessException("Confirm password does not match!", "CONFIRM_PASSWORD_MISMATCH");
+        }
+
+        validatePasswordPolicy(request.getNewPassword());
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setLastLogoutAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        refreshTokenService.revokeAllUserTokens(user);
+    }
+
+    public PasswordStrengthResponse validatePasswordStrength(String password) {
+        return PasswordStrengthEvaluator.evaluate(password);
+    }
+
+    private void validatePasswordPolicy(String password) {
+        PasswordStrengthResponse result = PasswordStrengthEvaluator.evaluate(password);
+        if (!result.isPass()) {
+            throw new BusinessException(result.getMessage(), "WEAK_PASSWORD");
+        }
     }
 
     private String generateOtp() {
