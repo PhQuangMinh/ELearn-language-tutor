@@ -3,6 +3,7 @@ package com.nhom2.elearnlanguage.data.repository
 import android.util.Log
 import com.nhom2.elearnlanguage.data.dto.ApiResponseDTO
 import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
+import com.nhom2.elearnlanguage.data.dto.ChangePasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
@@ -119,6 +120,24 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
 
         if (!response.success) {
             Log.d("RESET PASSWORD", response.toString())
+            throw Exception(response.message)
+        }
+    }
+
+    override suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ) {
+        val request = ChangePasswordRequestDTO(
+            currentPassword = currentPassword,
+            newPassword = newPassword,
+            confirmPassword = confirmPassword
+        )
+        val response = authDataSource.changePassword(request)
+
+        if (!response.success) {
+            Log.d("CHANGE PASSWORD", response.toString())
             throw Exception(response.message)
         }
     }

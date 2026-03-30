@@ -1,4 +1,4 @@
-package com.nhom2.elearnlanguage.presentation.ui.auth.forget_password
+package com.nhom2.elearnlanguage.presentation.ui.main_app.home.profile
 
 import android.os.Bundle
 import android.text.Editable
@@ -9,23 +9,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
-import com.nhom2.elearnlanguage.databinding.FragmentNewPasswordBinding
+import com.nhom2.elearnlanguage.databinding.FragmentChangePasswordBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class NewPasswordFragment : Fragment() {
+class ChangePasswordFragment : Fragment() {
 
-    private var _binding: FragmentNewPasswordBinding? = null
+    private var _binding: FragmentChangePasswordBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ForgetPasswordViewModel by activityViewModels()
+    private val viewModel: ChangePasswordViewModel by viewModels()
 
     private data class StrengthResult(
         val isPass: Boolean,
@@ -35,18 +33,18 @@ class NewPasswordFragment : Fragment() {
     )
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentNewPasswordBinding.inflate(inflater, container, false)
-        val view = binding.root
-        return view
+    ): View {
+        _binding = FragmentChangePasswordBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
-        setupObservers()
+        observeViewModel()
     }
 
     private fun setupListeners() {
@@ -61,14 +59,20 @@ class NewPasswordFragment : Fragment() {
                     tvPasswordStrength.setTextColor(ContextCompat.getColor(requireContext(), s.messageColorRes))
                 }
 
-                passwordInputLayout.boxStrokeColor =
+                newPasswordInputLayout.boxStrokeColor =
                     ContextCompat.getColor(requireContext(), s.strokeColorRes)
 
-                btnNextRegister.isEnabled = s.isPass
-                btnNextRegister.alpha = if (btnNextRegister.isEnabled) 1f else 0.6f
+                val passwordsMatch = etConfirmPassword.text?.toString().orEmpty() ==
+                    etNewPassword.text?.toString().orEmpty()
+                btnSave.isEnabled = s.isPass && passwordsMatch
+                btnSave.alpha = if (btnSave.isEnabled) 1f else 0.6f
             }
 
-            edtPassword.addTextChangedListener(object : TextWatcher {
+            topBackButton.root.setOnClickListener {
+                parentFragmentManager.popBackStack()
+            }
+
+            etNewPassword.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
                 override fun afterTextChanged(s: Editable?) {
@@ -76,61 +80,56 @@ class NewPasswordFragment : Fragment() {
                 }
             })
 
-            etPasswordConfirm.addTextChangedListener(object : TextWatcher {
+            etConfirmPassword.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
                 override fun afterTextChanged(s: Editable?) {
-                    applyStrength(evaluatePassword(edtPassword.text?.toString().orEmpty()))
+                    applyStrength(evaluatePassword(etNewPassword.text?.toString().orEmpty()))
                 }
             })
 
-            btnNextRegister.setOnClickListener {
-                val email = viewModel.email.value
-                val resetToken = viewModel.resetToken.value
-                val newPassword = edtPassword.text?.toString().orEmpty()
-                val confirmPassword = etPasswordConfirm.text?.toString().orEmpty()
-                viewModel.resetPassword(email, resetToken, newPassword, confirmPassword)
+            btnSave.setOnClickListener {
+                tvError.visibility = View.GONE
+                val currentPassword = etCurrentPassword.text?.toString().orEmpty().trim()
+                val newPassword = etNewPassword.text?.toString().orEmpty().trim()
+                val confirmPassword = etConfirmPassword.text?.toString().orEmpty().trim()
+
+                if (currentPassword.isBlank()) {
+                    tvError.visibility = View.VISIBLE
+                    tvError.text = getString(R.string.current_password_required)
+                    return@setOnClickListener
+                }
+
+                if (newPassword != confirmPassword) {
+                    tvError.visibility = View.VISIBLE
+                    tvError.text = getString(R.string.confirm_password_mismatch)
+                    return@setOnClickListener
+                }
+
+                viewModel.changePassword(currentPassword, newPassword, confirmPassword)
             }
 
-            applyStrength(evaluatePassword(edtPassword.text?.toString().orEmpty()))
+            applyStrength(evaluatePassword(etNewPassword.text?.toString().orEmpty()))
         }
     }
 
-    private fun setupObservers() {
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.uiState.collect { state ->
-                        when (state) {
-                            is ResetPasswordUIState.Idle -> {
-                                setLoading(false)
-                            }
-                            is ResetPasswordUIState.Loading -> {
-                                setLoading(true)
-                            }
-                            is ResetPasswordUIState.Success -> {
-                                setLoading(false)
-                                Toast.makeText(requireContext(), "Reset password successful.", Toast.LENGTH_SHORT).show()
-                                findNavController().popBackStack(R.id.loginFragment, false)
-                                viewModel.resetState()
-                            }
-                            is ResetPasswordUIState.Error -> {
-                                setLoading(false)
-                                viewModel.setError(state.message ?: "Reset password failed.")
-                            }
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is ChangePasswordUiState.Idle -> setLoading(false)
+                        is ChangePasswordUiState.Loading -> setLoading(true)
+                        is ChangePasswordUiState.Success -> {
+                            setLoading(false)
+                            Toast.makeText(requireContext(), getString(R.string.change_password_success), Toast.LENGTH_SHORT).show()
+                            viewModel.resetState()
+                            parentFragmentManager.popBackStack()
                         }
-                    }
-                }
-
-                launch {
-                    viewModel.error.collect { errorMessage ->
-                        with(binding) {
-                            if (errorMessage.isNotBlank()) {
-                                tvError.visibility = View.VISIBLE
-                                tvError.text = errorMessage
-                            } else {
-                                tvError.visibility = View.GONE
-                            }
+                        is ChangePasswordUiState.Error -> {
+                            setLoading(false)
+                            binding.tvError.visibility = View.VISIBLE
+                            binding.tvError.text = state.message
                         }
                     }
                 }
@@ -139,17 +138,18 @@ class NewPasswordFragment : Fragment() {
     }
 
     private fun setLoading(isLoading: Boolean) {
+        binding.pbChangePassword.visibility = if (isLoading) View.VISIBLE else View.GONE
         if (isLoading) {
-            binding.btnNextRegister.isEnabled = false
-            binding.btnNextRegister.alpha = 0.6f
-            binding.pbResetPassword.visibility = View.VISIBLE
+            binding.btnSave.isEnabled = false
+            binding.btnSave.alpha = 0.6f
             return
         }
 
-        binding.pbResetPassword.visibility = View.GONE
-        val strength = evaluatePassword(binding.edtPassword.text?.toString().orEmpty())
-        binding.btnNextRegister.isEnabled = strength.isPass
-        binding.btnNextRegister.alpha = if (strength.isPass) 1f else 0.6f
+        val strength = evaluatePassword(binding.etNewPassword.text?.toString().orEmpty())
+        val passwordsMatch = binding.etConfirmPassword.text?.toString().orEmpty() ==
+            binding.etNewPassword.text?.toString().orEmpty()
+        binding.btnSave.isEnabled = strength.isPass && passwordsMatch
+        binding.btnSave.alpha = if (binding.btnSave.isEnabled) 1f else 0.6f
     }
 
     private fun evaluatePassword(password: String): StrengthResult {
@@ -158,7 +158,7 @@ class NewPasswordFragment : Fragment() {
             return StrengthResult(
                 isPass = false,
                 message = "",
-                messageColorRes = R.color.neutral_60,
+                messageColorRes = R.color.status_grey,
                 strokeColorRes = R.color.input_stroke_blue,
             )
         }

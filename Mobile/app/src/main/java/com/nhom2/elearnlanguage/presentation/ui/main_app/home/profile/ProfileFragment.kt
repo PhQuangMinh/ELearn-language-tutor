@@ -66,7 +66,15 @@ class ProfileFragment : Fragment() {
         binding.etEmail.keyListener = null
         binding.avatarCard.setOnClickListener { pickAvatarLauncher.launch("image/*") }
         binding.tvChangeAvatar.setOnClickListener { pickAvatarLauncher.launch("image/*") }
+        binding.tvChangePassword.setOnClickListener { openChangePasswordScreen() }
         binding.btnSave.setOnClickListener { onSaveClicked() }
+    }
+
+    private fun openChangePasswordScreen() {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.flTabContainer, ChangePasswordFragment())
+            .addToBackStack("change_password")
+            .commit()
     }
 
     private fun observeViewModel() {
@@ -103,6 +111,8 @@ class ProfileFragment : Fragment() {
         binding.tvDisplayName.text = profile.fullName
         binding.etName.setText(profile.fullName)
         binding.etEmail.setText(profile.email)
+        binding.tvChangePassword.visibility =
+            if (profile.provider.equals("google", ignoreCase = true)) View.GONE else View.VISIBLE
 
         if (selectedAvatarUri == null) {
             if (profile.avatarUrl.isNullOrBlank()) {
