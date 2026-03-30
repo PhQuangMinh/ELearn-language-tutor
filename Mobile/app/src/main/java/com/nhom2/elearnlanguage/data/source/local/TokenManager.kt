@@ -20,8 +20,6 @@ object TokenManager {
             val userIdFromToken = extractUserIdFromJwt(accessToken)
             if (userIdFromToken != null) {
                 putLong(KEY_USER_ID, userIdFromToken)
-            } else {
-                remove(KEY_USER_ID)
             }
         }
     }

@@ -108,4 +108,7 @@
     <string name="profile_name_too_short_error">Your name\'s length must be &gt;= 4 characters.</string>
     <string name="profile_avatar_read_failed">Cannot read selected image. Please choose another one.</string>
     <string name="profile_avatar_too_large">Avatar is too large. Please choose an image &lt;= 10MB.</string>
+    <string name="profile_current_streak_label">Current streak</string>
+    <string name="profile_longest_streak_label">Longest streak</string>
+    <string name="profile_streak_default_value">--</string>
 </resources>

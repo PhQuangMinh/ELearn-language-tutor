@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhom2.elearnlanguage.domain.model.UserProfile
 import com.nhom2.elearnlanguage.domain.repository.ProfileRepository
+import com.nhom2.elearnlanguage.domain.repository.TokenStorage
+import com.nhom2.elearnlanguage.domain.usecase.GetUserStreakUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,13 +17,17 @@ data class ProfileUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val profile: UserProfile? = null,
+    val currentStreak: Int? = null,
+    val longestStreak: Int? = null,
     val errorMessage: String? = null,
     val successMessage: String? = null
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val getUserStreakUseCase: GetUserStreakUseCase,
+    private val tokenStorage: TokenStorage
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -40,10 +46,18 @@ class ProfileViewModel @Inject constructor(
             )
             try {
                 val profile = profileRepository.getMyProfile()
+                val userId = tokenStorage.getUserId()
+                val streak = try {
+                    userId?.let { getUserStreakUseCase(it) }
+                } catch (_: Exception) {
+                    null
+                }
                 hasLoadedProfile = true
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     profile = profile,
+                    currentStreak = streak?.currentStreak ?: _uiState.value.currentStreak,
+                    longestStreak = streak?.longestStreak ?: _uiState.value.longestStreak,
                     errorMessage = null
                 )
             } catch (e: Exception) {
