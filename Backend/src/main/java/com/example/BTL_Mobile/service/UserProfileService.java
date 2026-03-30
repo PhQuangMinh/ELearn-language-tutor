@@ -59,6 +59,7 @@ public class UserProfileService {
             .fullName(user.getFullName())
             .email(user.getEmail())
             .avatarUrl(user.getAvatarUrl())
+            .provider(user.getProvider())
             .build();
     }
 }
