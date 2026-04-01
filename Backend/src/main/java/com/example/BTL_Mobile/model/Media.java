@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.model;
 
+import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
 import com.example.BTL_Mobile.model.enums.EMediaType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,14 +12,13 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "media", schema = "btl_mobile")
-public class Media {
+public class Media extends AbstractAuditEntity {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Size(max = 50)
     @NotNull
     @Column(name = "type", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
