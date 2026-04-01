@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TopicResponse {
+public class AdminLessonResponse {
     private Integer id;
-    private String name;
-    private String description;
+    private Integer topicId;
+    private String title;
+    private String type;
     private String imageUrl;
+    private Integer parentId;
 }
