@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.dto.request;
 
+import com.example.BTL_Mobile.model.enums.ELessonType;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,14 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AdminTopicUpdateRequest {
+public class AdminLessonUpdateRequest {
 
-    @Size(max = 255, message = "Tên tối đa 255 ký tự")
-    private String name;
+    private Integer topicId;
 
-    @Size(max = 500, message = "Mô tả tối đa 500 ký tự")
-    private String description;
+    @Size(max = 255, message = "Tiêu đề lesson tối đa 255 ký tự")
+    private String title;
+
+    private ELessonType type;
 
     @Size(max = 1000, message = "Image URL tối đa 1000 ký tự")
     private String imageUrl;
+
+    private Integer parentId;
 }

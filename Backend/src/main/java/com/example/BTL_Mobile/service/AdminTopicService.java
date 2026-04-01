@@ -35,6 +35,7 @@ public class AdminTopicService {
         Topic topic = new Topic();
         topic.setName(request.getName());
         topic.setDescription(request.getDescription());
+        topic.setImageUrl(request.getImageUrl());
         Topic saved = topicRepository.save(topic);
         return toTopicResponse(saved);
     }
@@ -48,6 +49,9 @@ public class AdminTopicService {
         }
         if (request.getDescription() != null) {
             topic.setDescription(request.getDescription());
+        }
+        if (request.getImageUrl() != null) {
+            topic.setImageUrl(request.getImageUrl());
         }
         Topic saved = topicRepository.save(topic);
         return toTopicResponse(saved);
@@ -67,6 +71,7 @@ public class AdminTopicService {
                 .id(topic.getId())
                 .name(topic.getName())
                 .description(topic.getDescription())
+            .imageUrl(topic.getImageUrl())
                 .build();
     }
 }

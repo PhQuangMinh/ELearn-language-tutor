@@ -20,4 +20,7 @@ public class AdminTopicCreateRequest {
     @NotBlank(message = "Mô tả không được để trống")
     @Size(max = 500, message = "Mô tả tối đa 500 ký tự")
     private String description;
+
+    @Size(max = 1000, message = "Image URL tối đa 1000 ký tự")
+    private String imageUrl;
 }

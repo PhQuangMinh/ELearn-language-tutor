@@ -1,16 +1,21 @@
 package com.example.BTL_Mobile.model;
 
+import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
 @Entity
 @Table(name = "scenarios", schema = "btl_mobile")
-public class Scenario {
+public class Scenario extends AbstractAuditEntity {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

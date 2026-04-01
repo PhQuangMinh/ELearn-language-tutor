@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.service;
 
+import com.example.BTL_Mobile.dto.response.CloudinaryUploadResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,7 +8,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -18,10 +18,9 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@RequiredArgsConstructor
 public class CloudinaryService {
 
-    private final RestClient restClient = RestClient.builder().build();
+    private final RestClient restClient = RestClient.create();
 
     @Value("${cloudinary.cloud-name:}")
     private String cloudName;
@@ -36,7 +35,16 @@ public class CloudinaryService {
     private String folder;
 
     public String uploadAvatar(MultipartFile avatarFile, Integer userId) {
-        validateImageFile(avatarFile);
+        CloudinaryUploadResponse response = uploadImage(
+                avatarFile,
+                folder,
+                "user_" + userId
+        );
+        return response.getSecureUrl();
+    }
+
+    public CloudinaryUploadResponse uploadImage(MultipartFile imageFile, String folderPath, String publicIdPrefix) {
+        validateImageFile(imageFile);
 
         if (cloudName == null || cloudName.isBlank()) {
             throw new BusinessException("Chưa cấu hình cloudinary.cloud-name", "CLOUDINARY_NOT_CONFIGURED");
@@ -46,23 +54,27 @@ public class CloudinaryService {
         }
 
         try {
-            byte[] content = avatarFile.getBytes();
+            byte[] content = imageFile.getBytes();
             long timestamp = System.currentTimeMillis() / 1000;
-            String publicId = "user_" + userId + "_" + UUID.randomUUID();
-            String signature = buildSignature(folder, publicId, timestamp);
+            String effectiveFolder = (folderPath == null || folderPath.isBlank()) ? folder : folderPath;
+            String safePrefix = (publicIdPrefix == null || publicIdPrefix.isBlank())
+                    ? "asset"
+                    : publicIdPrefix;
+            String publicId = safePrefix + "_" + UUID.randomUUID();
+            String signature = buildSignature(effectiveFolder, publicId, timestamp);
 
             ByteArrayResource fileResource = new ByteArrayResource(content) {
                 @Override
                 public String getFilename() {
-                    return avatarFile.getOriginalFilename() == null
+                    return imageFile.getOriginalFilename() == null
                         ? "avatar-" + UUID.randomUUID() + ".jpg"
-                        : avatarFile.getOriginalFilename();
+                        : imageFile.getOriginalFilename();
                 }
             };
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", fileResource);
-            body.add("folder", folder);
+            body.add("folder", effectiveFolder);
             body.add("public_id", publicId);
             body.add("timestamp", String.valueOf(timestamp));
             body.add("api_key", apiKey);
@@ -79,7 +91,15 @@ public class CloudinaryService {
                 throw new BusinessException("Upload ảnh thất bại từ Cloudinary", "CLOUDINARY_UPLOAD_FAILED");
             }
 
-            return response.get("secure_url").toString();
+            return CloudinaryUploadResponse.builder()
+                    .secureUrl(response.get("secure_url").toString())
+                    .publicId(valueAsString(response.get("public_id")))
+                    .format(valueAsString(response.get("format")))
+                    .width(valueAsInteger(response.get("width")))
+                    .height(valueAsInteger(response.get("height")))
+                    .bytes(valueAsLong(response.get("bytes")))
+                    .originalFilename(imageFile.getOriginalFilename())
+                    .build();
         } catch (IOException e) {
             throw new BusinessException("Không thể đọc file ảnh", "INVALID_AVATAR_FILE");
         } catch (Exception e) {
@@ -87,15 +107,39 @@ public class CloudinaryService {
         }
     }
 
-    private void validateImageFile(MultipartFile avatarFile) {
-        if (avatarFile == null || avatarFile.isEmpty()) {
+    private void validateImageFile(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
             throw new BusinessException("Avatar không được để trống", "AVATAR_REQUIRED");
         }
 
-        String contentType = avatarFile.getContentType();
+        String contentType = imageFile.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new BusinessException("File avatar phải là ảnh", "INVALID_AVATAR_TYPE");
         }
+    }
+
+    private String valueAsString(Object value) {
+        return value == null ? null : value.toString();
+    }
+
+    private Integer valueAsInteger(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        return Integer.parseInt(value.toString());
+    }
+
+    private Long valueAsLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        return Long.parseLong(value.toString());
     }
 
     private String buildSignature(String folder, String publicId, long timestamp) {
