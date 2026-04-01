@@ -1,10 +1,12 @@
 import type {
   ApiResponse,
   CloudinaryUpload,
+  FlashCard,
   Lesson,
   PageResponse,
   Scenario,
   Topic,
+  Word,
 } from "./types";
 
 type Credentials = {
@@ -123,6 +125,18 @@ export const deleteTopic = (config: SessionConfig, id: number) => del(config, `/
 export const listLessons = (config: SessionConfig, page: number, size: number) =>
   getPaged<Lesson>(config, `/api/admin/lessons?page=${page}&size=${size}&sort=id,desc`);
 
+/** Loads every lesson page for admin dropdowns (topic + title). */
+export const listAllLessons = async (config: SessionConfig): Promise<Lesson[]> => {
+  const pageSize = 200;
+  const first = await listLessons(config, 0, pageSize);
+  const all: Lesson[] = [...first.content];
+  for (let p = 1; p < first.totalPages; p += 1) {
+    const next = await listLessons(config, p, pageSize);
+    all.push(...next.content);
+  }
+  return all;
+};
+
 export const createLesson = (config: SessionConfig, payload: Omit<Lesson, "id">) =>
   postJson<Lesson>(config, "/api/admin/lessons", payload);
 
@@ -149,3 +163,36 @@ export const updateScenario = (
 
 export const deleteScenario = (config: SessionConfig, id: number) =>
   del(config, `/api/admin/scenarios/${id}`);
+
+export const listLessonWords = (config: SessionConfig, lessonId: number) => {
+  const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/words`, {
+    headers: withHeaders(config.token),
+  });
+  return response.then((r) => parseJson<ApiResponse<Word[]>>(r)).then((d) => d.data);
+};
+
+export const createLessonWord = (config: SessionConfig, lessonId: number, payload: Omit<Word, "id">) =>
+  postJson<Word>(config, `/api/admin/lessons/${lessonId}/words`, payload);
+
+export const listLessonFlashCards = (config: SessionConfig, lessonId: number) => {
+  const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/flashcards`, {
+    headers: withHeaders(config.token),
+  });
+  return response.then((r) => parseJson<ApiResponse<FlashCard[]>>(r)).then((d) => d.data);
+};
+
+export const createLessonFlashCard = (
+  config: SessionConfig,
+  lessonId: number,
+  payload: {
+    dictionaryWordId?: number | null;
+    word?: string | null;
+    pronunciation?: string | null;
+    meaning?: string | null;
+    type?: Word["type"] | null;
+    example: string;
+    imageUrl: string;
+    imageName?: string | null;
+    imageSize?: number | null;
+  }
+) => postJson<FlashCard>(config, `/api/admin/lessons/${lessonId}/flashcards`, payload);

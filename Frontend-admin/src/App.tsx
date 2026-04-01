@@ -3,9 +3,14 @@ import {
   createLesson,
   createScenario,
   createTopic,
+  createLessonFlashCard,
+  createLessonWord,
   deleteLesson,
   deleteScenario,
   deleteTopic,
+  listAllLessons,
+  listLessonFlashCards,
+  listLessonWords,
   listLessons,
   listScenarios,
   listTopics,
@@ -15,9 +20,9 @@ import {
   updateTopic,
   uploadImage,
 } from "./api";
-import type { Lesson, PageResponse, Scenario, Topic } from "./types";
+import type { FlashCard, Lesson, PageResponse, Scenario, Topic, Word } from "./types";
 
-type Tab = "topics" | "lessons" | "scenarios";
+type Tab = "topics" | "lessons" | "scenarios" | "words" | "flashcards";
 
 const PAGE_SIZE = 10;
 const DEFAULT_API_BASE = "http://localhost:8080";
@@ -40,6 +45,7 @@ const initialPagedState = <T,>(): PagedState<T> => ({
 });
 
 const LESSON_TYPES: Lesson["type"][] = ["LISTENING", "PRACTICING", "VOCABULARY"];
+const WORD_TYPES: Word["type"][] = ["NOUN", "VERB", "ADJECTIVE"];
 
 const trimOrEmpty = (value?: string | null) => (value || "").trim();
 const isBlank = (value?: string | null) => trimOrEmpty(value).length === 0;
@@ -188,6 +194,27 @@ export function App() {
   const [lessonState, setLessonState] = useState<PagedState<Lesson>>(initialPagedState<Lesson>());
   const [scenarioState, setScenarioState] = useState<PagedState<Scenario>>(initialPagedState<Scenario>());
 
+  const [wordLessonId, setWordLessonId] = useState<number | "">("");
+  const [words, setWords] = useState<Word[]>([]);
+  const [wordForm, setWordForm] = useState<Partial<Omit<Word, "id">>>({ type: "NOUN" });
+  const [wordQuery, setWordQuery] = useState("");
+
+  const [flashLessonId, setFlashLessonId] = useState<number | "">("");
+  const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
+  const [flashForm, setFlashForm] = useState<{
+    dictionaryWordId?: number | null;
+    word?: string | null;
+    pronunciation?: string | null;
+    meaning?: string | null;
+    type?: Word["type"] | null;
+    example?: string | null;
+    imageUrl?: string | null;
+    imageName?: string | null;
+    imageSize?: number | null;
+  }>({ type: "NOUN" });
+  const [flashQuery, setFlashQuery] = useState("");
+  const [lessonsForSelect, setLessonsForSelect] = useState<Lesson[]>([]);
+
   const [topicForm, setTopicForm] = useState<Partial<Topic>>({});
   const [lessonForm, setLessonForm] = useState<Partial<Lesson>>({ type: "LISTENING" });
   const [scenarioForm, setScenarioForm] = useState<Partial<Scenario>>({});
@@ -250,6 +277,24 @@ export function App() {
     );
   }, [scenarios, scenarioQuery]);
 
+  const filteredWords = useMemo(() => {
+    const q = normalize(wordQuery).trim();
+    if (!q) return words;
+    return words.filter((w) =>
+      [w.id, w.word, w.pronunciation, w.meaning, w.type].some((part) => normalize(part).includes(q))
+    );
+  }, [words, wordQuery]);
+
+  const filteredFlashCards = useMemo(() => {
+    const q = normalize(flashQuery).trim();
+    if (!q) return flashCards;
+    return flashCards.filter((c) =>
+      [c.id, c.word, c.pronunciation, c.meaning, c.example, c.imageUrl].some((part) =>
+        normalize(part).includes(q)
+      )
+    );
+  }, [flashCards, flashQuery]);
+
   const notify = (text: string) => setMessage(text);
 
   const requireAuth = () => {
@@ -302,6 +347,12 @@ export function App() {
       setTopicState(toPagedState(topicPage));
       setLessonState(toPagedState(lessonPage));
       setScenarioState(toPagedState(scenarioPage));
+      try {
+        const all = await listAllLessons(config);
+        setLessonsForSelect(all);
+      } catch {
+        /* dropdown refresh optional */
+      }
       notify("Da tai du lieu Topic, Lesson, Scenario");
     } catch (error) {
       notify(`Khong the tai du lieu: ${toUiError(error)}`);
@@ -309,6 +360,30 @@ export function App() {
       setLoading(false);
     }
   }, [config, token, topicState.page, lessonState.page, scenarioState.page]);
+
+  const loadWordsForLesson = useCallback(
+    async (lessonId: number) => {
+      requireAuth();
+      const data = await listLessonWords(config, lessonId);
+      setWords(data);
+    },
+    [config, token]
+  );
+
+  const loadFlashCardsForLesson = useCallback(
+    async (lessonId: number) => {
+      requireAuth();
+      const data = await listLessonFlashCards(config, lessonId);
+      setFlashCards(data);
+    },
+    [config, token]
+  );
+
+  const loadLessonsForSelect = useCallback(async () => {
+    requireAuth();
+    const all = await listAllLessons(config);
+    setLessonsForSelect(all);
+  }, [config, token]);
 
   useEffect(() => {
     if (!token) {
@@ -318,6 +393,13 @@ export function App() {
     // Only trigger initial load after login/token restore.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  useEffect(() => {
+    if (!token || (tab !== "words" && tab !== "flashcards")) {
+      return;
+    }
+    loadLessonsForSelect().catch((e) => notify(`Khong tai danh sach lesson: ${toUiError(e)}`));
+  }, [token, tab, loadLessonsForSelect]);
 
   const onLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -351,9 +433,461 @@ export function App() {
     setSelectedTopic(null);
     setSelectedLesson(null);
     setSelectedScenario(null);
+    setWords([]);
+    setFlashCards([]);
+    setWordLessonId("");
+    setFlashLessonId("");
+    setLessonsForSelect([]);
     localStorage.removeItem("admin-token");
     notify("Da dang xuat");
   };
+
+  const validateWordForm = (form: Partial<Omit<Word, "id">>): string | null => {
+    if (isBlank(form.word)) return "Word khong duoc de trong";
+    if (exceeds(form.word, 50)) return "Word toi da 50 ky tu";
+    if (isBlank(form.pronunciation)) return "Pronunciation khong duoc de trong";
+    if (exceeds(form.pronunciation, 50)) return "Pronunciation toi da 50 ky tu";
+    if (isBlank(form.meaning)) return "Meaning khong duoc de trong";
+    if (exceeds(form.meaning, 255)) return "Meaning toi da 255 ky tu";
+    if (!WORD_TYPES.includes((form.type || "") as Word["type"])) return "Word type khong hop le";
+    return null;
+  };
+
+  const validateFlashForm = (): string | null => {
+    if (!isPositiveInt(flashLessonId)) return "Chon lesson";
+    if (isBlank(flashForm.example)) return "Example khong duoc de trong";
+    if (exceeds(flashForm.example, 255)) return "Example toi da 255 ky tu";
+    if (isBlank(flashForm.imageUrl)) return "Hay upload anh flashcard (Cloudinary)";
+    if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
+    if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+
+    const hasWordId = isPositiveInt(flashForm.dictionaryWordId);
+    if (!hasWordId) {
+      const err = validateWordForm({
+        word: flashForm.word || "",
+        pronunciation: flashForm.pronunciation || "",
+        meaning: flashForm.meaning || "",
+        type: (flashForm.type || "NOUN") as Word["type"],
+      });
+      if (err) return `Flashcard word: ${err}`;
+    }
+    return null;
+  };
+
+  const onWordSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    requireAuth();
+    if (!isPositiveInt(wordLessonId)) {
+      notify("Chon lesson");
+      return;
+    }
+
+    const validationError = validateWordForm(wordForm);
+    if (validationError) {
+      notify(validationError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        word: trimOrEmpty(wordForm.word),
+        pronunciation: trimOrEmpty(wordForm.pronunciation),
+        meaning: trimOrEmpty(wordForm.meaning),
+        type: (wordForm.type || "NOUN") as Word["type"],
+      };
+      await createLessonWord(config, Number(wordLessonId), payload);
+      notify("Da them word vao lesson");
+      setWordForm({ type: "NOUN" });
+      await loadWordsForLesson(Number(wordLessonId));
+    } catch (error) {
+      notify(`Them word that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onFlashSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    requireAuth();
+
+    const validationError = validateFlashForm();
+    if (validationError) {
+      notify(validationError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createLessonFlashCard(config, Number(flashLessonId), {
+        dictionaryWordId: flashForm.dictionaryWordId ? Number(flashForm.dictionaryWordId) : null,
+        word: trimOrEmpty(flashForm.word),
+        pronunciation: trimOrEmpty(flashForm.pronunciation),
+        meaning: trimOrEmpty(flashForm.meaning),
+        type: (flashForm.type || "NOUN") as Word["type"],
+        example: trimOrEmpty(flashForm.example),
+        imageUrl: trimOrEmpty(flashForm.imageUrl),
+        imageName: trimOrEmpty(flashForm.imageName) || null,
+        imageSize: flashForm.imageSize ?? null,
+      });
+      notify("Da tao flashcard theo lesson");
+      setFlashForm({ type: "NOUN", dictionaryWordId: null });
+      await loadFlashCardsForLesson(Number(flashLessonId));
+    } catch (error) {
+      notify(`Tao flashcard that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const lessonSelectValue = (id: number | "") => (id === "" ? "" : String(id));
+
+  const onWordLessonChange = (value: string) => {
+    const id = value === "" ? "" : Number(value);
+    setWordLessonId(id);
+    if (isPositiveInt(id)) {
+      setLoading(true);
+      loadWordsForLesson(Number(id))
+        .then(() => notify("Da tai vocabulary"))
+        .catch((e) => notify(toUiError(e)))
+        .finally(() => setLoading(false));
+    } else {
+      setWords([]);
+    }
+  };
+
+  const onFlashLessonChange = (value: string) => {
+    const id = value === "" ? "" : Number(value);
+    setFlashLessonId(id);
+    if (isPositiveInt(id)) {
+      setLoading(true);
+      loadFlashCardsForLesson(Number(id))
+        .then(() => notify("Da tai flashcards"))
+        .catch((e) => notify(toUiError(e)))
+        .finally(() => setLoading(false));
+    } else {
+      setFlashCards([]);
+    }
+  };
+
+  const renderWordsTab = () => (
+    <div className="panel-grid">
+      <section className="panel">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h3 style={{ margin: 0 }}>Vocabulary theo Lesson</h3>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => {
+                const fallback = selectedLesson?.id;
+                if (fallback) {
+                  onWordLessonChange(String(fallback));
+                } else {
+                  notify("Chon lesson o tab Lesson truoc (View)");
+                }
+              }}
+              style={{ padding: "0.5rem 1rem" }}
+            >
+              Dung lesson dang chon (Lesson tab)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                loadLessonsForSelect().catch((e) => notify(toUiError(e)));
+              }}
+              disabled={loading}
+              style={{ padding: "0.5rem 1rem" }}
+            >
+              Tai lai danh sach lesson
+            </button>
+          </div>
+        </div>
+        <div className="list-toolbar">
+          <label style={{ flex: 1, display: "grid", gap: "6px", minWidth: 0 }}>
+            <span className="note" style={{ fontWeight: 600 }}>
+              Chon lesson
+            </span>
+            <select
+              value={lessonSelectValue(wordLessonId)}
+              onChange={(e) => onWordLessonChange(e.target.value)}
+            >
+              <option value="">-- Chon lesson --</option>
+              {lessonsForSelect.map((l) => (
+                <option key={l.id} value={l.id}>
+                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="list-toolbar">
+          <input
+            placeholder="Tim nhanh word..."
+            value={wordQuery}
+            onChange={(e) => setWordQuery(e.target.value)}
+          />
+          <span>Hien {filteredWords.length}/{words.length} muc</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Word</th>
+              <th>Pronunciation</th>
+              <th>Meaning</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredWords.map((w) => (
+              <tr key={w.id}>
+                <td>{w.id}</td>
+                <td>{w.word}</td>
+                <td>{w.pronunciation}</td>
+                <td>{w.meaning}</td>
+                <td>{w.type}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="panel">
+        <h3>Them Word vao Lesson</h3>
+        <form onSubmit={onWordSubmit} className="form-grid">
+          <label style={{ display: "grid", gap: "6px" }}>
+            <span className="note" style={{ fontWeight: 600 }}>
+              Chon lesson
+            </span>
+            <select
+              value={lessonSelectValue(wordLessonId)}
+              onChange={(e) => onWordLessonChange(e.target.value)}
+              required
+            >
+              <option value="">-- Chon lesson --</option>
+              {lessonsForSelect.map((l) => (
+                <option key={l.id} value={l.id}>
+                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+                </option>
+              ))}
+            </select>
+          </label>
+          <input
+            placeholder="Word"
+            value={wordForm.word || ""}
+            onChange={(e) => setWordForm((p) => ({ ...p, word: e.target.value }))}
+            maxLength={50}
+            required
+          />
+          <input
+            placeholder="Pronunciation"
+            value={wordForm.pronunciation || ""}
+            onChange={(e) => setWordForm((p) => ({ ...p, pronunciation: e.target.value }))}
+            maxLength={50}
+            required
+          />
+          <input
+            placeholder="Meaning"
+            value={wordForm.meaning || ""}
+            onChange={(e) => setWordForm((p) => ({ ...p, meaning: e.target.value }))}
+            maxLength={255}
+            required
+          />
+          <select
+            value={wordForm.type || "NOUN"}
+            onChange={(e) => setWordForm((p) => ({ ...p, type: e.target.value as Word["type"] }))}
+          >
+            <option value="NOUN">NOUN</option>
+            <option value="VERB">VERB</option>
+            <option value="ADJECTIVE">ADJECTIVE</option>
+          </select>
+          <button type="submit" disabled={loading}>
+            Them word
+          </button>
+          <button type="button" onClick={() => setWordForm({ type: "NOUN" })}>
+            Reset
+          </button>
+        </form>
+      </section>
+    </div>
+  );
+
+  const renderFlashCardsTab = () => (
+    <div className="panel-grid">
+      <section className="panel">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h3 style={{ margin: 0 }}>Flashcards theo Lesson</h3>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => {
+                const fallback = selectedLesson?.id;
+                if (fallback) {
+                  onFlashLessonChange(String(fallback));
+                } else {
+                  notify("Chon lesson o tab Lesson truoc (View)");
+                }
+              }}
+              style={{ padding: "0.5rem 1rem" }}
+            >
+              Dung lesson dang chon (Lesson tab)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                loadLessonsForSelect().catch((e) => notify(toUiError(e)));
+              }}
+              disabled={loading}
+              style={{ padding: "0.5rem 1rem" }}
+            >
+              Tai lai danh sach lesson
+            </button>
+          </div>
+        </div>
+        <div className="list-toolbar">
+          <label style={{ flex: 1, display: "grid", gap: "6px", minWidth: 0 }}>
+            <span className="note" style={{ fontWeight: 600 }}>
+              Chon lesson
+            </span>
+            <select
+              value={lessonSelectValue(flashLessonId)}
+              onChange={(e) => onFlashLessonChange(e.target.value)}
+            >
+              <option value="">-- Chon lesson --</option>
+              {lessonsForSelect.map((l) => (
+                <option key={l.id} value={l.id}>
+                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="list-toolbar">
+          <input
+            placeholder="Tim nhanh flashcard..."
+            value={flashQuery}
+            onChange={(e) => setFlashQuery(e.target.value)}
+          />
+          <span>Hien {filteredFlashCards.length}/{flashCards.length} muc</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Word</th>
+              <th>Meaning</th>
+              <th>Example</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredFlashCards.map((c) => (
+              <tr key={c.id}>
+                <td>{c.id}</td>
+                <td>{c.word || "-"}</td>
+                <td>{c.meaning || "-"}</td>
+                <td>{c.example}</td>
+                <td>{c.imageUrl ? <a href={c.imageUrl}>link</a> : "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="panel">
+        <h3>Tao Flashcard (thuoc Lesson)</h3>
+        <form onSubmit={onFlashSubmit} className="form-grid">
+          <label style={{ display: "grid", gap: "6px" }}>
+            <span className="note" style={{ fontWeight: 600 }}>
+              Chon lesson
+            </span>
+            <select
+              value={lessonSelectValue(flashLessonId)}
+              onChange={(e) => onFlashLessonChange(e.target.value)}
+              required
+            >
+              <option value="">-- Chon lesson --</option>
+              {lessonsForSelect.map((l) => (
+                <option key={l.id} value={l.id}>
+                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+                </option>
+              ))}
+            </select>
+          </label>
+          <input
+            type="number"
+            min={1}
+            placeholder="Dictionary Word ID (neu co)"
+            value={flashForm.dictionaryWordId || ""}
+            onChange={(e) =>
+              setFlashForm((p) => ({ ...p, dictionaryWordId: e.target.value ? Number(e.target.value) : null }))
+            }
+          />
+          <input
+            placeholder="Word (bo qua neu dung Word ID)"
+            value={flashForm.word || ""}
+            onChange={(e) => setFlashForm((p) => ({ ...p, word: e.target.value }))}
+            maxLength={50}
+          />
+          <input
+            placeholder="Pronunciation"
+            value={flashForm.pronunciation || ""}
+            onChange={(e) => setFlashForm((p) => ({ ...p, pronunciation: e.target.value }))}
+            maxLength={50}
+          />
+          <input
+            placeholder="Meaning"
+            value={flashForm.meaning || ""}
+            onChange={(e) => setFlashForm((p) => ({ ...p, meaning: e.target.value }))}
+            maxLength={255}
+          />
+          <select
+            value={flashForm.type || "NOUN"}
+            onChange={(e) => setFlashForm((p) => ({ ...p, type: e.target.value as Word["type"] }))}
+          >
+            <option value="NOUN">NOUN</option>
+            <option value="VERB">VERB</option>
+            <option value="ADJECTIVE">ADJECTIVE</option>
+          </select>
+          <input
+            placeholder="Example"
+            value={flashForm.example || ""}
+            onChange={(e) => setFlashForm((p) => ({ ...p, example: e.target.value }))}
+            maxLength={255}
+            required
+          />
+          <label style={{ display: "grid", gap: "6px" }}>
+            <span className="note" style={{ fontWeight: 600 }}>
+              Anh flashcard (upload len Cloudinary)
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  onUploadForFlashcard(file).catch((err: Error) => notify(err.message));
+                }
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {flashForm.imageUrl && (
+            <img className="image-preview" src={flashForm.imageUrl} alt="Flashcard preview" />
+          )}
+          <button type="submit" disabled={loading}>
+            Tao flashcard
+          </button>
+          <button
+            type="button"
+            onClick={() => setFlashForm({ type: "NOUN", dictionaryWordId: null })}
+          >
+            Reset
+          </button>
+        </form>
+      </section>
+    </div>
+  );
 
   const renderPagination = (
     entity: "topics" | "lessons" | "scenarios",
@@ -532,6 +1066,22 @@ export function App() {
       notify(`Da upload Lesson image: ${upload.publicId || "ok"}`);
     } catch (error) {
       notify(`Upload Lesson image that bai: ${toUiError(error)}`);
+    }
+  };
+
+  const onUploadForFlashcard = async (file: File) => {
+    requireAuth();
+    try {
+      const upload = await uploadImage(config, file, "elearn/flashcards");
+      setFlashForm((prev) => ({
+        ...prev,
+        imageUrl: upload.secureUrl,
+        imageName: upload.originalFilename ?? file.name,
+        imageSize: upload.bytes ?? file.size,
+      }));
+      notify(`Da upload anh flashcard (Cloudinary): ${upload.publicId || "ok"}`);
+    } catch (error) {
+      notify(`Upload anh flashcard that bai: ${toUiError(error)}`);
     }
   };
 
@@ -1072,6 +1622,12 @@ export function App() {
           <button className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>
             Scenario
           </button>
+          <button className={tab === "words" ? "active" : ""} onClick={() => setTab("words")}>
+            Words
+          </button>
+          <button className={tab === "flashcards" ? "active" : ""} onClick={() => setTab("flashcards")}>
+            Flashcards
+          </button>
         </nav>
       </aside>
 
@@ -1107,6 +1663,8 @@ export function App() {
         {tab === "topics" && renderTopicTab()}
         {tab === "lessons" && renderLessonTab()}
         {tab === "scenarios" && renderScenarioTab()}
+        {tab === "words" && renderWordsTab()}
+        {tab === "flashcards" && renderFlashCardsTab()}
 
         <p className="note status-note">{message}</p>
       </main>

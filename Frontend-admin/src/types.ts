@@ -29,6 +29,23 @@ export type Lesson = {
   parentId?: number | null;
 };
 
+export type Word = {
+  id: number;
+  word: string;
+  pronunciation: string;
+  meaning: string;
+  type: "VERB" | "ADJECTIVE" | "NOUN";
+};
+
+export type FlashCard = {
+  id: number;
+  word: string | null;
+  pronunciation: string | null;
+  meaning: string | null;
+  example: string;
+  imageUrl: string | null;
+};
+
 export type Scenario = {
   id: number;
   topicId: number;

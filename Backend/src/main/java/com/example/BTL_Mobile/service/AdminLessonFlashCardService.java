@@ -1,0 +1,122 @@
+package com.example.BTL_Mobile.service;
+
+import com.example.BTL_Mobile.dto.request.AdminFlashCardCreateRequest;
+import com.example.BTL_Mobile.dto.response.FlashCardResponse;
+import com.example.BTL_Mobile.exception.BusinessException;
+import com.example.BTL_Mobile.model.DictionaryWord;
+import com.example.BTL_Mobile.model.FlashCard;
+import com.example.BTL_Mobile.model.Lesson;
+import com.example.BTL_Mobile.model.Media;
+import com.example.BTL_Mobile.model.Topic;
+import com.example.BTL_Mobile.model.enums.EMediaType;
+import com.example.BTL_Mobile.repository.DictionaryWordRepository;
+import com.example.BTL_Mobile.repository.FlashCardRepository;
+import com.example.BTL_Mobile.repository.LessonRepository;
+import com.example.BTL_Mobile.repository.MediaRepository;
+import com.example.BTL_Mobile.repository.TopicRepository;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AdminLessonFlashCardService {
+
+    private final LessonRepository lessonRepository;
+    private final TopicRepository topicRepository;
+    private final DictionaryWordRepository dictionaryWordRepository;
+    private final MediaRepository mediaRepository;
+    private final FlashCardRepository flashCardRepository;
+
+    public List<FlashCardResponse> listFlashCards(Integer lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
+        Topic topic = lesson.getTopic();
+        if (topic == null) {
+            return List.of();
+        }
+
+        return flashCardRepository.findByTopicId(topic.getId()).stream()
+                .sorted(Comparator.comparing(FlashCard::getId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public FlashCardResponse addFlashCard(Integer lessonId, AdminFlashCardCreateRequest request) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
+        Topic topic = lesson.getTopic();
+        if (topic == null) {
+            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
+        }
+
+        DictionaryWord dictionaryWord = resolveDictionaryWord(request);
+
+        if (topic.getVocabulary() == null) {
+            topic.setVocabulary(new HashSet<>());
+        }
+        topic.getVocabulary().add(dictionaryWord);
+        topicRepository.save(topic);
+
+        Media media = new Media();
+        media.setType(EMediaType.IMAGE);
+        media.setUrl(request.getImageUrl().trim());
+        media.setName((request.getImageName() == null || request.getImageName().isBlank())
+                ? "flashcard_image"
+                : request.getImageName().trim());
+        media.setSize(request.getImageSize() == null ? 0 : request.getImageSize());
+        Media savedMedia = mediaRepository.save(media);
+
+        FlashCard flashCard = new FlashCard();
+        flashCard.setDictionaryWord(dictionaryWord);
+        flashCard.setMedia(savedMedia);
+        flashCard.setExample(request.getExample().trim());
+        FlashCard saved = flashCardRepository.save(flashCard);
+
+        return toResponse(saved);
+    }
+
+    private DictionaryWord resolveDictionaryWord(AdminFlashCardCreateRequest request) {
+        if (request.getDictionaryWordId() != null) {
+            return dictionaryWordRepository.findById(request.getDictionaryWordId())
+                    .orElseThrow(() -> new BusinessException("Không tìm thấy word", "WORD_NOT_FOUND"));
+        }
+
+        if (request.getWord() == null || request.getWord().isBlank()
+                || request.getPronunciation() == null || request.getPronunciation().isBlank()
+                || request.getMeaning() == null || request.getMeaning().isBlank()
+                || request.getType() == null) {
+            throw new BusinessException("Thiếu thông tin word để tạo flashcard", "WORD_REQUIRED");
+        }
+
+        String normalizedWord = request.getWord().trim();
+        return dictionaryWordRepository.findByWordIgnoreCase(normalizedWord)
+                .orElseGet(() -> {
+                    DictionaryWord created = new DictionaryWord();
+                    created.setWord(normalizedWord);
+                    created.setPronunciation(request.getPronunciation().trim());
+                    created.setMeaning(request.getMeaning().trim());
+                    created.setType(request.getType());
+                    return dictionaryWordRepository.save(created);
+                });
+    }
+
+    private FlashCardResponse toResponse(FlashCard flashCard) {
+        var dictionaryWord = flashCard.getDictionaryWord();
+        var media = flashCard.getMedia();
+
+        return FlashCardResponse.builder()
+                .id(flashCard.getId())
+                .word(dictionaryWord != null ? dictionaryWord.getWord() : null)
+                .pronunciation(dictionaryWord != null ? dictionaryWord.getPronunciation() : null)
+                .meaning(dictionaryWord != null ? dictionaryWord.getMeaning() : null)
+                .example(flashCard.getExample())
+                .imageUrl(media != null ? media.getUrl() : null)
+                .build();
+    }
+}
+
