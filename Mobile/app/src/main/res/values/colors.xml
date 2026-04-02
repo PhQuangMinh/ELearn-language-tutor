@@ -62,4 +62,13 @@
     <color name="info_40">#A8CEEA</color>
     <color name="info_20">#D4E7F4</color>
 
+    <!-- Theme-aware surfaces for XML layouts -->
+    <color name="app_surface">#FFFFFF</color>
+    <color name="app_surface_card">#FFFFFF</color>
+    <color name="app_surface_input">#FFFFFF</color>
+    <color name="back_icon_tint">#0693F1</color>
+    <color name="flashcard_title_tint">#626262</color>
+    <color name="topic_item_arrow_tint">#A9A9A9</color>
+    <color name="lesson_item_arrow_bg">#FFFFFF</color>
+
 </resources>

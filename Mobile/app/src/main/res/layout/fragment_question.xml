@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/app_surface"
     tools:context=".presentation.ui.main_app.lesson.QuestionFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -316,7 +316,7 @@
         android:id="@+id/bottomPanel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/app_surface"
         android:paddingTop="12dp"
         android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"

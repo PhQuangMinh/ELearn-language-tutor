@@ -7,7 +7,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="@color/app_surface_card"
     app:cardCornerRadius="10dp"
     app:cardElevation="8dp"
     app:cardUseCompatPadding="true">
@@ -22,6 +22,7 @@
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:contentDescription="@string/back"
+            android:tint="@color/back_icon_tint"
             android:src="@drawable/baseline_chevron_left_24" />
     </FrameLayout>
 

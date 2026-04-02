@@ -112,6 +112,8 @@
     <string name="profile_avatar_too_large">Avatar must be &lt;= 10MB.</string>
     <string name="profile_name_empty_error">Your name cannot be empty!</string>
     <string name="profile_name_too_short_error">Your name\'s length must be &gt;= 4 characters.</string>
+    <string name="profile_theme_section">Theme</string>
+    <string name="profile_theme_dark_mode">Dark mode</string>
 
     <!-- Change password -->
     <string name="change_password_title">Change password</string>

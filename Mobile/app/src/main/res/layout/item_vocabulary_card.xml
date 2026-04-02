@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="@color/app_surface_card"
     app:cardCornerRadius="14dp"
     app:cardElevation="8dp"
     app:cardPreventCornerOverlap="false"
@@ -34,6 +34,7 @@
             android:layout_height="24dp"
             android:contentDescription="@string/open"
             android:src="@drawable/baseline_keyboard_arrow_down_24"
+            android:tint="@color/neutral_100"
             app:layout_constraintBottom_toBottomOf="@id/tvWord"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvWord" />

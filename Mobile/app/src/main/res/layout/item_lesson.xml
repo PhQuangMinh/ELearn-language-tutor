@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="@color/app_surface_card"
     app:cardCornerRadius="14dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/border_gray"
@@ -17,6 +17,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/app_surface_card"
         android:padding="16dp">
 
         <com.google.android.material.card.MaterialCardView
@@ -57,7 +58,7 @@
             android:id="@+id/cardArrow"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            app:cardBackgroundColor="@android:color/white"
+            app:cardBackgroundColor="@color/lesson_item_arrow_bg"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/border_gray"
