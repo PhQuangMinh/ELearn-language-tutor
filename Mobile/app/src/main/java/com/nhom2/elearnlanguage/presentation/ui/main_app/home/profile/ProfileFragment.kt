@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.data.source.local.ThemeManager
 import com.nhom2.elearnlanguage.databinding.FragmentProfileBinding
 import com.nhom2.elearnlanguage.domain.model.UserProfile
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +37,7 @@ class ProfileFragment : Fragment() {
     private var selectedAvatarName: String? = null
     private var selectedAvatarMimeType: String? = null
     private var lastRenderedProfile: UserProfile? = null
+    private var isThemeSwitchBinding = false
 
     private val pickAvatarLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -68,6 +70,18 @@ class ProfileFragment : Fragment() {
         binding.tvChangeAvatar.setOnClickListener { pickAvatarLauncher.launch("image/*") }
         binding.tvChangePassword.setOnClickListener { openChangePasswordScreen() }
         binding.btnSave.setOnClickListener { onSaveClicked() }
+        setupThemeToggle()
+    }
+
+    private fun setupThemeToggle() {
+        isThemeSwitchBinding = true
+        binding.switchTheme.isChecked = ThemeManager.isDarkMode(requireContext())
+        isThemeSwitchBinding = false
+
+        binding.switchTheme.setOnCheckedChangeListener { _, isChecked ->
+            if (isThemeSwitchBinding) return@setOnCheckedChangeListener
+            ThemeManager.setDarkMode(requireContext(), isChecked)
+        }
     }
 
     private fun openChangePasswordScreen() {

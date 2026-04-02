@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="@color/app_surface_card"
     app:cardCornerRadius="14dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/border_gray"
@@ -63,7 +63,7 @@
             app:layout_constraintBottom_toBottomOf="@id/cardTopicImage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/cardTopicImage"
-            app:tint="@color/neutral_60" />
+            app:tint="@color/topic_item_arrow_tint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingVertical="24dp"
     android:paddingHorizontal="16dp"
-    android:background="@color/white"
+    android:background="@color/app_surface"
     tools:context=".presentation.ui.auth.register.VerifyCodeFragment">
 
     <include

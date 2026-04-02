@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/app_surface"
     android:paddingStart="24dp"
     android:paddingEnd="24dp"
     tools:context=".presentation.ui.main_app.lesson.LessonCompleteFragment">
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        app:cardBackgroundColor="@android:color/white"
+        app:cardBackgroundColor="@color/app_surface_card"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         app:strokeColor="@color/neutral_20"
