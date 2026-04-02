@@ -80,6 +80,7 @@ class QuestionFragment : Fragment() {
     private var hasHandledNoQuestionsState: Boolean = false
     private var hasHandledLoadErrorState: Boolean = false
     private var correctAnswerCount: Int = 0
+    private val correctnessByQuestionId: MutableMap<Int, Boolean> = mutableMapOf()
 
     private val lessonAudioCacheDir: File by lazy {
         File(requireContext().cacheDir, "audio_cache/lesson_${args.lessonId}")
@@ -227,6 +228,10 @@ class QuestionFragment : Fragment() {
                 onNextQuestionClicked()
             }
 
+            btnTryAgain.setOnClickListener {
+                onTryAgainClicked()
+            }
+
             btnNextQuestionCorrect.setOnClickListener {
                 onNextQuestionClicked()
             }
@@ -268,7 +273,15 @@ class QuestionFragment : Fragment() {
         }
 
         Log.d(TAG, "checkAnswer result=${if (isCorrect) "CORRECT" else "WRONG"} questionId=${currentQuestion.id} type=${currentQuestion.type}")
-        if (isCorrect) correctAnswerCount++
+        val previousResult = correctnessByQuestionId[currentQuestion.id]
+        if (previousResult != isCorrect) {
+            if (isCorrect) {
+                correctAnswerCount++
+            } else if (previousResult == true) {
+                correctAnswerCount = (correctAnswerCount - 1).coerceAtLeast(0)
+            }
+            correctnessByQuestionId[currentQuestion.id] = isCorrect
+        }
         saveUserAnswer(question = currentQuestion)
         if (currentQuestion.type == QuestionType.ONE_SELECTION) {
             applyOneSelectionCheckedStyle(isCorrect)
@@ -370,6 +383,12 @@ class QuestionFragment : Fragment() {
         moveNextQuestion()
     }
 
+    private fun onTryAgainClicked() {
+        val currentQuestion = viewModel.getCurrentQuestion() ?: return
+        hideFeedback(animated = false)
+        displayCurrentQuestion(currentQuestion)
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buildAggregatedAnswersPayload(): LessonSubmitRequest {
         val startedAt = lessonStartedAt ?: nowIsoLocalDateTime().also { lessonStartedAt = it }
@@ -449,6 +468,7 @@ class QuestionFragment : Fragment() {
             requireContext(),
             if (isCorrect) R.color.status_green else R.color.error_100
         )
+        binding.btnTryAgain.isVisible = question.repeatable
 
         playFeedbackSfx(isCorrect)
 
@@ -473,6 +493,7 @@ class QuestionFragment : Fragment() {
         binding.pbSubmit.isVisible = false
         binding.btnNextQuestion.isEnabled = true
         binding.btnNextQuestion.isClickable = true
+        binding.btnTryAgain.isVisible = false
         isSubmitting = false
 
         if (!binding.feedbackContainer.isVisible) return

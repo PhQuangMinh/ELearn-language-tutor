@@ -7,6 +7,7 @@ data class QuestionDetailDTO(
     val id: Int,
     val type: String, // "ONE_SELECTION", "LISTEN_AND_ARRANGE_SENTENCE", "TRANSLATE_AND_ARRANGE_SENTENCE"
     val content: String,
+    val repeatable: Boolean = false,
     val media: MediaDTO? = null,
     val answers: List<AnswerDTO> = emptyList()
 )

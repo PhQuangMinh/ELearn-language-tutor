@@ -59,6 +59,7 @@
     <string name="feedback_correct_title">Amazing!</string>
     <string name="feedback_answer_prefix">Answer:</string>
     <string name="next_question">Next Question</string>
+    <string name="try_again">Try again</string>
     <string name="complete">Complete</string>
 
     <!-- Arrange Words Question -->

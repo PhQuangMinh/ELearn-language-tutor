@@ -386,10 +386,28 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp">
 
+                <ImageButton
+                    android:id="@+id/btnTryAgain"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_icon_circle_primary_60"
+                    android:contentDescription="@string/try_again"
+                    android:padding="14dp"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_try_again_24"
+                    android:tint="@android:color/white"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnNextQuestion" />
+
                 <Button
                     android:id="@+id/btnNextQuestion"
                     android:layout_width="0dp"
                     android:layout_height="56dp"
+                    android:layout_marginStart="8dp"
                     android:backgroundTint="@color/error_100"
                     android:fontFamily="@font/lexend"
                     android:text="@string/next_question"
@@ -399,7 +417,8 @@
                     android:textSize="18sp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnTryAgain"
+                    app:layout_goneMarginStart="0dp"
                     app:layout_constraintEnd_toEndOf="parent" />
 
                 <ProgressBar
