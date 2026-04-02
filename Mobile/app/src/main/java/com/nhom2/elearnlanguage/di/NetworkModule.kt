@@ -11,6 +11,7 @@ import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
 import com.nhom2.elearnlanguage.data.source.remote.LessonDataSource
 import com.nhom2.elearnlanguage.data.source.remote.SpeakingDataSource
 import com.nhom2.elearnlanguage.data.source.remote.VocabularyDataSource
+import com.nhom2.elearnlanguage.data.source.remote.LocalDateTimeAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,6 +39,7 @@ import io.ktor.http.takeFrom
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.gson.gson
 import kotlinx.coroutines.CancellationException
+import java.time.LocalDateTime
 import javax.inject.Singleton
 
 @Module
@@ -58,6 +60,8 @@ object NetworkModule {
                 gson {
                     setPrettyPrinting()
                     setLenient()
+                    // Đăng ký Adapter để xử lý LocalDateTime
+                    registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
                 }
             }
             install(Logging) {

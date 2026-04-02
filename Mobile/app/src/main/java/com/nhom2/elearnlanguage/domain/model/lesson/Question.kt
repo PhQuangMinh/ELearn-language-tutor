@@ -10,6 +10,7 @@ data class Question(
     val id: Int,
     val type: QuestionType,
     val content: String,
+    val repeatable: Boolean = false,
     val media: Media? = null,
     val answers: List<Answer> = emptyList()
 ) {

@@ -56,6 +56,7 @@ fun QuestionDetailDTO.toDomain(): Question {
             else -> QuestionType.ONE_SELECTION
         },
         content = content,
+        repeatable = repeatable,
         media = media?.toDomain(media),
         answers = answers.map { it.toDomain() }
     )
