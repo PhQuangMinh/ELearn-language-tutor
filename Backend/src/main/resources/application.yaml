@@ -87,3 +87,10 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY:}
   api-secret: ${CLOUDINARY_API_SECRET:}
   folder: ${CLOUDINARY_FOLDER:elearn/avatars}
+  audio-folder: "elearn/audio-assessments"
+
+azure:
+  speech:
+    key: ${SPEECH_AZURE_API_KEY}
+    region: ${SPEECH_AZURE_REGION}
+    default-language: ${SPEECH_AZURE_DEFAULT_LANGUAGE}

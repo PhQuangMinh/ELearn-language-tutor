@@ -21,4 +21,6 @@ public class QuestionDetailDTO {
 
     private List<AnswerDTO> answers;
 
+    private boolean repeatable;
+
 }
