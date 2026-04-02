@@ -14,4 +14,8 @@ public enum EQuestionType {
         Dịch câu gốc sang ngoại ngữ và sắp xếp từ thành câu hoàn chỉnh
      */
     TRANSLATE_AND_ARRANGE_SENTENCE,
+    /*
+        Đánh giá phát âm qua một câu ngắn
+     */
+    SPEAKING_ASSESSMENT
 }
