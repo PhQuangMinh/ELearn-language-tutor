@@ -56,6 +56,13 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.microsoft.cognitiveservices.speech</groupId>
+			<artifactId>client-sdk</artifactId>
+			<version>1.47.0</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- Swagger / OpenAPI (springdoc) -->
 		<dependency>
 			<groupId>org.springdoc</groupId>

@@ -43,4 +43,7 @@ public class Question {
     @JoinColumn(name = "media_id")
     private Media media;
 
+    @Column(name = "repeatable")
+    private boolean repeatable;
+
 }

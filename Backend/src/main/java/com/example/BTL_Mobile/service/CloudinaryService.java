@@ -34,11 +34,37 @@ public class CloudinaryService {
     @Value("${cloudinary.folder:elearn/avatars}")
     private String folder;
 
+    @Value("${cloudinary.audio-folder:elearn/audio-assessments}")
+    private String audioFolder;
+
     public String uploadAvatar(MultipartFile avatarFile, Integer userId) {
         CloudinaryUploadResponse response = uploadImage(
                 avatarFile,
                 folder,
                 "user_" + userId
+        );
+        return response.getSecureUrl();
+    }
+
+    public String uploadAudio(MultipartFile audioFile, String publicIdPrefix) {
+        validateRawFile(audioFile);
+        try {
+            return uploadAudio(
+                    audioFile.getBytes(),
+                    audioFile.getOriginalFilename(),
+                    publicIdPrefix
+            );
+        } catch (IOException e) {
+            throw new BusinessException("Không thể đọc file upload", "INVALID_UPLOAD_FILE");
+        }
+    }
+
+    public String uploadAudio(byte[] audioBytes, String originalFilename, String publicIdPrefix) {
+        CloudinaryUploadResponse response = uploadRawFile(
+                audioBytes,
+                originalFilename,
+                audioFolder,
+                publicIdPrefix == null || publicIdPrefix.isBlank() ? "voice_assessment" : publicIdPrefix
         );
         return response.getSecureUrl();
     }
@@ -107,6 +133,79 @@ public class CloudinaryService {
         }
     }
 
+    public CloudinaryUploadResponse uploadRawFile(MultipartFile rawFile, String folderPath, String publicIdPrefix) {
+        validateRawFile(rawFile);
+        try {
+            return uploadRawFile(
+                    rawFile.getBytes(),
+                    rawFile.getOriginalFilename(),
+                    folderPath,
+                    publicIdPrefix
+            );
+        } catch (IOException e) {
+            throw new BusinessException("Không thể đọc file upload", "INVALID_UPLOAD_FILE");
+        }
+    }
+
+    public CloudinaryUploadResponse uploadRawFile(byte[] rawContent, String originalFilename, String folderPath, String publicIdPrefix) {
+        validateRawBytes(rawContent);
+
+        if (cloudName == null || cloudName.isBlank()) {
+            throw new BusinessException("Chưa cấu hình cloudinary.cloud-name", "CLOUDINARY_NOT_CONFIGURED");
+        }
+        if (apiKey == null || apiKey.isBlank() || apiSecret == null || apiSecret.isBlank()) {
+            throw new BusinessException("Chưa cấu hình cloudinary.api-key hoặc cloudinary.api-secret", "CLOUDINARY_NOT_CONFIGURED");
+        }
+
+        try {
+            long timestamp = System.currentTimeMillis() / 1000;
+            String effectiveFolder = (folderPath == null || folderPath.isBlank()) ? folder : folderPath;
+            String safePrefix = (publicIdPrefix == null || publicIdPrefix.isBlank())
+                    ? "asset"
+                    : publicIdPrefix;
+            String publicId = safePrefix + "_" + UUID.randomUUID();
+            String signature = buildSignature(effectiveFolder, publicId, timestamp);
+
+            ByteArrayResource fileResource = new ByteArrayResource(rawContent) {
+                @Override
+                public String getFilename() {
+                    return originalFilename == null
+                            ? "audio-" + UUID.randomUUID() + ".wav"
+                            : originalFilename;
+                }
+            };
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", fileResource);
+            body.add("folder", effectiveFolder);
+            body.add("public_id", publicId);
+            body.add("timestamp", String.valueOf(timestamp));
+            body.add("api_key", apiKey);
+            body.add("signature", signature);
+
+            Map<?, ?> response = restClient.post()
+                    .uri("https://api.cloudinary.com/v1_1/{cloudName}/raw/upload", cloudName)
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve()
+                    .body(Map.class);
+
+            if (response == null || response.get("secure_url") == null) {
+                throw new BusinessException("Upload file thất bại từ Cloudinary", "CLOUDINARY_UPLOAD_FAILED");
+            }
+
+            return CloudinaryUploadResponse.builder()
+                    .secureUrl(response.get("secure_url").toString())
+                    .publicId(valueAsString(response.get("public_id")))
+                    .format(valueAsString(response.get("format")))
+                    .bytes(valueAsLong(response.get("bytes")))
+                    .originalFilename(originalFilename)
+                    .build();
+        } catch (Exception e) {
+            throw new BusinessException("Upload file thất bại: " + e.getMessage(), "CLOUDINARY_UPLOAD_FAILED");
+        }
+    }
+
     private void validateImageFile(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             throw new BusinessException("Avatar không được để trống", "AVATAR_REQUIRED");
@@ -115,6 +214,18 @@ public class CloudinaryService {
         String contentType = imageFile.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new BusinessException("File avatar phải là ảnh", "INVALID_AVATAR_TYPE");
+        }
+    }
+
+    private void validateRawFile(MultipartFile rawFile) {
+        if (rawFile == null || rawFile.isEmpty()) {
+            throw new BusinessException("File upload không được để trống", "FILE_REQUIRED");
+        }
+    }
+
+    private void validateRawBytes(byte[] rawContent) {
+        if (rawContent == null || rawContent.length == 0) {
+            throw new BusinessException("File upload không được để trống", "FILE_REQUIRED");
         }
     }
 
