@@ -20,13 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -131,6 +127,10 @@ public class LessonServiceImpl implements LessonService {
                         .get(0);
                 if(correctAns.getId() == q.getAnswer().getId()) correctCount++;
             }
+            else if(question.getType() == EQuestionType.SPEAKING_ASSESSMENT){
+                boolean correct = checkSpeakingAnswer(q);
+                if(correct) correctCount++;
+            }
             else {
                 Answer correctAns = question.getAnswers().stream().toList().get(0);
                 if(correctAns.getContent().equals(q.getAnswer().getContent())) correctCount++;
@@ -148,6 +148,33 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = existedResult.getLesson();
         lessonResultRepository.delete(existedResult);
         saveNewResult(lesson, submitLesson, score);
+    }
+
+    private boolean checkSpeakingAnswer(SubmitQuestionDTO q){
+        try{
+            /*
+        Content sẽ có dạng: a=..,b=..,c=..;;<audio url>
+         */
+            // 1. Tách data và url
+            String[] parts = q.getAnswer().getContent().split(";;");
+            String dataPart = parts[0];
+            String urlPart = parts.length > 1 ? parts[1] : "";
+
+            // 2. Tính trung bình bằng Stream
+            double avg = Arrays.stream(dataPart.split(","))
+                    .map(pair -> pair.split("="))
+                    .filter(kv -> kv.length == 2)
+                    .map(kv -> kv[1])
+                    .mapToDouble(Double::parseDouble)
+                    .average()
+                    .orElse(0);
+            // 3. Ghép lại chuỗi
+            q.getAnswer().setContent(dataPart + ",avg=" + avg + ";;" + urlPart);
+            return avg >= 70;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
 }
