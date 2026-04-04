@@ -69,3 +69,9 @@ export type CloudinaryUpload = {
   bytes?: number;
   originalFilename?: string;
 };
+
+export type ImportResult = {
+  successCount: number;
+  errorCount: number;
+  errors: string[];
+};

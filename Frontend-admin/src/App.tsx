@@ -10,8 +10,12 @@ import {
   createLessonFlashCard,
   createLessonWord,
   deleteLesson,
+  deleteLessonFlashCard,
+  deleteLessonWord,
   deleteScenario,
   deleteTopic,
+  importFlashCardsExcel,
+  importWordsExcel,
   listAllLessons,
   listLessonFlashCards,
   listLessonWords,
@@ -20,6 +24,8 @@ import {
   listTopics,
   login,
   updateLesson,
+  updateLessonFlashCard,
+  updateLessonWord,
   updateScenario,
   updateTopic,
   uploadImage,
@@ -283,6 +289,7 @@ export function App() {
   const [wordLessonId, setWordLessonId] = useState<number | "">("");
   const [words, setWords] = useState<Word[]>([]);
   const [wordForm, setWordForm] = useState<Partial<Omit<Word, "id">>>({ type: "NOUN" });
+  const [editingWordId, setEditingWordId] = useState<number | null>(null);
   const [wordQuery, setWordQuery] = useState("");
 
   const [flashLessonId, setFlashLessonId] = useState<number | "">("");
@@ -298,6 +305,7 @@ export function App() {
     imageName?: string | null;
     imageSize?: number | null;
   }>({ type: "NOUN" });
+  const [editingFlashId, setEditingFlashId] = useState<number | null>(null);
   const [flashQuery, setFlashQuery] = useState("");
   const [lessonsForSelect, setLessonsForSelect] = useState<Lesson[]>([]);
 
@@ -556,6 +564,8 @@ export function App() {
     setFlashCards([]);
     setWordLessonId("");
     setFlashLessonId("");
+    setEditingWordId(null);
+    setEditingFlashId(null);
     setLessonsForSelect([]);
     localStorage.removeItem("admin-token");
     notify("Da dang xuat");
@@ -572,13 +582,18 @@ export function App() {
     return null;
   };
 
-  const validateFlashForm = (): string | null => {
+  const validateFlashForm = (isEdit: boolean): string | null => {
     if (!isPositiveInt(flashLessonId)) return "Chon lesson";
     if (isBlank(flashForm.example)) return "Example khong duoc de trong";
     if (exceeds(flashForm.example, 255)) return "Example toi da 255 ky tu";
-    if (isBlank(flashForm.imageUrl)) return "Hay upload anh flashcard (Cloudinary)";
-    if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
-    if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+    if (!isEdit) {
+      if (isBlank(flashForm.imageUrl)) return "Hay upload anh flashcard (Cloudinary)";
+      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
+      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+    } else if (!isBlank(flashForm.imageUrl)) {
+      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
+      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+    }
 
     const hasWordId = isPositiveInt(flashForm.dictionaryWordId);
     if (!hasWordId) {
@@ -615,12 +630,18 @@ export function App() {
         meaning: trimOrEmpty(wordForm.meaning),
         type: (wordForm.type || "NOUN") as Word["type"],
       };
-      await createLessonWord(config, Number(wordLessonId), payload);
-      notify("Da them word vao lesson");
+      if (editingWordId != null) {
+        await updateLessonWord(config, Number(wordLessonId), editingWordId, payload);
+        notify("Da cap nhat word");
+        setEditingWordId(null);
+      } else {
+        await createLessonWord(config, Number(wordLessonId), payload);
+        notify("Da them word vao lesson");
+      }
       setWordForm({ type: "NOUN" });
       await loadWordsForLesson(Number(wordLessonId));
     } catch (error) {
-      notify(`Them word that bai: ${toUiError(error)}`);
+      notify(`Luu word that bai: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -630,7 +651,7 @@ export function App() {
     event.preventDefault();
     requireAuth();
 
-    const validationError = validateFlashForm();
+    const validationError = validateFlashForm(editingFlashId != null);
     if (validationError) {
       notify(validationError);
       return;
@@ -638,22 +659,47 @@ export function App() {
 
     setLoading(true);
     try {
-      await createLessonFlashCard(config, Number(flashLessonId), {
-        dictionaryWordId: flashForm.dictionaryWordId ? Number(flashForm.dictionaryWordId) : null,
-        word: trimOrEmpty(flashForm.word),
-        pronunciation: trimOrEmpty(flashForm.pronunciation),
-        meaning: trimOrEmpty(flashForm.meaning),
-        type: (flashForm.type || "NOUN") as Word["type"],
-        example: trimOrEmpty(flashForm.example),
-        imageUrl: trimOrEmpty(flashForm.imageUrl),
-        imageName: trimOrEmpty(flashForm.imageName) || null,
-        imageSize: flashForm.imageSize ?? null,
-      });
-      notify("Da tao flashcard theo lesson");
+      const lessonIdNum = Number(flashLessonId);
+      if (editingFlashId != null) {
+        const img = trimOrEmpty(flashForm.imageUrl);
+        await updateLessonFlashCard(config, lessonIdNum, editingFlashId, {
+          example: trimOrEmpty(flashForm.example),
+          ...(img
+            ? {
+                imageUrl: img,
+                imageName: trimOrEmpty(flashForm.imageName) || null,
+                imageSize: flashForm.imageSize ?? null,
+              }
+            : {}),
+          ...(isPositiveInt(flashForm.dictionaryWordId)
+            ? { dictionaryWordId: Number(flashForm.dictionaryWordId) }
+            : {
+                word: trimOrEmpty(flashForm.word),
+                pronunciation: trimOrEmpty(flashForm.pronunciation),
+                meaning: trimOrEmpty(flashForm.meaning),
+                type: (flashForm.type || "NOUN") as Word["type"],
+              }),
+        });
+        notify("Da cap nhat flashcard");
+        setEditingFlashId(null);
+      } else {
+        await createLessonFlashCard(config, lessonIdNum, {
+          dictionaryWordId: flashForm.dictionaryWordId ? Number(flashForm.dictionaryWordId) : null,
+          word: trimOrEmpty(flashForm.word),
+          pronunciation: trimOrEmpty(flashForm.pronunciation),
+          meaning: trimOrEmpty(flashForm.meaning),
+          type: (flashForm.type || "NOUN") as Word["type"],
+          example: trimOrEmpty(flashForm.example),
+          imageUrl: trimOrEmpty(flashForm.imageUrl),
+          imageName: trimOrEmpty(flashForm.imageName) || null,
+          imageSize: flashForm.imageSize ?? null,
+        });
+        notify("Da tao flashcard theo lesson");
+      }
       setFlashForm({ type: "NOUN", dictionaryWordId: null });
-      await loadFlashCardsForLesson(Number(flashLessonId));
+      await loadFlashCardsForLesson(lessonIdNum);
     } catch (error) {
-      notify(`Tao flashcard that bai: ${toUiError(error)}`);
+      notify(`Luu flashcard that bai: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -686,6 +732,50 @@ export function App() {
         .finally(() => setLoading(false));
     } else {
       setFlashCards([]);
+    }
+  };
+
+  const runWordExcelImport = async (file: File) => {
+    requireAuth();
+    if (!isPositiveInt(wordLessonId)) {
+      notify("Chon lesson truoc khi import (lesson duoc ap dung cho toan bo dong trong file)");
+      return;
+    }
+    setLoading(true);
+    try {
+      const r = await importWordsExcel(config, Number(wordLessonId), file);
+      const hint =
+        r.errors?.length > 0 ? ` Vi du loi: ${r.errors.slice(0, 3).join(" | ")}` : "";
+      notify(`Import vocabulary: ${r.successCount} thanh cong, ${r.errorCount} loi.${hint}`);
+      if (isPositiveInt(wordLessonId)) {
+        await loadWordsForLesson(Number(wordLessonId));
+      }
+    } catch (error) {
+      notify(`Import vocabulary that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runFlashExcelImport = async (file: File) => {
+    requireAuth();
+    if (!isPositiveInt(flashLessonId)) {
+      notify("Chon lesson truoc khi import (lesson duoc ap dung cho toan bo dong trong file)");
+      return;
+    }
+    setLoading(true);
+    try {
+      const r = await importFlashCardsExcel(config, Number(flashLessonId), file);
+      const hint =
+        r.errors?.length > 0 ? ` Vi du loi: ${r.errors.slice(0, 3).join(" | ")}` : "";
+      notify(`Import flashcard: ${r.successCount} thanh cong, ${r.errorCount} loi.${hint}`);
+      if (isPositiveInt(flashLessonId)) {
+        await loadFlashCardsForLesson(Number(flashLessonId));
+      }
+    } catch (error) {
+      notify(`Import flashcard that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -747,6 +837,26 @@ export function App() {
           />
           <span>Hien {filteredWords.length}/{words.length} muc</span>
         </div>
+        <div className="list-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
+          <span className="note" style={{ fontWeight: 600 }}>
+            Import Excel (.xlsx / .xls) — moi dong mot word vao lesson dang chon o tren
+          </span>
+          <span className="note">
+            Hang 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE)
+          </span>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            disabled={loading || !isPositiveInt(wordLessonId)}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                void runWordExcelImport(file);
+              }
+              e.target.value = "";
+            }}
+          />
+        </div>
         <table>
           <thead>
             <tr>
@@ -755,6 +865,7 @@ export function App() {
               <th>Pronunciation</th>
               <th>Meaning</th>
               <th>Type</th>
+              <th>Thao tac</th>
             </tr>
           </thead>
           <tbody>
@@ -765,6 +876,55 @@ export function App() {
                 <td>{w.pronunciation}</td>
                 <td>{w.meaning}</td>
                 <td>{w.type}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setEditingWordId(w.id);
+                      setWordForm({
+                        word: w.word,
+                        pronunciation: w.pronunciation,
+                        meaning: w.meaning,
+                        type: w.type,
+                      });
+                      notify("Dang sua word — bam Cap nhat word de luu");
+                    }}
+                  >
+                    Sua
+                  </button>{" "}
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      if (!isPositiveInt(wordLessonId)) {
+                        notify("Chon lesson");
+                        return;
+                      }
+                      if (
+                        !confirm(
+                          `Xoa word "${w.word}"? Cac flashcard gan word nay trong lesson cung se bi xoa.`
+                        )
+                      ) {
+                        return;
+                      }
+                      setLoading(true);
+                      deleteLessonWord(config, Number(wordLessonId), w.id)
+                        .then(() => {
+                          notify("Da xoa word");
+                          if (editingWordId === w.id) {
+                            setEditingWordId(null);
+                            setWordForm({ type: "NOUN" });
+                          }
+                          return loadWordsForLesson(Number(wordLessonId));
+                        })
+                        .catch((err) => notify(`Xoa word that bai: ${toUiError(err)}`))
+                        .finally(() => setLoading(false));
+                    }}
+                  >
+                    Xoa
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -772,7 +932,7 @@ export function App() {
       </section>
 
       <section className="panel">
-        <h3>Them Word vao Lesson</h3>
+        <h3>{editingWordId != null ? "Sua word trong Lesson" : "Them Word vao Lesson"}</h3>
         <form onSubmit={onWordSubmit} className="form-grid">
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
@@ -821,10 +981,16 @@ export function App() {
             <option value="ADJECTIVE">ADJECTIVE</option>
           </select>
           <button type="submit" disabled={loading}>
-            Them word
+            {editingWordId != null ? "Cap nhat word" : "Them word"}
           </button>
-          <button type="button" onClick={() => setWordForm({ type: "NOUN" })}>
-            Reset
+          <button
+            type="button"
+            onClick={() => {
+              setWordForm({ type: "NOUN" });
+              setEditingWordId(null);
+            }}
+          >
+            {editingWordId != null ? "Huy sua" : "Reset"}
           </button>
         </form>
       </section>
@@ -889,6 +1055,26 @@ export function App() {
           />
           <span>Hien {filteredFlashCards.length}/{flashCards.length} muc</span>
         </div>
+        <div className="list-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
+          <span className="note" style={{ fontWeight: 600 }}>
+            Import Excel (.xlsx / .xls) — vao lesson dang chon; khong can cot anh (backend gan anh placeholder)
+          </span>
+          <span className="note">
+            Hang 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE) · example
+          </span>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            disabled={loading || !isPositiveInt(flashLessonId)}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                void runFlashExcelImport(file);
+              }
+              e.target.value = "";
+            }}
+          />
+        </div>
         <table>
           <thead>
             <tr>
@@ -897,6 +1083,7 @@ export function App() {
               <th>Meaning</th>
               <th>Example</th>
               <th>Image</th>
+              <th>Thao tac</th>
             </tr>
           </thead>
           <tbody>
@@ -907,6 +1094,56 @@ export function App() {
                 <td>{c.meaning || "-"}</td>
                 <td>{c.example}</td>
                 <td>{c.imageUrl ? <a href={c.imageUrl}>link</a> : "-"}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setEditingFlashId(c.id);
+                      setFlashForm({
+                        dictionaryWordId: null,
+                        word: c.word || "",
+                        pronunciation: c.pronunciation || "",
+                        meaning: c.meaning || "",
+                        type: "NOUN",
+                        example: c.example,
+                        imageUrl: c.imageUrl || "",
+                        imageName: null,
+                        imageSize: null,
+                      });
+                      notify("Dang sua flashcard — anh tuy chon khi cap nhat");
+                    }}
+                  >
+                    Sua
+                  </button>{" "}
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      if (!isPositiveInt(flashLessonId)) {
+                        notify("Chon lesson");
+                        return;
+                      }
+                      if (!confirm(`Xoa flashcard #${c.id}?`)) {
+                        return;
+                      }
+                      setLoading(true);
+                      deleteLessonFlashCard(config, Number(flashLessonId), c.id)
+                        .then(() => {
+                          notify("Da xoa flashcard");
+                          if (editingFlashId === c.id) {
+                            setEditingFlashId(null);
+                            setFlashForm({ type: "NOUN", dictionaryWordId: null });
+                          }
+                          return loadFlashCardsForLesson(Number(flashLessonId));
+                        })
+                        .catch((err) => notify(`Xoa flashcard that bai: ${toUiError(err)}`))
+                        .finally(() => setLoading(false));
+                    }}
+                  >
+                    Xoa
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -914,7 +1151,7 @@ export function App() {
       </section>
 
       <section className="panel">
-        <h3>Tao Flashcard (thuoc Lesson)</h3>
+        <h3>{editingFlashId != null ? "Sua Flashcard" : "Tao Flashcard (thuoc Lesson)"}</h3>
         <form onSubmit={onFlashSubmit} className="form-grid">
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
@@ -977,7 +1214,9 @@ export function App() {
           />
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
-              Anh flashcard (upload len Cloudinary)
+              {editingFlashId != null
+                ? "Anh flashcard (tuy chon khi sua — upload Cloudinary)"
+                : "Anh flashcard (upload len Cloudinary)"}
             </span>
             <input
               type="file"
@@ -995,13 +1234,16 @@ export function App() {
             <img className="image-preview" src={flashForm.imageUrl} alt="Flashcard preview" />
           )}
           <button type="submit" disabled={loading}>
-            Tao flashcard
+            {editingFlashId != null ? "Cap nhat flashcard" : "Tao flashcard"}
           </button>
           <button
             type="button"
-            onClick={() => setFlashForm({ type: "NOUN", dictionaryWordId: null })}
+            onClick={() => {
+              setFlashForm({ type: "NOUN", dictionaryWordId: null });
+              setEditingFlashId(null);
+            }}
           >
-            Reset
+            {editingFlashId != null ? "Huy sua" : "Reset"}
           </button>
         </form>
       </section>
