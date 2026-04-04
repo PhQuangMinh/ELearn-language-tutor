@@ -16,11 +16,16 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
+import androidx.navigation.findNavController
 import coil.load
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.data.source.local.ThemeManager
 import com.nhom2.elearnlanguage.databinding.FragmentProfileBinding
+import com.nhom2.elearnlanguage.databinding.DialogLogoutAccountBinding
 import com.nhom2.elearnlanguage.domain.model.UserProfile
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -70,6 +75,7 @@ class ProfileFragment : Fragment() {
         binding.avatarCard.setOnClickListener { pickAvatarLauncher.launch("image/*") }
         binding.tvChangeAvatar.setOnClickListener { pickAvatarLauncher.launch("image/*") }
         binding.tvChangePassword.setOnClickListener { openChangePasswordScreen() }
+        binding.tvLogoutAccount.setOnClickListener { showLogoutDialog() }
         binding.btnSave.setOnClickListener { onSaveClicked() }
         setupThemeToggle()
     }
@@ -92,11 +98,41 @@ class ProfileFragment : Fragment() {
             .commit()
     }
 
+    private fun showLogoutDialog() {
+        val dialog = BottomSheetDialog(requireContext())
+        val dialogBinding = DialogLogoutAccountBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+
+        dialog.window?.setDimAmount(0.55f)
+        dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let { sheet ->
+            sheet.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            BottomSheetBehavior.from(sheet).state = BottomSheetBehavior.STATE_EXPANDED
+            BottomSheetBehavior.from(sheet).skipCollapsed = true
+        }
+
+        dialogBinding.btnConfirmLogout.setOnClickListener {
+            dialog.dismiss()
+            performLogout()
+        }
+        dialogBinding.tvCancelLogout.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun performLogout() {
+        viewModel.logout()
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.btnSave.isEnabled = !state.isLoading && !state.isSaving
+                    binding.btnSave.isEnabled = !state.isLoading && !state.isSaving && !state.isLoggingOut
+                    binding.tvLogoutAccount.isEnabled = !state.isLoggingOut
 
                     val profile = state.profile
                     if (profile != null && profile != lastRenderedProfile) {
@@ -116,6 +152,16 @@ class ProfileFragment : Fragment() {
                         selectedAvatarMimeType = null
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         viewModel.consumeMessages()
+                    }
+
+                    if (state.logoutCompleted) {
+                        val navOptions = NavOptions.Builder()
+                            .setPopUpTo(R.id.homeFragment, true)
+                            .build()
+                        requireActivity()
+                            .findNavController(R.id.nav_host_fragment)
+                            .navigate(R.id.loginFragment, null, navOptions)
+                        viewModel.consumeLogoutEvent()
                     }
                 }
             }
