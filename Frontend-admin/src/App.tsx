@@ -1,5 +1,9 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as XLSX from "xlsx";
 import {
+  bulkImportLessons,
+  bulkImportScenarios,
+  bulkImportTopics,
   createLesson,
   createScenario,
   createTopic,
@@ -64,6 +68,88 @@ const ensureUrlIfProvided = (value?: string | null): boolean => {
     return false;
   }
 };
+
+const parseCSV = (csv: string): string[][] => {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < csv.length; i += 1) {
+    const char = csv[i];
+    const next = csv[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        currentCell += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") {
+        i += 1;
+      }
+      currentRow.push(currentCell.trim());
+      currentCell = "";
+      if (currentRow.some((cell) => cell.length > 0)) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      continue;
+    }
+
+    currentCell += char;
+  }
+
+  currentRow.push(currentCell.trim());
+  if (currentRow.some((cell) => cell.length > 0)) {
+    rows.push(currentRow);
+  }
+
+  return rows;
+};
+
+const parseSpreadsheet = (arrayBuffer: ArrayBuffer): string[][] => {
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+  const firstSheetName = workbook.SheetNames[0];
+  if (!firstSheetName) {
+    return [];
+  }
+  const worksheet = workbook.Sheets[firstSheetName];
+  const rows = XLSX.utils.sheet_to_json<(string | number | boolean | null)[]>(worksheet, {
+    header: 1,
+    raw: false,
+    defval: "",
+  });
+  return rows
+    .map((row) => row.map((cell) => String(cell ?? "").trim()))
+    .filter((row) => row.some((cell) => cell.length > 0));
+};
+
+const readImportRows = async (file: File): Promise<string[][]> => {
+  const lower = file.name.toLowerCase();
+  if (lower.endsWith(".xlsx") || lower.endsWith(".xls")) {
+    const buffer = await file.arrayBuffer();
+    return parseSpreadsheet(buffer);
+  }
+  const text = await file.text();
+  return parseCSV(text);
+};
+
+const TOPIC_TEMPLATE_CSV = [
+  "name,description,imageUrl",
+  'English Basics,"Introduction to core English communication",https://images.unsplash.com/photo-1456283174360-12bccda6dda9?w=1200',
+].join("\n");
 
 const toUiError = (error: unknown) => {
   const raw = error instanceof Error ? error.message : "Loi khong xac dinh";
@@ -224,12 +310,33 @@ export function App() {
   const [topicQuery, setTopicQuery] = useState("");
   const [lessonQuery, setLessonQuery] = useState("");
   const [scenarioQuery, setScenarioQuery] = useState("");
+  const topicImportInputRef = useRef<HTMLInputElement | null>(null);
+  const lessonImportInputRef = useRef<HTMLInputElement | null>(null);
+  const scenarioImportInputRef = useRef<HTMLInputElement | null>(null);
 
   const config = useMemo(() => ({ apiBase: API_BASE, token }), [token]);
 
   const topics = topicState.items;
   const lessons = lessonState.items;
   const scenarios = scenarioState.items;
+
+  const buildLessonTemplateCsv = useCallback(() => {
+    const sampleTopicId = topics[0]?.id ?? 1;
+    return [
+      "topicId,title,type,imageUrl,parentId",
+      `${sampleTopicId},Welcome to English,LISTENING,https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200,`,
+    ].join("\n");
+  }, [topics]);
+
+  const buildScenarioTemplateCsv = useCallback(() => {
+    const sampleLesson = lessons[0];
+    const sampleTopicId = sampleLesson?.topicId ?? topics[0]?.id ?? 1;
+    const sampleLessonId = sampleLesson?.id ?? 1;
+    return [
+      "topicId,lessonId,title,description,aiRole,userRole,tasks,openningMessage,suggestion,translation",
+      `${sampleTopicId},${sampleLessonId},Welcome Dialogue,"Basic greeting and self-introduction",Tutor,Learner,"Introduce yourself","Hello! Nice to meet you.","Use short sentences","Ban dang tap gioi thieu ban than"`,
+    ].join("\n");
+  }, [lessons, topics]);
 
   const normalize = (value: unknown) => String(value ?? "").toLowerCase();
 
@@ -297,6 +404,16 @@ export function App() {
 
   const notify = (text: string) => setMessage(text);
 
+  const downloadCsvTemplate = (fileName: string, content: string) => {
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const requireAuth = () => {
     if (!token) {
       throw new Error("Ban can dang nhap admin");
@@ -335,7 +452,7 @@ export function App() {
     [config, scenarioState.page]
   );
 
-  const refreshAll = useCallback(async () => {
+  const refreshAll = useCallback(async (silent = false) => {
     requireAuth();
     setLoading(true);
     try {
@@ -353,7 +470,9 @@ export function App() {
       } catch {
         /* dropdown refresh optional */
       }
-      notify("Da tai du lieu Topic, Lesson, Scenario");
+      if (!silent) {
+        notify("Da tai du lieu Topic, Lesson, Scenario");
+      }
     } catch (error) {
       notify(`Khong the tai du lieu: ${toUiError(error)}`);
     } finally {
@@ -960,7 +1079,7 @@ export function App() {
       }
       setTopicForm({});
       setSelectedTopic(null);
-      await refreshAll();
+      await refreshAll(true);
     } catch (error) {
       notify(`Loi luu Topic: ${toUiError(error)}`);
     } finally {
@@ -1042,6 +1161,139 @@ export function App() {
       await refreshAll();
     } catch (error) {
       notify(`Loi luu Scenario: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onBulkImportTopics = async (file: File) => {
+    requireAuth();
+    setLoading(true);
+    try {
+      notify("Dang doc file Topic...");
+      const rows = await readImportRows(file);
+      const dataRows = rows.filter((row) => row.length >= 2 && row[0].toLowerCase() !== "name");
+      const topicReqs = dataRows
+        .map((row) => ({
+          name: trimOrEmpty(row[0]),
+          description: trimOrEmpty(row[1]),
+          imageUrl: trimOrEmpty(row[2]) || null,
+        }))
+        .filter((row) => row.name && row.description);
+      const skipped = dataRows.length - topicReqs.length;
+      
+      if (topicReqs.length === 0) {
+        notify("Khong co du lieu hop le trong file");
+        return;
+      }
+
+      notify(`Dang import ${topicReqs.length} topic...`);
+      const result = await bulkImportTopics(config, topicReqs);
+      notify(`Da import ${result.length} topic${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      await refreshAll();
+    } catch (error) {
+      notify(`Import Topic that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onBulkImportLessons = async (file: File) => {
+    requireAuth();
+    setLoading(true);
+    try {
+      notify("Dang doc file Lesson...");
+      if (topicState.totalElements === 0) {
+        notify("Khong co Topic nao. Hay import/create Topic truoc");
+        return;
+      }
+      const rows = await readImportRows(file);
+      const dataRows = rows.filter((row) => row.length >= 3 && row[0].toLowerCase() !== "topicid");
+      const lessonReqs = dataRows
+        .map((row) => ({
+          topicId: Number(row[0]),
+          title: trimOrEmpty(row[1]),
+          type: (row[2] || "LISTENING") as Lesson["type"],
+          imageUrl: trimOrEmpty(row[3]) || null,
+          parentId: row[4] ? Number(row[4]) : null,
+        }))
+        .filter((row) => isPositiveInt(row.topicId) && row.title.length > 0);
+      const skipped = dataRows.length - lessonReqs.length;
+
+      if (lessonReqs.length === 0) {
+        notify("Khong co du lieu hop le trong file");
+        return;
+      }
+
+      notify(`Dang import ${lessonReqs.length} lesson...`);
+      const result = await bulkImportLessons(config, lessonReqs);
+      notify(`Da import ${result.length} lesson${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      await refreshAll(true);
+    } catch (error) {
+      notify(`Import Lesson that bai: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onBulkImportScenarios = async (file: File) => {
+    requireAuth();
+    setLoading(true);
+    try {
+      notify("Dang doc file Scenario...");
+      if (lessonState.totalElements === 0) {
+        notify("Khong co Lesson nao. Hay import/create Lesson truoc");
+        return;
+      }
+      const allLessons = await listAllLessons(config);
+      const lessonTopicMap = new Map<number, number>();
+      allLessons.forEach((lesson) => {
+        if (isPositiveInt(lesson.id) && isPositiveInt(lesson.topicId)) {
+          lessonTopicMap.set(Number(lesson.id), Number(lesson.topicId));
+        }
+      });
+      const rows = await readImportRows(file);
+      const dataRows = rows.filter((row) => row.length >= 6 && row[0].toLowerCase() !== "topicid");
+      const scenarioReqs = dataRows
+        .map((row) => {
+          const lessonId = Number(row[1]);
+          const mappedTopicId = lessonTopicMap.get(lessonId);
+          const rawTopicId = Number(row[0]);
+          return {
+            topicId: mappedTopicId ?? rawTopicId,
+            lessonId,
+            title: trimOrEmpty(row[2]),
+            description: trimOrEmpty(row[3]),
+            aiRole: trimOrEmpty(row[4]),
+            userRole: trimOrEmpty(row[5]),
+            tasks: trimOrEmpty(row[6]) || null,
+            openningMessage: trimOrEmpty(row[7]) || null,
+            suggestion: trimOrEmpty(row[8]) || null,
+            translation: trimOrEmpty(row[9]) || null,
+          };
+        })
+        .filter(
+          (row) =>
+            isPositiveInt(row.topicId) &&
+            isPositiveInt(row.lessonId) &&
+            row.title.length > 0 &&
+            row.description.length > 0 &&
+            row.aiRole.length > 0 &&
+            row.userRole.length > 0
+        );
+      const skipped = dataRows.length - scenarioReqs.length;
+
+      if (scenarioReqs.length === 0) {
+        notify("Khong co du lieu hop le trong file");
+        return;
+      }
+
+      notify(`Dang import ${scenarioReqs.length} scenario...`);
+      const result = await bulkImportScenarios(config, scenarioReqs);
+      notify(`Da import ${result.length} scenario${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      await refreshAll(true);
+    } catch (error) {
+      notify(`Import Scenario that bai: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1161,6 +1413,35 @@ export function App() {
             Hien {filteredTopics.length}/{topics.length} muc
           </span>
         </div>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => topicImportInputRef.current?.click()}
+          >
+            📥 Import CSV
+          </button>
+          <input
+            ref={topicImportInputRef}
+            type="file"
+            accept=".csv,.txt,.xlsx,.xls"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onBulkImportTopics(file).catch(() => {});
+                e.target.value = "";
+              }
+            }}
+          />
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => downloadCsvTemplate("topics-import-template.csv", TOPIC_TEMPLATE_CSV)}
+          >
+            Template CSV
+          </button>
+        </div>
         <table>
           <thead>
             <tr>
@@ -1276,6 +1557,35 @@ export function App() {
           <span>
             Hien {filteredLessons.length}/{lessons.length} muc
           </span>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => lessonImportInputRef.current?.click()}
+          >
+            📥 Import CSV
+          </button>
+          <input
+            ref={lessonImportInputRef}
+            type="file"
+            accept=".csv,.txt,.xlsx,.xls"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onBulkImportLessons(file).catch(() => {});
+                e.target.value = "";
+              }
+            }}
+          />
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => downloadCsvTemplate("lessons-import-template.csv", buildLessonTemplateCsv())}
+          >
+            Template CSV
+          </button>
         </div>
         <table>
           <thead>
@@ -1421,6 +1731,35 @@ export function App() {
           <span>
             Hien {filteredScenarios.length}/{scenarios.length} muc
           </span>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => scenarioImportInputRef.current?.click()}
+          >
+            📥 Import CSV
+          </button>
+          <input
+            ref={scenarioImportInputRef}
+            type="file"
+            accept=".csv,.txt,.xlsx,.xls"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onBulkImportScenarios(file).catch(() => {});
+                e.target.value = "";
+              }
+            }}
+          />
+          <button
+            type="button"
+            style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}
+            onClick={() => downloadCsvTemplate("scenarios-import-template.csv", buildScenarioTemplateCsv())}
+          >
+            Template CSV
+          </button>
         </div>
         <table>
           <thead>
@@ -1645,6 +1984,8 @@ export function App() {
           </div>
         </header>
 
+        <p className="note status-note" style={{ marginTop: "0.5rem" }}>{message}</p>
+
         <section className="stats-grid">
           <article className="stat-card">
             <p>Topic</p>
@@ -1666,7 +2007,6 @@ export function App() {
         {tab === "words" && renderWordsTab()}
         {tab === "flashcards" && renderFlashCardsTab()}
 
-        <p className="note status-note">{message}</p>
       </main>
     </div>
   );
