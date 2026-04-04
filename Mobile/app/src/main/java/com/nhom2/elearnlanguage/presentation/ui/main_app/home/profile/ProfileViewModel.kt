@@ -108,4 +108,8 @@ class ProfileViewModel @Inject constructor(
             successMessage = null
         )
     }
+
+    fun logout() {
+        tokenStorage.clearTokens()
+    }
 }
