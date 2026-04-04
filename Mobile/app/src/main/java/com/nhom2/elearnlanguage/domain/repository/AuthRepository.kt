@@ -13,6 +13,7 @@ interface AuthRepository {
     suspend fun registerComplete(email: String, registerToken: String, password: String): AuthSession
     suspend fun forgotPassword(email: String)
     suspend fun verifyForgotPasswordCode(email: String, code: String): String
+    suspend fun logout(refreshToken: String)
     suspend fun resetPassword(
         email: String,
         resetToken: String,

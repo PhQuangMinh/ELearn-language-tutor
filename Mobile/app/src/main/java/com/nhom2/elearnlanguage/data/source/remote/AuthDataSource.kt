@@ -6,6 +6,7 @@ import com.nhom2.elearnlanguage.data.dto.AuthResponseDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
+import com.nhom2.elearnlanguage.data.dto.RefreshTokenRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterCompleteRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterInitiateRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterTokenResponseDTO
@@ -85,6 +86,13 @@ class AuthDataSource @Inject constructor(
 
     suspend fun changePassword(request: ChangePasswordRequestDTO): ApiResponseDTO<Unit> {
         return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/change-password") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun logout(request: RefreshTokenRequestDTO): ApiResponseDTO<Unit> {
+        return httpClient.post("${BuildConfig.API_BASE_URL}/api/auth/logout") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

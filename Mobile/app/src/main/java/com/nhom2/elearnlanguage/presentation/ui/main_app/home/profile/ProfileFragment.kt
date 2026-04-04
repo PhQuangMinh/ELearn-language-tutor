@@ -125,19 +125,14 @@ class ProfileFragment : Fragment() {
 
     private fun performLogout() {
         viewModel.logout()
-        val navOptions = NavOptions.Builder()
-            .setPopUpTo(R.id.homeFragment, true)
-            .build()
-        requireActivity()
-            .findNavController(R.id.nav_host_fragment)
-            .navigate(R.id.loginFragment, null, navOptions)
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.btnSave.isEnabled = !state.isLoading && !state.isSaving
+                    binding.btnSave.isEnabled = !state.isLoading && !state.isSaving && !state.isLoggingOut
+                    binding.tvLogoutAccount.isEnabled = !state.isLoggingOut
 
                     val profile = state.profile
                     if (profile != null && profile != lastRenderedProfile) {
@@ -157,6 +152,16 @@ class ProfileFragment : Fragment() {
                         selectedAvatarMimeType = null
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         viewModel.consumeMessages()
+                    }
+
+                    if (state.logoutCompleted) {
+                        val navOptions = NavOptions.Builder()
+                            .setPopUpTo(R.id.homeFragment, true)
+                            .build()
+                        requireActivity()
+                            .findNavController(R.id.nav_host_fragment)
+                            .navigate(R.id.loginFragment, null, navOptions)
+                        viewModel.consumeLogoutEvent()
                     }
                 }
             }

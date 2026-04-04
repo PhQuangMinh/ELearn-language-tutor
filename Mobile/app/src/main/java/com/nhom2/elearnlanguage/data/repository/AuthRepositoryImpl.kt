@@ -7,6 +7,7 @@ import com.nhom2.elearnlanguage.data.dto.ChangePasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ForgotPasswordRequestDTO
 import com.nhom2.elearnlanguage.data.dto.GoogleLoginRequestDTO
 import com.nhom2.elearnlanguage.data.dto.LoginRequestDTO
+import com.nhom2.elearnlanguage.data.dto.RefreshTokenRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterCompleteRequestDTO
 import com.nhom2.elearnlanguage.data.dto.RegisterInitiateRequestDTO
 import com.nhom2.elearnlanguage.data.dto.ResetPasswordWithTokenRequestDTO
@@ -102,6 +103,13 @@ class AuthRepositoryImpl @Inject constructor(private val authDataSource: AuthDat
         }
 
         return response.data.resetToken
+    }
+
+    override suspend fun logout(refreshToken: String) {
+        val response = authDataSource.logout(RefreshTokenRequestDTO(refreshToken))
+        if (!response.success) {
+            throw Exception(response.message)
+        }
     }
 
     override suspend fun resetPassword(
