@@ -2,6 +2,7 @@ import type {
   ApiResponse,
   CloudinaryUpload,
   FlashCard,
+  ImportResult,
   Lesson,
   PageResponse,
   Scenario,
@@ -174,6 +175,16 @@ export const listLessonWords = (config: SessionConfig, lessonId: number) => {
 export const createLessonWord = (config: SessionConfig, lessonId: number, payload: Omit<Word, "id">) =>
   postJson<Word>(config, `/api/admin/lessons/${lessonId}/words`, payload);
 
+export const updateLessonWord = (
+  config: SessionConfig,
+  lessonId: number,
+  wordId: number,
+  payload: Omit<Word, "id">
+) => putJson<Word>(config, `/api/admin/lessons/${lessonId}/words/${wordId}`, payload);
+
+export const deleteLessonWord = (config: SessionConfig, lessonId: number, wordId: number) =>
+  del(config, `/api/admin/lessons/${lessonId}/words/${wordId}`);
+
 export const listLessonFlashCards = (config: SessionConfig, lessonId: number) => {
   const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/flashcards`, {
     headers: withHeaders(config.token),
@@ -196,3 +207,49 @@ export const createLessonFlashCard = (
     imageSize?: number | null;
   }
 ) => postJson<FlashCard>(config, `/api/admin/lessons/${lessonId}/flashcards`, payload);
+
+export const updateLessonFlashCard = (
+  config: SessionConfig,
+  lessonId: number,
+  flashCardId: number,
+  payload: {
+    dictionaryWordId?: number | null;
+    word?: string | null;
+    pronunciation?: string | null;
+    meaning?: string | null;
+    type?: Word["type"] | null;
+    example?: string | null;
+    imageUrl?: string | null;
+    imageName?: string | null;
+    imageSize?: number | null;
+  }
+) => putJson<FlashCard>(config, `/api/admin/lessons/${lessonId}/flashcards/${flashCardId}`, payload);
+
+export const deleteLessonFlashCard = (config: SessionConfig, lessonId: number, flashCardId: number) =>
+  del(config, `/api/admin/lessons/${lessonId}/flashcards/${flashCardId}`);
+
+const postMultipart = async <T>(config: SessionConfig, path: string, file: File): Promise<T> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await safeFetch(`${config.apiBase}${path}`, {
+    method: "POST",
+    headers: withHeaders(config.token),
+    body: formData,
+  });
+  const data = await parseJson<ApiResponse<T>>(response);
+  return data.data;
+};
+
+export const importWordsExcel = (config: SessionConfig, lessonId: number, file: File) =>
+  postMultipart<ImportResult>(
+    config,
+    `/api/admin/import/words?lessonId=${encodeURIComponent(String(lessonId))}`,
+    file
+  );
+
+export const importFlashCardsExcel = (config: SessionConfig, lessonId: number, file: File) =>
+  postMultipart<ImportResult>(
+    config,
+    `/api/admin/import/flashcards?lessonId=${encodeURIComponent(String(lessonId))}`,
+    file
+  );

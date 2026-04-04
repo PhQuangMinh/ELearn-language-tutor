@@ -1,6 +1,7 @@
 package com.example.BTL_Mobile.service;
 
 import com.example.BTL_Mobile.dto.request.AdminFlashCardCreateRequest;
+import com.example.BTL_Mobile.dto.request.AdminFlashCardUpdateRequest;
 import com.example.BTL_Mobile.dto.response.FlashCardResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.DictionaryWord;
@@ -78,6 +79,96 @@ public class AdminLessonFlashCardService {
         FlashCard saved = flashCardRepository.save(flashCard);
 
         return toResponse(saved);
+    }
+
+    @Transactional
+    public FlashCardResponse updateFlashCard(Integer lessonId, Integer flashCardId, AdminFlashCardUpdateRequest request) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
+        Topic topic = lesson.getTopic();
+        if (topic == null) {
+            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
+        }
+
+        FlashCard flashCard = flashCardRepository.findById(flashCardId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy flashcard", "FLASHCARD_NOT_FOUND"));
+        requireFlashCardInLessonTopic(topic, flashCard);
+
+        boolean hasChange = false;
+
+        if (request.getExample() != null && !request.getExample().isBlank()) {
+            flashCard.setExample(request.getExample().trim());
+            hasChange = true;
+        }
+
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            Media media = new Media();
+            media.setType(EMediaType.IMAGE);
+            media.setUrl(request.getImageUrl().trim());
+            media.setName((request.getImageName() == null || request.getImageName().isBlank())
+                    ? "flashcard_image"
+                    : request.getImageName().trim());
+            media.setSize(request.getImageSize() == null ? 0 : request.getImageSize());
+            Media savedMedia = mediaRepository.save(media);
+            flashCard.setMedia(savedMedia);
+            hasChange = true;
+        }
+
+        boolean wordChangeRequested = request.getDictionaryWordId() != null
+                || (request.getWord() != null && !request.getWord().isBlank());
+        if (wordChangeRequested) {
+            AdminFlashCardCreateRequest resolveReq = new AdminFlashCardCreateRequest();
+            resolveReq.setDictionaryWordId(request.getDictionaryWordId());
+            resolveReq.setWord(request.getWord());
+            resolveReq.setPronunciation(request.getPronunciation());
+            resolveReq.setMeaning(request.getMeaning());
+            resolveReq.setType(request.getType());
+            DictionaryWord dictionaryWord = resolveDictionaryWord(resolveReq);
+            if (topic.getVocabulary() == null) {
+                topic.setVocabulary(new HashSet<>());
+            }
+            topic.getVocabulary().add(dictionaryWord);
+            topicRepository.save(topic);
+            flashCard.setDictionaryWord(dictionaryWord);
+            hasChange = true;
+        }
+
+        if (!hasChange) {
+            throw new BusinessException("Không có dữ liệu cập nhật", "NO_CHANGES");
+        }
+
+        FlashCard saved = flashCardRepository.save(flashCard);
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public void deleteFlashCard(Integer lessonId, Integer flashCardId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
+        Topic topic = lesson.getTopic();
+        if (topic == null) {
+            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
+        }
+
+        FlashCard flashCard = flashCardRepository.findById(flashCardId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy flashcard", "FLASHCARD_NOT_FOUND"));
+        requireFlashCardInLessonTopic(topic, flashCard);
+        flashCardRepository.delete(flashCard);
+    }
+
+    private void requireFlashCardInLessonTopic(Topic topic, FlashCard flashCard) {
+        DictionaryWord dw = flashCard.getDictionaryWord();
+        if (dw == null || dw.getId() == null) {
+            throw new BusinessException("Flashcard dữ liệu không hợp lệ", "FLASHCARD_INVALID");
+        }
+        if (topic.getVocabulary() == null || topic.getVocabulary().isEmpty()) {
+            throw new BusinessException("Flashcard không thuộc lesson/topic này", "FLASHCARD_NOT_IN_LESSON");
+        }
+        boolean linked = topic.getVocabulary().stream()
+                .anyMatch(w -> w.getId() != null && w.getId().equals(dw.getId()));
+        if (!linked) {
+            throw new BusinessException("Flashcard không thuộc lesson/topic này", "FLASHCARD_NOT_IN_LESSON");
+        }
     }
 
     private DictionaryWord resolveDictionaryWord(AdminFlashCardCreateRequest request) {
