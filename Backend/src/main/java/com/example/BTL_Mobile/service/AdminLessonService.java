@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AdminLessonService {
@@ -90,6 +92,13 @@ public class AdminLessonService {
             throw new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND");
         }
         lessonRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<AdminLessonResponse> bulkImport(List<AdminLessonCreateRequest> requests) {
+        return requests.stream()
+                .map(this::create)
+                .toList();
     }
 
     private Lesson resolveParentLesson(Integer parentId) {

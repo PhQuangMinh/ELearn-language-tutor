@@ -31,7 +31,6 @@ public class Lesson extends AbstractAuditEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Size(max = 255)
     @NotNull
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)

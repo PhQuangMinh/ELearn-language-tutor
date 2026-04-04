@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/topics")
 @RequiredArgsConstructor
@@ -58,5 +60,13 @@ public class AdminTopicController {
   public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
     adminTopicService.delete(id);
     return ResponseEntity.ok(ApiResponse.success("Xóa topic thành công!", null));
+  }
+
+  @PostMapping("/import")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ApiResponse<List<TopicResponse>>> bulkImport(
+      @RequestBody List<AdminTopicCreateRequest> requests) {
+    List<TopicResponse> topics = adminTopicService.bulkImport(requests);
+    return ResponseEntity.ok(ApiResponse.success("Import " + topics.size() + " topic thành công!", topics));
   }
 }

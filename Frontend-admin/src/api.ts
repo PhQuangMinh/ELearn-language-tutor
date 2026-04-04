@@ -123,6 +123,9 @@ export const updateTopic = (config: SessionConfig, id: number, payload: Partial<
 
 export const deleteTopic = (config: SessionConfig, id: number) => del(config, `/api/admin/topics/${id}`);
 
+export const bulkImportTopics = (config: SessionConfig, topics: any[]) =>
+  postJson<Topic[]>(config, "/api/admin/topics/import", topics);
+
 export const listLessons = (config: SessionConfig, page: number, size: number) =>
   getPaged<Lesson>(config, `/api/admin/lessons?page=${page}&size=${size}&sort=id,desc`);
 
@@ -150,6 +153,9 @@ export const updateLesson = (
 export const deleteLesson = (config: SessionConfig, id: number) =>
   del(config, `/api/admin/lessons/${id}`);
 
+export const bulkImportLessons = (config: SessionConfig, lessons: any[]) =>
+  postJson<Lesson[]>(config, "/api/admin/lessons/import", lessons);
+
 export const listScenarios = (config: SessionConfig, page: number, size: number) =>
   getPaged<Scenario>(config, `/api/admin/scenarios?page=${page}&size=${size}&sort=id,desc`);
 
@@ -164,6 +170,9 @@ export const updateScenario = (
 
 export const deleteScenario = (config: SessionConfig, id: number) =>
   del(config, `/api/admin/scenarios/${id}`);
+
+export const bulkImportScenarios = (config: SessionConfig, scenarios: any[]) =>
+  postJson<Scenario[]>(config, "/api/admin/scenarios/import", scenarios);
 
 export const listLessonWords = (config: SessionConfig, lessonId: number) => {
   const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/words`, {
