@@ -35,10 +35,10 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/avatarCard"
-                android:layout_width="96dp"
-                android:layout_height="96dp"
+                android:layout_width="124dp"
+                android:layout_height="124dp"
                 app:cardBackgroundColor="@android:color/black"
-                app:cardCornerRadius="48dp"
+                app:cardCornerRadius="62dp"
                 app:cardElevation="0dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -49,7 +49,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/profile_avatar"
-                    android:padding="18dp"
+                    android:padding="0dp"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/ic_person_outline"
                     android:tint="@android:color/white" />
             </com.google.android.material.card.MaterialCardView>

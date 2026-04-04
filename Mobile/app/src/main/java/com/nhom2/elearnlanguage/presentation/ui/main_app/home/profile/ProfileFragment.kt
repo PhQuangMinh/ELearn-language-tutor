@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -210,6 +211,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun renderAvatar(source: Any) {
+        binding.ivAvatar.setPadding(0, 0, 0, 0)
+        binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_CROP
         binding.ivAvatar.imageTintList = null
         binding.ivAvatar.load(source) {
             crossfade(true)
@@ -219,6 +222,9 @@ class ProfileFragment : Fragment() {
     }
 
     private fun renderDefaultAvatar() {
+        val padding = (22 * resources.displayMetrics.density).toInt()
+        binding.ivAvatar.setPadding(padding, padding, padding, padding)
+        binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_INSIDE
         binding.ivAvatar.load(R.drawable.ic_person_outline)
         binding.ivAvatar.imageTintList = ColorStateList.valueOf(
             ContextCompat.getColor(requireContext(), android.R.color.white)
