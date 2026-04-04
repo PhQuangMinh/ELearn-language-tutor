@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AdminScenarioService {
@@ -106,6 +108,13 @@ public class AdminScenarioService {
             throw new BusinessException("Không tìm thấy scenario", "SCENARIO_NOT_FOUND");
         }
         scenarioRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<AdminScenarioResponse> bulkImport(List<AdminScenarioCreateRequest> requests) {
+        return requests.stream()
+                .map(this::create)
+                .toList();
     }
 
     private Topic resolveTopic(Integer topicId) {

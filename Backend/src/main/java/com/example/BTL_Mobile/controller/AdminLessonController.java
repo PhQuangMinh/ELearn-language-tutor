@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/lessons")
 @RequiredArgsConstructor
@@ -58,5 +60,13 @@ public class AdminLessonController {
     public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
         adminLessonService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa lesson thành công!", null));
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<AdminLessonResponse>>> bulkImport(
+            @RequestBody List<AdminLessonCreateRequest> requests) {
+        List<AdminLessonResponse> lessons = adminLessonService.bulkImport(requests);
+        return ResponseEntity.ok(ApiResponse.success("Import " + lessons.size() + " lesson thành công!", lessons));
     }
 }

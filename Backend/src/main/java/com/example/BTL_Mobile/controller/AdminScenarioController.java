@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/scenarios")
 @RequiredArgsConstructor
@@ -58,5 +60,13 @@ public class AdminScenarioController {
     public ResponseEntity<ApiResponse<Object>> delete(@PathVariable Integer id) {
         adminScenarioService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa scenario thành công!", null));
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<AdminScenarioResponse>>> bulkImport(
+            @RequestBody List<AdminScenarioCreateRequest> requests) {
+        List<AdminScenarioResponse> scenarios = adminScenarioService.bulkImport(requests);
+        return ResponseEntity.ok(ApiResponse.success("Import " + scenarios.size() + " scenario thành công!", scenarios));
     }
 }
