@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
 import com.nhom2.elearnlanguage.domain.model.lesson.LessonSubmitResult
+import com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult
 import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
+import com.nhom2.elearnlanguage.domain.usecase.AssessSpeakingAssessmentUseCase
 import com.nhom2.elearnlanguage.domain.usecase.GetLessonQuestionsUseCase
 import com.nhom2.elearnlanguage.domain.usecase.SubmitLessonAnswersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,12 +14,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class LessonViewModel @Inject constructor(
     private val getLessonQuestionsUseCase: GetLessonQuestionsUseCase,
-    private val submitLessonAnswersUseCase: SubmitLessonAnswersUseCase
+    private val submitLessonAnswersUseCase: SubmitLessonAnswersUseCase,
+    private val assessSpeakingAssessmentUseCase: AssessSpeakingAssessmentUseCase
 ): ViewModel() {
 
     private val _questionsState = MutableStateFlow<LessonQuestionsState>(LessonQuestionsState.Initial)
@@ -90,6 +94,14 @@ class LessonViewModel @Inject constructor(
 
     suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): Result<LessonSubmitResult> {
         return submitLessonAnswersUseCase(lessonId, request)
+    }
+
+    suspend fun assessSpeakingAssessment(
+        referenceText: String,
+        audioFile: File,
+        language: String = "US_ENGLISH"
+    ): Result<SpeakingAssessmentResult> {
+        return assessSpeakingAssessmentUseCase(referenceText, audioFile, language)
     }
 }
 

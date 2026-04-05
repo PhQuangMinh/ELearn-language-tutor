@@ -8,7 +8,9 @@ import com.nhom2.elearnlanguage.data.dto.lesson.LessonSubmitRequest
 import com.nhom2.elearnlanguage.domain.model.lesson.Question
 import com.nhom2.elearnlanguage.domain.model.LessonInTopic
 import com.nhom2.elearnlanguage.domain.model.lesson.LessonSubmitResult
+import com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult
 import com.nhom2.elearnlanguage.domain.repository.LessonRepository
+import java.io.File
 import javax.inject.Inject
 
 class LessonRepositoryImpl @Inject constructor(
@@ -30,6 +32,10 @@ class LessonRepositoryImpl @Inject constructor(
 
     override suspend fun submitLessonAnswers(lessonId: Int, request: LessonSubmitRequest): LessonSubmitResult {
         return lessonDataSource.submitLessonAnswers(lessonId, request).toDomain()
+    }
+
+    override suspend fun assessSpeaking(referenceText: String, audioFile: File, language: String): SpeakingAssessmentResult {
+        return lessonDataSource.assessSpeaking(referenceText, audioFile, language).toDomain()
     }
 }
 

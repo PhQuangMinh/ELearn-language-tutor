@@ -3,7 +3,8 @@ package com.nhom2.elearnlanguage.domain.model.lesson
 enum class QuestionType {
     ONE_SELECTION,
     LISTEN_AND_ARRANGE_SENTENCE,
-    TRANSLATE_AND_ARRANGE_SENTENCE
+    TRANSLATE_AND_ARRANGE_SENTENCE,
+    SPEAKING_ASSESSMENT
 }
 
 data class Question(

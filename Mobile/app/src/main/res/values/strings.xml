@@ -67,6 +67,8 @@
     <string name="feedback_not_quite_right">Ups.. That not quite right</string>
     <string name="answer">Answer:</string>
     <string name="arrange_question_title">What\'s the meaning of this sentence?</string>
+    <string name="speaking_assessment_title">Speak this sentence</string>
+    <string name="speaking_assessment_record_hint">Tap the mic to record your answer first.</string>
 
     <!-- Lesson complete -->
     <string name="lesson_complete_celebration">Lesson complete celebration</string>
