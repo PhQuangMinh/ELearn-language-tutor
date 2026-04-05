@@ -34,8 +34,8 @@ public class AdminExcelImportService {
     private final AdminLessonVocabularyService adminLessonVocabularyService;
     private final AdminLessonFlashCardService adminLessonFlashCardService;
 
-    public AdminImportResult importWords(Integer lessonId, MultipartFile file) {
-        requireLessonId(lessonId);
+    public AdminImportResult importWords(Integer topicId, MultipartFile file) {
+        requireTopicId(topicId);
         if (file == null || file.isEmpty()) {
             throw new BusinessException("File import trống", "IMPORT_FILE_EMPTY");
         }
@@ -76,7 +76,7 @@ public class AdminExcelImportService {
                     req.setMeaning(meaning);
                     req.setType(type);
 
-                    adminLessonVocabularyService.addWord(lessonId, req);
+                    adminLessonVocabularyService.addWord(topicId, req);
                     success++;
                 } catch (Exception e) {
                     errors++;
@@ -96,8 +96,8 @@ public class AdminExcelImportService {
                 .build();
     }
 
-    public AdminImportResult importFlashCards(Integer lessonId, MultipartFile file) {
-        requireLessonId(lessonId);
+    public AdminImportResult importFlashCards(Integer topicId, MultipartFile file) {
+        requireTopicId(topicId);
         if (file == null || file.isEmpty()) {
             throw new BusinessException("File import trống", "IMPORT_FILE_EMPTY");
         }
@@ -145,7 +145,7 @@ public class AdminExcelImportService {
                     req.setImageName("import_placeholder");
                     req.setImageSize(0);
 
-                    adminLessonFlashCardService.addFlashCard(lessonId, req);
+                    adminLessonFlashCardService.addFlashCard(topicId, req);
                     success++;
                 } catch (Exception e) {
                     errors++;
@@ -165,9 +165,9 @@ public class AdminExcelImportService {
                 .build();
     }
 
-    private static void requireLessonId(Integer lessonId) {
-        if (lessonId == null || lessonId <= 0) {
-            throw new BusinessException("Thiếu lesson hợp lệ (lessonId)", "IMPORT_LESSON_REQUIRED");
+    private static void requireTopicId(Integer topicId) {
+        if (topicId == null || topicId <= 0) {
+            throw new BusinessException("Thiếu topic hợp lệ (topicId)", "IMPORT_TOPIC_REQUIRED");
         }
     }
 

@@ -7,25 +7,26 @@ import {
   createLesson,
   createScenario,
   createTopic,
-  createLessonFlashCard,
-  createLessonWord,
+  createTopicFlashCard,
+  createTopicWord,
   deleteLesson,
-  deleteLessonFlashCard,
-  deleteLessonWord,
+  deleteTopicFlashCard,
+  deleteTopicWord,
   deleteScenario,
   deleteTopic,
   importFlashCardsExcel,
   importWordsExcel,
   listAllLessons,
-  listLessonFlashCards,
-  listLessonWords,
+  listAllTopics,
+  listTopicFlashCards,
+  listTopicWords,
   listLessons,
   listScenarios,
   listTopics,
   login,
   updateLesson,
-  updateLessonFlashCard,
-  updateLessonWord,
+  updateTopicFlashCard,
+  updateTopicWord,
   updateScenario,
   updateTopic,
   uploadImage,
@@ -158,9 +159,9 @@ const TOPIC_TEMPLATE_CSV = [
 ].join("\n");
 
 const toUiError = (error: unknown) => {
-  const raw = error instanceof Error ? error.message : "Loi khong xac dinh";
-  if (raw.includes("Khong ket noi duoc backend")) {
-    return `${raw} (Hien tai FE dang tro toi ${API_BASE})`;
+  const raw = error instanceof Error ? error.message : "Lỗi không xác định";
+  if (raw.includes("Không kết nối được backend")) {
+    return `${raw} (Hiện tại FE đang trỏ tới ${API_BASE})`;
   }
   return raw;
 };
@@ -170,106 +171,106 @@ const validateLogin = (email: string, password: string): string | null => {
   const passwordValue = trimOrEmpty(password);
 
   if (!emailValue) {
-    return "Email khong duoc de trong";
+    return "Email không được để trống";
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-    return "Email khong dung dinh dang";
+    return "Email không đúng định dạng";
   }
   if (!passwordValue) {
-    return "Password khong duoc de trong";
+    return "Mật khẩu không được để trống";
   }
   return null;
 };
 
 const validateTopicForm = (form: Partial<Topic>): string | null => {
   if (isBlank(form.name)) {
-    return "Ten topic khong duoc de trong";
+    return "Tên topic không được để trống";
   }
   if (exceeds(form.name, 255)) {
-    return "Ten topic toi da 255 ky tu";
+    return "Tên topic tối đa 255 ký tự";
   }
   if (isBlank(form.description)) {
-    return "Mo ta topic khong duoc de trong";
+    return "Mô tả topic không được để trống";
   }
   if (exceeds(form.description, 500)) {
-    return "Mo ta topic toi da 500 ky tu";
+    return "Mô tả topic tối đa 500 ký tự";
   }
   if (exceeds(form.imageUrl, 1000)) {
-    return "Image URL topic toi da 1000 ky tu";
+    return "Image URL topic tối đa 1000 ký tự";
   }
   if (!ensureUrlIfProvided(form.imageUrl)) {
-    return "Image URL topic khong hop le";
+    return "Image URL topic không hợp lệ";
   }
   return null;
 };
 
 const validateLessonForm = (form: Partial<Lesson>): string | null => {
   if (!isPositiveInt(form.topicId)) {
-    return "Topic ID phai la so nguyen duong";
+    return "Topic ID phải là số nguyên dương";
   }
   if (isBlank(form.title)) {
-    return "Title lesson khong duoc de trong";
+    return "Tiêu đề lesson không được để trống";
   }
   if (exceeds(form.title, 255)) {
-    return "Title lesson toi da 255 ky tu";
+    return "Tiêu đề lesson tối đa 255 ký tự";
   }
   if (!LESSON_TYPES.includes((form.type || "") as Lesson["type"])) {
-    return "Loai lesson khong hop le";
+    return "Loại lesson không hợp lệ";
   }
   if (exceeds(form.imageUrl, 1000)) {
-    return "Image URL lesson toi da 1000 ky tu";
+    return "Image URL lesson tối đa 1000 ký tự";
   }
   if (!ensureUrlIfProvided(form.imageUrl)) {
-    return "Image URL lesson khong hop le";
+    return "Image URL lesson không hợp lệ";
   }
   if (form.parentId != null && form.parentId !== undefined && !isPositiveInt(form.parentId)) {
-    return "Parent Lesson ID phai la so nguyen duong";
+    return "Parent Lesson ID phải là số nguyên dương";
   }
   return null;
 };
 
 const validateScenarioForm = (form: Partial<Scenario>): string | null => {
   if (!isPositiveInt(form.topicId)) {
-    return "Topic ID phai la so nguyen duong";
+    return "Topic ID phải là số nguyên dương";
   }
   if (!isPositiveInt(form.lessonId)) {
-    return "Lesson ID phai la so nguyen duong";
+    return "Lesson ID phải là số nguyên dương";
   }
   if (isBlank(form.title)) {
-    return "Title scenario khong duoc de trong";
+    return "Tiêu đề scenario không được để trống";
   }
   if (exceeds(form.title, 255)) {
-    return "Title scenario toi da 255 ky tu";
+    return "Tiêu đề scenario tối đa 255 ký tự";
   }
   if (isBlank(form.description)) {
-    return "Mo ta scenario khong duoc de trong";
+    return "Mô tả scenario không được để trống";
   }
   if (exceeds(form.description, 500)) {
-    return "Mo ta scenario toi da 500 ky tu";
+    return "Mô tả scenario tối đa 500 ký tự";
   }
   if (isBlank(form.aiRole)) {
-    return "AI Role khong duoc de trong";
+    return "AI Role không được để trống";
   }
   if (exceeds(form.aiRole, 50)) {
-    return "AI Role toi da 50 ky tu";
+    return "AI Role tối đa 50 ký tự";
   }
   if (isBlank(form.userRole)) {
-    return "User Role khong duoc de trong";
+    return "User Role không được để trống";
   }
   if (exceeds(form.userRole, 50)) {
-    return "User Role toi da 50 ky tu";
+    return "User Role tối đa 50 ký tự";
   }
   if (exceeds(form.tasks, 500)) {
-    return "Tasks toi da 500 ky tu";
+    return "Tasks tối đa 500 ký tự";
   }
   if (exceeds(form.openningMessage, 500)) {
-    return "Openning message toi da 500 ky tu";
+    return "Openning message tối đa 500 ký tự";
   }
   if (exceeds(form.suggestion, 500)) {
-    return "Suggestion toi da 500 ky tu";
+    return "Suggestion tối đa 500 ký tự";
   }
   if (exceeds(form.translation, 500)) {
-    return "Translation toi da 500 ky tu";
+    return "Translation tối đa 500 ký tự";
   }
   return null;
 };
@@ -286,13 +287,13 @@ export function App() {
   const [lessonState, setLessonState] = useState<PagedState<Lesson>>(initialPagedState<Lesson>());
   const [scenarioState, setScenarioState] = useState<PagedState<Scenario>>(initialPagedState<Scenario>());
 
-  const [wordLessonId, setWordLessonId] = useState<number | "">("");
+  const [wordTopicId, setWordTopicId] = useState<number | "">("");
   const [words, setWords] = useState<Word[]>([]);
   const [wordForm, setWordForm] = useState<Partial<Omit<Word, "id">>>({ type: "NOUN" });
   const [editingWordId, setEditingWordId] = useState<number | null>(null);
   const [wordQuery, setWordQuery] = useState("");
 
-  const [flashLessonId, setFlashLessonId] = useState<number | "">("");
+  const [flashTopicId, setFlashTopicId] = useState<number | "">("");
   const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
   const [flashForm, setFlashForm] = useState<{
     dictionaryWordId?: number | null;
@@ -307,7 +308,9 @@ export function App() {
   }>({ type: "NOUN" });
   const [editingFlashId, setEditingFlashId] = useState<number | null>(null);
   const [flashQuery, setFlashQuery] = useState("");
-  const [lessonsForSelect, setLessonsForSelect] = useState<Lesson[]>([]);
+  const [selectedWordIds, setSelectedWordIds] = useState<Set<number>>(() => new Set());
+  const [selectedFlashCardIds, setSelectedFlashCardIds] = useState<Set<number>>(() => new Set());
+  const [topicsForSelect, setTopicsForSelect] = useState<Topic[]>([]);
 
   const [topicForm, setTopicForm] = useState<Partial<Topic>>({});
   const [lessonForm, setLessonForm] = useState<Partial<Lesson>>({ type: "LISTENING" });
@@ -342,7 +345,7 @@ export function App() {
     const sampleLessonId = sampleLesson?.id ?? 1;
     return [
       "topicId,lessonId,title,description,aiRole,userRole,tasks,openningMessage,suggestion,translation",
-      `${sampleTopicId},${sampleLessonId},Welcome Dialogue,"Basic greeting and self-introduction",Tutor,Learner,"Introduce yourself","Hello! Nice to meet you.","Use short sentences","Ban dang tap gioi thieu ban than"`,
+      `${sampleTopicId},${sampleLessonId},Welcome Dialogue,"Basic greeting and self-introduction",Tutor,Learner,"Introduce yourself","Hello! Nice to meet you.","Use short sentences","Bạn đang tập giới thiệu bản thân"`,
     ].join("\n");
   }, [lessons, topics]);
 
@@ -410,6 +413,11 @@ export function App() {
     );
   }, [flashCards, flashQuery]);
 
+  const allFilteredWordsSelected =
+    filteredWords.length > 0 && filteredWords.every((w) => selectedWordIds.has(w.id));
+  const allFilteredFlashCardsSelected =
+    filteredFlashCards.length > 0 && filteredFlashCards.every((c) => selectedFlashCardIds.has(c.id));
+
   const notify = (text: string) => setMessage(text);
 
   const downloadCsvTemplate = (fileName: string, content: string) => {
@@ -424,7 +432,7 @@ export function App() {
 
   const requireAuth = () => {
     if (!token) {
-      throw new Error("Ban can dang nhap admin");
+      throw new Error("Bạn cần đăng nhập admin");
     }
   };
 
@@ -473,50 +481,50 @@ export function App() {
       setLessonState(toPagedState(lessonPage));
       setScenarioState(toPagedState(scenarioPage));
       try {
-        const all = await listAllLessons(config);
-        setLessonsForSelect(all);
+        const allTopics = await listAllTopics(config);
+        setTopicsForSelect(allTopics);
       } catch {
         /* dropdown refresh optional */
       }
       if (!silent) {
-        notify("Da tai du lieu Topic, Lesson, Scenario");
+        notify("Đã tải dữ liệu Topic, Lesson, Scenario");
       }
     } catch (error) {
-      notify(`Khong the tai du lieu: ${toUiError(error)}`);
+      notify(`Không thể tải dữ liệu: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
   }, [config, token, topicState.page, lessonState.page, scenarioState.page]);
 
-  const loadWordsForLesson = useCallback(
-    async (lessonId: number) => {
+  const loadWordsForTopic = useCallback(
+    async (topicId: number) => {
       requireAuth();
-      const data = await listLessonWords(config, lessonId);
+      const data = await listTopicWords(config, topicId);
       setWords(data);
     },
     [config, token]
   );
 
-  const loadFlashCardsForLesson = useCallback(
-    async (lessonId: number) => {
+  const loadFlashCardsForTopic = useCallback(
+    async (topicId: number) => {
       requireAuth();
-      const data = await listLessonFlashCards(config, lessonId);
+      const data = await listTopicFlashCards(config, topicId);
       setFlashCards(data);
     },
     [config, token]
   );
 
-  const loadLessonsForSelect = useCallback(async () => {
+  const loadTopicsForSelect = useCallback(async () => {
     requireAuth();
-    const all = await listAllLessons(config);
-    setLessonsForSelect(all);
+    const all = await listAllTopics(config);
+    setTopicsForSelect(all);
   }, [config, token]);
 
   useEffect(() => {
     if (!token) {
       return;
     }
-    refreshAll().catch((error) => notify(`Khong the tai du lieu: ${toUiError(error)}`));
+    refreshAll().catch((error) => notify(`Không thể tải dữ liệu: ${toUiError(error)}`));
     // Only trigger initial load after login/token restore.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -525,8 +533,8 @@ export function App() {
     if (!token || (tab !== "words" && tab !== "flashcards")) {
       return;
     }
-    loadLessonsForSelect().catch((e) => notify(`Khong tai danh sach lesson: ${toUiError(e)}`));
-  }, [token, tab, loadLessonsForSelect]);
+    loadTopicsForSelect().catch((e) => notify(`Không tải được danh sách topic: ${toUiError(e)}`));
+  }, [token, tab, loadTopicsForSelect]);
 
   const onLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -544,9 +552,9 @@ export function App() {
       });
       setToken(nextToken);
       localStorage.setItem("admin-token", nextToken);
-      notify("Dang nhap thanh cong");
+      notify("Đăng nhập thành công");
     } catch (error) {
-      notify(`Dang nhap that bai: ${toUiError(error)}`);
+      notify(`Đăng nhập thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -562,37 +570,39 @@ export function App() {
     setSelectedScenario(null);
     setWords([]);
     setFlashCards([]);
-    setWordLessonId("");
-    setFlashLessonId("");
+    setWordTopicId("");
+    setFlashTopicId("");
     setEditingWordId(null);
     setEditingFlashId(null);
-    setLessonsForSelect([]);
+    setSelectedWordIds(new Set());
+    setSelectedFlashCardIds(new Set());
+    setTopicsForSelect([]);
     localStorage.removeItem("admin-token");
-    notify("Da dang xuat");
+    notify("Đã đăng xuất");
   };
 
   const validateWordForm = (form: Partial<Omit<Word, "id">>): string | null => {
-    if (isBlank(form.word)) return "Word khong duoc de trong";
-    if (exceeds(form.word, 50)) return "Word toi da 50 ky tu";
-    if (isBlank(form.pronunciation)) return "Pronunciation khong duoc de trong";
-    if (exceeds(form.pronunciation, 50)) return "Pronunciation toi da 50 ky tu";
-    if (isBlank(form.meaning)) return "Meaning khong duoc de trong";
-    if (exceeds(form.meaning, 255)) return "Meaning toi da 255 ky tu";
-    if (!WORD_TYPES.includes((form.type || "") as Word["type"])) return "Word type khong hop le";
+    if (isBlank(form.word)) return "Word không được để trống";
+    if (exceeds(form.word, 50)) return "Word tối đa 50 ký tự";
+    if (isBlank(form.pronunciation)) return "Pronunciation không được để trống";
+    if (exceeds(form.pronunciation, 50)) return "Pronunciation tối đa 50 ký tự";
+    if (isBlank(form.meaning)) return "Meaning không được để trống";
+    if (exceeds(form.meaning, 255)) return "Meaning tối đa 255 ký tự";
+    if (!WORD_TYPES.includes((form.type || "") as Word["type"])) return "Word type không hợp lệ";
     return null;
   };
 
   const validateFlashForm = (isEdit: boolean): string | null => {
-    if (!isPositiveInt(flashLessonId)) return "Chon lesson";
-    if (isBlank(flashForm.example)) return "Example khong duoc de trong";
-    if (exceeds(flashForm.example, 255)) return "Example toi da 255 ky tu";
+    if (!isPositiveInt(flashTopicId)) return "Chọn topic";
+    if (isBlank(flashForm.example)) return "Example không được để trống";
+    if (exceeds(flashForm.example, 255)) return "Example tối đa 255 ký tự";
     if (!isEdit) {
-      if (isBlank(flashForm.imageUrl)) return "Hay upload anh flashcard (Cloudinary)";
-      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
-      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+      if (isBlank(flashForm.imageUrl)) return "Hãy tải ảnh flashcard (Cloudinary)";
+      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL tối đa 1000 ký tự";
+      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Ảnh tải lên không hợp lệ";
     } else if (!isBlank(flashForm.imageUrl)) {
-      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL toi da 1000 ky tu";
-      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Anh upload khong hop le";
+      if (exceeds(flashForm.imageUrl, 1000)) return "Image URL tối đa 1000 ký tự";
+      if (!ensureUrlIfProvided(flashForm.imageUrl || "")) return "Ảnh tải lên không hợp lệ";
     }
 
     const hasWordId = isPositiveInt(flashForm.dictionaryWordId);
@@ -603,7 +613,7 @@ export function App() {
         meaning: flashForm.meaning || "",
         type: (flashForm.type || "NOUN") as Word["type"],
       });
-      if (err) return `Flashcard word: ${err}`;
+      if (err) return `Flashcard — từ: ${err}`;
     }
     return null;
   };
@@ -611,8 +621,8 @@ export function App() {
   const onWordSubmit = async (event: FormEvent) => {
     event.preventDefault();
     requireAuth();
-    if (!isPositiveInt(wordLessonId)) {
-      notify("Chon lesson");
+    if (!isPositiveInt(wordTopicId)) {
+      notify("Chọn topic");
       return;
     }
 
@@ -631,17 +641,17 @@ export function App() {
         type: (wordForm.type || "NOUN") as Word["type"],
       };
       if (editingWordId != null) {
-        await updateLessonWord(config, Number(wordLessonId), editingWordId, payload);
-        notify("Da cap nhat word");
+        await updateTopicWord(config, Number(wordTopicId), editingWordId, payload);
+        notify("Đã cập nhật từ");
         setEditingWordId(null);
       } else {
-        await createLessonWord(config, Number(wordLessonId), payload);
-        notify("Da them word vao lesson");
+        await createTopicWord(config, Number(wordTopicId), payload);
+        notify("Đã thêm từ vào topic");
       }
       setWordForm({ type: "NOUN" });
-      await loadWordsForLesson(Number(wordLessonId));
+      await loadWordsForTopic(Number(wordTopicId));
     } catch (error) {
-      notify(`Luu word that bai: ${toUiError(error)}`);
+      notify(`Lưu từ thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -659,10 +669,10 @@ export function App() {
 
     setLoading(true);
     try {
-      const lessonIdNum = Number(flashLessonId);
+      const topicIdNum = Number(flashTopicId);
       if (editingFlashId != null) {
         const img = trimOrEmpty(flashForm.imageUrl);
-        await updateLessonFlashCard(config, lessonIdNum, editingFlashId, {
+        await updateTopicFlashCard(config, topicIdNum, editingFlashId, {
           example: trimOrEmpty(flashForm.example),
           ...(img
             ? {
@@ -680,10 +690,10 @@ export function App() {
                 type: (flashForm.type || "NOUN") as Word["type"],
               }),
         });
-        notify("Da cap nhat flashcard");
+        notify("Đã cập nhật flashcard");
         setEditingFlashId(null);
       } else {
-        await createLessonFlashCard(config, lessonIdNum, {
+        await createTopicFlashCard(config, topicIdNum, {
           dictionaryWordId: flashForm.dictionaryWordId ? Number(flashForm.dictionaryWordId) : null,
           word: trimOrEmpty(flashForm.word),
           pronunciation: trimOrEmpty(flashForm.pronunciation),
@@ -694,12 +704,12 @@ export function App() {
           imageName: trimOrEmpty(flashForm.imageName) || null,
           imageSize: flashForm.imageSize ?? null,
         });
-        notify("Da tao flashcard theo lesson");
+        notify("Đã tạo flashcard theo topic");
       }
       setFlashForm({ type: "NOUN", dictionaryWordId: null });
-      await loadFlashCardsForLesson(lessonIdNum);
+      await loadFlashCardsForTopic(topicIdNum);
     } catch (error) {
-      notify(`Luu flashcard that bai: ${toUiError(error)}`);
+      notify(`Lưu flashcard thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -707,13 +717,14 @@ export function App() {
 
   const lessonSelectValue = (id: number | "") => (id === "" ? "" : String(id));
 
-  const onWordLessonChange = (value: string) => {
+  const onWordTopicChange = (value: string) => {
     const id = value === "" ? "" : Number(value);
-    setWordLessonId(id);
+    setWordTopicId(id);
+    setSelectedWordIds(new Set());
     if (isPositiveInt(id)) {
       setLoading(true);
-      loadWordsForLesson(Number(id))
-        .then(() => notify("Da tai vocabulary"))
+      loadWordsForTopic(Number(id))
+        .then(() => notify("Đã tải từ vựng"))
         .catch((e) => notify(toUiError(e)))
         .finally(() => setLoading(false));
     } else {
@@ -721,13 +732,14 @@ export function App() {
     }
   };
 
-  const onFlashLessonChange = (value: string) => {
+  const onFlashTopicChange = (value: string) => {
     const id = value === "" ? "" : Number(value);
-    setFlashLessonId(id);
+    setFlashTopicId(id);
+    setSelectedFlashCardIds(new Set());
     if (isPositiveInt(id)) {
       setLoading(true);
-      loadFlashCardsForLesson(Number(id))
-        .then(() => notify("Da tai flashcards"))
+      loadFlashCardsForTopic(Number(id))
+        .then(() => notify("Đã tải flashcard"))
         .catch((e) => notify(toUiError(e)))
         .finally(() => setLoading(false));
     } else {
@@ -735,23 +747,145 @@ export function App() {
     }
   };
 
-  const runWordExcelImport = async (file: File) => {
+  const toggleWordRowSelected = (wordId: number) => {
+    setSelectedWordIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(wordId)) {
+        next.delete(wordId);
+      } else {
+        next.add(wordId);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAllFilteredWords = () => {
+    setSelectedWordIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredWordsSelected) {
+        filteredWords.forEach((w) => next.delete(w.id));
+      } else {
+        filteredWords.forEach((w) => next.add(w.id));
+      }
+      return next;
+    });
+  };
+
+  const bulkDeleteSelectedWords = async () => {
     requireAuth();
-    if (!isPositiveInt(wordLessonId)) {
-      notify("Chon lesson truoc khi import (lesson duoc ap dung cho toan bo dong trong file)");
+    if (!isPositiveInt(wordTopicId)) {
+      notify("Chọn topic trước.");
+      return;
+    }
+    const ids = [...selectedWordIds];
+    if (ids.length === 0) {
+      return;
+    }
+    if (
+      !confirm(
+        `Xóa ${ids.length} từ đã chọn? Các flashcard gắn các từ này trong topic cũng sẽ bị xóa.`
+      )
+    ) {
       return;
     }
     setLoading(true);
     try {
-      const r = await importWordsExcel(config, Number(wordLessonId), file);
+      const results = await Promise.allSettled(
+        ids.map((id) => deleteTopicWord(config, Number(wordTopicId), id))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed > 0) {
+        notify(`Đã xóa ${ids.length - failed}/${ids.length} từ. ${failed} lỗi.`);
+      } else {
+        notify(`Đã xóa ${ids.length} từ.`);
+      }
+      setSelectedWordIds(new Set());
+      setEditingWordId(null);
+      setWordForm({ type: "NOUN" });
+      await loadWordsForTopic(Number(wordTopicId));
+    } catch (error) {
+      notify(`Xóa hàng loạt thất bại: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleFlashCardRowSelected = (flashId: number) => {
+    setSelectedFlashCardIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(flashId)) {
+        next.delete(flashId);
+      } else {
+        next.add(flashId);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAllFilteredFlashCards = () => {
+    setSelectedFlashCardIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredFlashCardsSelected) {
+        filteredFlashCards.forEach((c) => next.delete(c.id));
+      } else {
+        filteredFlashCards.forEach((c) => next.add(c.id));
+      }
+      return next;
+    });
+  };
+
+  const bulkDeleteSelectedFlashCards = async () => {
+    requireAuth();
+    if (!isPositiveInt(flashTopicId)) {
+      notify("Chọn topic trước.");
+      return;
+    }
+    const ids = [...selectedFlashCardIds];
+    if (ids.length === 0) {
+      return;
+    }
+    if (!confirm(`Xóa ${ids.length} flashcard đã chọn?`)) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        ids.map((id) => deleteTopicFlashCard(config, Number(flashTopicId), id))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed > 0) {
+        notify(`Đã xóa ${ids.length - failed}/${ids.length} flashcard. ${failed} lỗi.`);
+      } else {
+        notify(`Đã xóa ${ids.length} flashcard.`);
+      }
+      setSelectedFlashCardIds(new Set());
+      setEditingFlashId(null);
+      setFlashForm({ type: "NOUN", dictionaryWordId: null });
+      await loadFlashCardsForTopic(Number(flashTopicId));
+    } catch (error) {
+      notify(`Xóa hàng loạt thất bại: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runWordExcelImport = async (file: File) => {
+    requireAuth();
+    if (!isPositiveInt(wordTopicId)) {
+      notify("Chọn topic trước khi import (topic áp dụng cho toàn bộ dòng trong file)");
+      return;
+    }
+    setLoading(true);
+    try {
+      const r = await importWordsExcel(config, Number(wordTopicId), file);
       const hint =
-        r.errors?.length > 0 ? ` Vi du loi: ${r.errors.slice(0, 3).join(" | ")}` : "";
-      notify(`Import vocabulary: ${r.successCount} thanh cong, ${r.errorCount} loi.${hint}`);
-      if (isPositiveInt(wordLessonId)) {
-        await loadWordsForLesson(Number(wordLessonId));
+        r.errors?.length > 0 ? ` Ví dụ lỗi: ${r.errors.slice(0, 3).join(" | ")}` : "";
+      notify(`Import vocabulary: ${r.successCount} thành công, ${r.errorCount} lỗi.${hint}`);
+      if (isPositiveInt(wordTopicId)) {
+        await loadWordsForTopic(Number(wordTopicId));
       }
     } catch (error) {
-      notify(`Import vocabulary that bai: ${toUiError(error)}`);
+      notify(`Import vocabulary thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -759,21 +893,21 @@ export function App() {
 
   const runFlashExcelImport = async (file: File) => {
     requireAuth();
-    if (!isPositiveInt(flashLessonId)) {
-      notify("Chon lesson truoc khi import (lesson duoc ap dung cho toan bo dong trong file)");
+    if (!isPositiveInt(flashTopicId)) {
+      notify("Chọn topic trước khi import (topic áp dụng cho toàn bộ dòng trong file)");
       return;
     }
     setLoading(true);
     try {
-      const r = await importFlashCardsExcel(config, Number(flashLessonId), file);
+      const r = await importFlashCardsExcel(config, Number(flashTopicId), file);
       const hint =
-        r.errors?.length > 0 ? ` Vi du loi: ${r.errors.slice(0, 3).join(" | ")}` : "";
-      notify(`Import flashcard: ${r.successCount} thanh cong, ${r.errorCount} loi.${hint}`);
-      if (isPositiveInt(flashLessonId)) {
-        await loadFlashCardsForLesson(Number(flashLessonId));
+        r.errors?.length > 0 ? ` Ví dụ lỗi: ${r.errors.slice(0, 3).join(" | ")}` : "";
+      notify(`Import flashcard: ${r.successCount} thành công, ${r.errorCount} lỗi.${hint}`);
+      if (isPositiveInt(flashTopicId)) {
+        await loadFlashCardsForTopic(Number(flashTopicId));
       }
     } catch (error) {
-      notify(`Import flashcard that bai: ${toUiError(error)}`);
+      notify(`Import flashcard thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -783,47 +917,47 @@ export function App() {
     <div className="panel-grid">
       <section className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Vocabulary theo Lesson</h3>
+          <h3 style={{ margin: 0 }}>Từ vựng theo topic</h3>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
               type="button"
               onClick={() => {
-                const fallback = selectedLesson?.id;
+                const fallback = selectedTopic?.id;
                 if (fallback) {
-                  onWordLessonChange(String(fallback));
+                  onWordTopicChange(String(fallback));
                 } else {
-                  notify("Chon lesson o tab Lesson truoc (View)");
+                  notify("Chọn topic ở tab Topic trước (View)");
                 }
               }}
               style={{ padding: "0.5rem 1rem" }}
             >
-              Dung lesson dang chon (Lesson tab)
+              Dùng topic đang chọn (tab Topic)
             </button>
             <button
               type="button"
               onClick={() => {
-                loadLessonsForSelect().catch((e) => notify(toUiError(e)));
+                loadTopicsForSelect().catch((e) => notify(toUiError(e)));
               }}
               disabled={loading}
               style={{ padding: "0.5rem 1rem" }}
             >
-              Tai lai danh sach lesson
+              Tải lại danh sách topic
             </button>
           </div>
         </div>
         <div className="list-toolbar">
           <label style={{ flex: 1, display: "grid", gap: "6px", minWidth: 0 }}>
             <span className="note" style={{ fontWeight: 600 }}>
-              Chon lesson
+              Chọn topic
             </span>
             <select
-              value={lessonSelectValue(wordLessonId)}
-              onChange={(e) => onWordLessonChange(e.target.value)}
+              value={lessonSelectValue(wordTopicId)}
+              onChange={(e) => onWordTopicChange(e.target.value)}
             >
-              <option value="">-- Chon lesson --</option>
-              {lessonsForSelect.map((l) => (
-                <option key={l.id} value={l.id}>
-                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+              <option value="">-- Chọn topic --</option>
+              {topicsForSelect.map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.id} · {t.name}
                 </option>
               ))}
             </select>
@@ -831,23 +965,33 @@ export function App() {
         </div>
         <div className="list-toolbar">
           <input
-            placeholder="Tim nhanh word..."
+            placeholder="Tìm nhanh từ..."
             value={wordQuery}
             onChange={(e) => setWordQuery(e.target.value)}
           />
-          <span>Hien {filteredWords.length}/{words.length} muc</span>
+          <span>Hiện {filteredWords.length}/{words.length} mục</span>
+        </div>
+        <div className="list-toolbar" style={{ gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            className="danger"
+            disabled={loading || selectedWordIds.size === 0 || !isPositiveInt(wordTopicId)}
+            onClick={() => void bulkDeleteSelectedWords()}
+          >
+            Xóa đã chọn ({selectedWordIds.size})
+          </button>
         </div>
         <div className="list-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
           <span className="note" style={{ fontWeight: 600 }}>
-            Import Excel (.xlsx / .xls) — moi dong mot word vao lesson dang chon o tren
+            Import Excel (.xlsx / .xls) — mỗi dòng một từ vào topic đang chọn ở trên
           </span>
           <span className="note">
-            Hang 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE)
+            Hàng 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE)
           </span>
           <input
             type="file"
             accept=".xlsx,.xls"
-            disabled={loading || !isPositiveInt(wordLessonId)}
+            disabled={loading || !isPositiveInt(wordTopicId)}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
@@ -860,17 +1004,34 @@ export function App() {
         <table>
           <thead>
             <tr>
+              <th style={{ width: 44 }}>
+                <input
+                  type="checkbox"
+                  title="Chọn tất cả trong danh sách lọc"
+                  checked={allFilteredWordsSelected}
+                  onChange={toggleSelectAllFilteredWords}
+                  disabled={loading || filteredWords.length === 0}
+                />
+              </th>
               <th>ID</th>
               <th>Word</th>
               <th>Pronunciation</th>
               <th>Meaning</th>
               <th>Type</th>
-              <th>Thao tac</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filteredWords.map((w) => (
               <tr key={w.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedWordIds.has(w.id)}
+                    onChange={() => toggleWordRowSelected(w.id)}
+                    disabled={loading}
+                  />
+                </td>
                 <td>{w.id}</td>
                 <td>{w.word}</td>
                 <td>{w.pronunciation}</td>
@@ -888,41 +1049,46 @@ export function App() {
                         meaning: w.meaning,
                         type: w.type,
                       });
-                      notify("Dang sua word — bam Cap nhat word de luu");
+                      notify("Đang sửa từ — bấm Cập nhật từ để lưu");
                     }}
                   >
-                    Sua
+                    Sửa
                   </button>{" "}
                   <button
                     type="button"
                     disabled={loading}
                     onClick={() => {
-                      if (!isPositiveInt(wordLessonId)) {
-                        notify("Chon lesson");
+                      if (!isPositiveInt(wordTopicId)) {
+                        notify("Chọn topic");
                         return;
                       }
                       if (
                         !confirm(
-                          `Xoa word "${w.word}"? Cac flashcard gan word nay trong lesson cung se bi xoa.`
+                          `Xóa từ "${w.word}"? Các flashcard gắn từ này trong topic cũng sẽ bị xóa.`
                         )
                       ) {
                         return;
                       }
                       setLoading(true);
-                      deleteLessonWord(config, Number(wordLessonId), w.id)
+                      deleteTopicWord(config, Number(wordTopicId), w.id)
                         .then(() => {
-                          notify("Da xoa word");
+                          notify("Đã xóa từ");
+                          setSelectedWordIds((prev) => {
+                            const next = new Set(prev);
+                            next.delete(w.id);
+                            return next;
+                          });
                           if (editingWordId === w.id) {
                             setEditingWordId(null);
                             setWordForm({ type: "NOUN" });
                           }
-                          return loadWordsForLesson(Number(wordLessonId));
+                          return loadWordsForTopic(Number(wordTopicId));
                         })
-                        .catch((err) => notify(`Xoa word that bai: ${toUiError(err)}`))
+                        .catch((err) => notify(`Xóa từ thất bại: ${toUiError(err)}`))
                         .finally(() => setLoading(false));
                     }}
                   >
-                    Xoa
+                    Xóa
                   </button>
                 </td>
               </tr>
@@ -932,21 +1098,21 @@ export function App() {
       </section>
 
       <section className="panel">
-        <h3>{editingWordId != null ? "Sua word trong Lesson" : "Them Word vao Lesson"}</h3>
+        <h3>{editingWordId != null ? "Sửa từ trong topic" : "Thêm từ vào topic"}</h3>
         <form onSubmit={onWordSubmit} className="form-grid">
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
-              Chon lesson
+              Chọn topic
             </span>
             <select
-              value={lessonSelectValue(wordLessonId)}
-              onChange={(e) => onWordLessonChange(e.target.value)}
+              value={lessonSelectValue(wordTopicId)}
+              onChange={(e) => onWordTopicChange(e.target.value)}
               required
             >
-              <option value="">-- Chon lesson --</option>
-              {lessonsForSelect.map((l) => (
-                <option key={l.id} value={l.id}>
-                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+              <option value="">-- Chọn topic --</option>
+              {topicsForSelect.map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.id} · {t.name}
                 </option>
               ))}
             </select>
@@ -981,7 +1147,7 @@ export function App() {
             <option value="ADJECTIVE">ADJECTIVE</option>
           </select>
           <button type="submit" disabled={loading}>
-            {editingWordId != null ? "Cap nhat word" : "Them word"}
+            {editingWordId != null ? "Cập nhật từ" : "Thêm từ"}
           </button>
           <button
             type="button"
@@ -990,7 +1156,7 @@ export function App() {
               setEditingWordId(null);
             }}
           >
-            {editingWordId != null ? "Huy sua" : "Reset"}
+            {editingWordId != null ? "Hủy sửa" : "Reset"}
           </button>
         </form>
       </section>
@@ -1001,47 +1167,47 @@ export function App() {
     <div className="panel-grid">
       <section className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Flashcards theo Lesson</h3>
+          <h3 style={{ margin: 0 }}>Flashcard theo topic</h3>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
               type="button"
               onClick={() => {
-                const fallback = selectedLesson?.id;
+                const fallback = selectedTopic?.id;
                 if (fallback) {
-                  onFlashLessonChange(String(fallback));
+                  onFlashTopicChange(String(fallback));
                 } else {
-                  notify("Chon lesson o tab Lesson truoc (View)");
+                  notify("Chọn topic ở tab Topic trước (View)");
                 }
               }}
               style={{ padding: "0.5rem 1rem" }}
             >
-              Dung lesson dang chon (Lesson tab)
+              Dùng topic đang chọn (tab Topic)
             </button>
             <button
               type="button"
               onClick={() => {
-                loadLessonsForSelect().catch((e) => notify(toUiError(e)));
+                loadTopicsForSelect().catch((e) => notify(toUiError(e)));
               }}
               disabled={loading}
               style={{ padding: "0.5rem 1rem" }}
             >
-              Tai lai danh sach lesson
+              Tải lại danh sách topic
             </button>
           </div>
         </div>
         <div className="list-toolbar">
           <label style={{ flex: 1, display: "grid", gap: "6px", minWidth: 0 }}>
             <span className="note" style={{ fontWeight: 600 }}>
-              Chon lesson
+              Chọn topic
             </span>
             <select
-              value={lessonSelectValue(flashLessonId)}
-              onChange={(e) => onFlashLessonChange(e.target.value)}
+              value={lessonSelectValue(flashTopicId)}
+              onChange={(e) => onFlashTopicChange(e.target.value)}
             >
-              <option value="">-- Chon lesson --</option>
-              {lessonsForSelect.map((l) => (
-                <option key={l.id} value={l.id}>
-                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+              <option value="">-- Chọn topic --</option>
+              {topicsForSelect.map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.id} · {t.name}
                 </option>
               ))}
             </select>
@@ -1049,23 +1215,33 @@ export function App() {
         </div>
         <div className="list-toolbar">
           <input
-            placeholder="Tim nhanh flashcard..."
+            placeholder="Tìm nhanh flashcard..."
             value={flashQuery}
             onChange={(e) => setFlashQuery(e.target.value)}
           />
-          <span>Hien {filteredFlashCards.length}/{flashCards.length} muc</span>
+          <span>Hiện {filteredFlashCards.length}/{flashCards.length} mục</span>
+        </div>
+        <div className="list-toolbar" style={{ gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            className="danger"
+            disabled={loading || selectedFlashCardIds.size === 0 || !isPositiveInt(flashTopicId)}
+            onClick={() => void bulkDeleteSelectedFlashCards()}
+          >
+            Xóa đã chọn ({selectedFlashCardIds.size})
+          </button>
         </div>
         <div className="list-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
           <span className="note" style={{ fontWeight: 600 }}>
-            Import Excel (.xlsx / .xls) — vao lesson dang chon; khong can cot anh (backend gan anh placeholder)
+            Import Excel (.xlsx / .xls) — vào topic đang chọn; không cần cột ảnh (backend gắn ảnh placeholder)
           </span>
           <span className="note">
-            Hang 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE) · example
+            Hàng 1 (header): word · pronunciation · meaning · type (NOUN | VERB | ADJECTIVE) · example
           </span>
           <input
             type="file"
             accept=".xlsx,.xls"
-            disabled={loading || !isPositiveInt(flashLessonId)}
+            disabled={loading || !isPositiveInt(flashTopicId)}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
@@ -1078,17 +1254,34 @@ export function App() {
         <table>
           <thead>
             <tr>
+              <th style={{ width: 44 }}>
+                <input
+                  type="checkbox"
+                  title="Chọn tất cả trong danh sách lọc"
+                  checked={allFilteredFlashCardsSelected}
+                  onChange={toggleSelectAllFilteredFlashCards}
+                  disabled={loading || filteredFlashCards.length === 0}
+                />
+              </th>
               <th>ID</th>
               <th>Word</th>
               <th>Meaning</th>
               <th>Example</th>
               <th>Image</th>
-              <th>Thao tac</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filteredFlashCards.map((c) => (
               <tr key={c.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedFlashCardIds.has(c.id)}
+                    onChange={() => toggleFlashCardRowSelected(c.id)}
+                    disabled={loading}
+                  />
+                </td>
                 <td>{c.id}</td>
                 <td>{c.word || "-"}</td>
                 <td>{c.meaning || "-"}</td>
@@ -1111,37 +1304,42 @@ export function App() {
                         imageName: null,
                         imageSize: null,
                       });
-                      notify("Dang sua flashcard — anh tuy chon khi cap nhat");
+                      notify("Đang sửa flashcard — ảnh tùy chọn khi cập nhật");
                     }}
                   >
-                    Sua
+                    Sửa
                   </button>{" "}
                   <button
                     type="button"
                     disabled={loading}
                     onClick={() => {
-                      if (!isPositiveInt(flashLessonId)) {
-                        notify("Chon lesson");
+                      if (!isPositiveInt(flashTopicId)) {
+                        notify("Chọn topic");
                         return;
                       }
-                      if (!confirm(`Xoa flashcard #${c.id}?`)) {
+                      if (!confirm(`Xóa flashcard #${c.id}?`)) {
                         return;
                       }
                       setLoading(true);
-                      deleteLessonFlashCard(config, Number(flashLessonId), c.id)
+                      deleteTopicFlashCard(config, Number(flashTopicId), c.id)
                         .then(() => {
-                          notify("Da xoa flashcard");
+                          notify("Đã xóa flashcard");
+                          setSelectedFlashCardIds((prev) => {
+                            const next = new Set(prev);
+                            next.delete(c.id);
+                            return next;
+                          });
                           if (editingFlashId === c.id) {
                             setEditingFlashId(null);
                             setFlashForm({ type: "NOUN", dictionaryWordId: null });
                           }
-                          return loadFlashCardsForLesson(Number(flashLessonId));
+                          return loadFlashCardsForTopic(Number(flashTopicId));
                         })
-                        .catch((err) => notify(`Xoa flashcard that bai: ${toUiError(err)}`))
+                        .catch((err) => notify(`Xóa flashcard thất bại: ${toUiError(err)}`))
                         .finally(() => setLoading(false));
                     }}
                   >
-                    Xoa
+                    Xóa
                   </button>
                 </td>
               </tr>
@@ -1151,21 +1349,21 @@ export function App() {
       </section>
 
       <section className="panel">
-        <h3>{editingFlashId != null ? "Sua Flashcard" : "Tao Flashcard (thuoc Lesson)"}</h3>
+        <h3>{editingFlashId != null ? "Sửa flashcard" : "Tạo flashcard (thuộc topic)"}</h3>
         <form onSubmit={onFlashSubmit} className="form-grid">
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
-              Chon lesson
+              Chọn topic
             </span>
             <select
-              value={lessonSelectValue(flashLessonId)}
-              onChange={(e) => onFlashLessonChange(e.target.value)}
+              value={lessonSelectValue(flashTopicId)}
+              onChange={(e) => onFlashTopicChange(e.target.value)}
               required
             >
-              <option value="">-- Chon lesson --</option>
-              {lessonsForSelect.map((l) => (
-                <option key={l.id} value={l.id}>
-                  #{l.id} · {l.title} · {l.type} · Topic {l.topicId}
+              <option value="">-- Chọn topic --</option>
+              {topicsForSelect.map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.id} · {t.name}
                 </option>
               ))}
             </select>
@@ -1173,14 +1371,14 @@ export function App() {
           <input
             type="number"
             min={1}
-            placeholder="Dictionary Word ID (neu co)"
+            placeholder="Dictionary Word ID (nếu có)"
             value={flashForm.dictionaryWordId || ""}
             onChange={(e) =>
               setFlashForm((p) => ({ ...p, dictionaryWordId: e.target.value ? Number(e.target.value) : null }))
             }
           />
           <input
-            placeholder="Word (bo qua neu dung Word ID)"
+            placeholder="Word (bỏ qua nếu dùng Word ID)"
             value={flashForm.word || ""}
             onChange={(e) => setFlashForm((p) => ({ ...p, word: e.target.value }))}
             maxLength={50}
@@ -1215,8 +1413,8 @@ export function App() {
           <label style={{ display: "grid", gap: "6px" }}>
             <span className="note" style={{ fontWeight: 600 }}>
               {editingFlashId != null
-                ? "Anh flashcard (tuy chon khi sua — upload Cloudinary)"
-                : "Anh flashcard (upload len Cloudinary)"}
+                ? "Ảnh flashcard (tùy chọn khi sửa — upload Cloudinary)"
+                : "Ảnh flashcard (upload lên Cloudinary)"}
             </span>
             <input
               type="file"
@@ -1234,7 +1432,7 @@ export function App() {
             <img className="image-preview" src={flashForm.imageUrl} alt="Flashcard preview" />
           )}
           <button type="submit" disabled={loading}>
-            {editingFlashId != null ? "Cap nhat flashcard" : "Tao flashcard"}
+            {editingFlashId != null ? "Cập nhật flashcard" : "Tạo flashcard"}
           </button>
           <button
             type="button"
@@ -1243,7 +1441,7 @@ export function App() {
               setEditingFlashId(null);
             }}
           >
-            {editingFlashId != null ? "Huy sua" : "Reset"}
+            {editingFlashId != null ? "Hủy sửa" : "Reset"}
           </button>
         </form>
       </section>
@@ -1268,7 +1466,7 @@ export function App() {
           await loadScenarios(nextPage);
         }
       } catch (error) {
-        notify(`Loi phan trang: ${toUiError(error)}`);
+        notify(`Lỗi phân trang: ${toUiError(error)}`);
       } finally {
         setLoading(false);
       }
@@ -1314,16 +1512,16 @@ export function App() {
 
       if (topicForm.id) {
         await updateTopic(config, topicForm.id, payload);
-        notify("Cap nhat Topic thanh cong");
+        notify("Cập nhật Topic thành công");
       } else {
         await createTopic(config, payload);
-        notify("Tao Topic thanh cong");
+        notify("Tạo Topic thành công");
       }
       setTopicForm({});
       setSelectedTopic(null);
       await refreshAll(true);
     } catch (error) {
-      notify(`Loi luu Topic: ${toUiError(error)}`);
+      notify(`Lỗi lưu Topic: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1351,16 +1549,16 @@ export function App() {
 
       if (lessonForm.id) {
         await updateLesson(config, lessonForm.id, payload);
-        notify("Cap nhat Lesson thanh cong");
+        notify("Cập nhật Lesson thành công");
       } else {
         await createLesson(config, payload);
-        notify("Tao Lesson thanh cong");
+        notify("Tạo Lesson thành công");
       }
       setLessonForm({ type: "LISTENING" });
       setSelectedLesson(null);
       await refreshAll();
     } catch (error) {
-      notify(`Loi luu Lesson: ${toUiError(error)}`);
+      notify(`Lỗi lưu Lesson: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1393,16 +1591,16 @@ export function App() {
 
       if (scenarioForm.id) {
         await updateScenario(config, scenarioForm.id, payload);
-        notify("Cap nhat Scenario thanh cong");
+        notify("Cập nhật Scenario thành công");
       } else {
         await createScenario(config, payload);
-        notify("Tao Scenario thanh cong");
+        notify("Tạo Scenario thành công");
       }
       setScenarioForm({});
       setSelectedScenario(null);
       await refreshAll();
     } catch (error) {
-      notify(`Loi luu Scenario: ${toUiError(error)}`);
+      notify(`Lỗi lưu Scenario: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1412,7 +1610,7 @@ export function App() {
     requireAuth();
     setLoading(true);
     try {
-      notify("Dang doc file Topic...");
+      notify("Đang đọc file Topic...");
       const rows = await readImportRows(file);
       const dataRows = rows.filter((row) => row.length >= 2 && row[0].toLowerCase() !== "name");
       const topicReqs = dataRows
@@ -1425,16 +1623,16 @@ export function App() {
       const skipped = dataRows.length - topicReqs.length;
       
       if (topicReqs.length === 0) {
-        notify("Khong co du lieu hop le trong file");
+        notify("Không có dữ liệu hợp lệ trong file");
         return;
       }
 
-      notify(`Dang import ${topicReqs.length} topic...`);
+      notify(`Đang import ${topicReqs.length} topic...`);
       const result = await bulkImportTopics(config, topicReqs);
-      notify(`Da import ${result.length} topic${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      notify(`Đã import ${result.length} topic${skipped > 0 ? `, bỏ qua ${skipped} dòng không hợp lệ` : ""}`);
       await refreshAll();
     } catch (error) {
-      notify(`Import Topic that bai: ${toUiError(error)}`);
+      notify(`Import Topic thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1444,9 +1642,9 @@ export function App() {
     requireAuth();
     setLoading(true);
     try {
-      notify("Dang doc file Lesson...");
+      notify("Đang đọc file Lesson...");
       if (topicState.totalElements === 0) {
-        notify("Khong co Topic nao. Hay import/create Topic truoc");
+        notify("Không có Topic nào. Hãy import/tạo Topic trước");
         return;
       }
       const rows = await readImportRows(file);
@@ -1463,16 +1661,16 @@ export function App() {
       const skipped = dataRows.length - lessonReqs.length;
 
       if (lessonReqs.length === 0) {
-        notify("Khong co du lieu hop le trong file");
+        notify("Không có dữ liệu hợp lệ trong file");
         return;
       }
 
-      notify(`Dang import ${lessonReqs.length} lesson...`);
+      notify(`Đang import ${lessonReqs.length} lesson...`);
       const result = await bulkImportLessons(config, lessonReqs);
-      notify(`Da import ${result.length} lesson${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      notify(`Đã import ${result.length} lesson${skipped > 0 ? `, bỏ qua ${skipped} dòng không hợp lệ` : ""}`);
       await refreshAll(true);
     } catch (error) {
-      notify(`Import Lesson that bai: ${toUiError(error)}`);
+      notify(`Import Lesson thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1482,9 +1680,9 @@ export function App() {
     requireAuth();
     setLoading(true);
     try {
-      notify("Dang doc file Scenario...");
+      notify("Đang đọc file Scenario...");
       if (lessonState.totalElements === 0) {
-        notify("Khong co Lesson nao. Hay import/create Lesson truoc");
+        notify("Không có Lesson nào. Hãy import/tạo Lesson trước");
         return;
       }
       const allLessons = await listAllLessons(config);
@@ -1526,16 +1724,16 @@ export function App() {
       const skipped = dataRows.length - scenarioReqs.length;
 
       if (scenarioReqs.length === 0) {
-        notify("Khong co du lieu hop le trong file");
+        notify("Không có dữ liệu hợp lệ trong file");
         return;
       }
 
-      notify(`Dang import ${scenarioReqs.length} scenario...`);
+      notify(`Đang import ${scenarioReqs.length} scenario...`);
       const result = await bulkImportScenarios(config, scenarioReqs);
-      notify(`Da import ${result.length} scenario${skipped > 0 ? `, bo qua ${skipped} dong khong hop le` : ""}`);
+      notify(`Đã import ${result.length} scenario${skipped > 0 ? `, bỏ qua ${skipped} dòng không hợp lệ` : ""}`);
       await refreshAll(true);
     } catch (error) {
-      notify(`Import Scenario that bai: ${toUiError(error)}`);
+      notify(`Import Scenario thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1546,9 +1744,9 @@ export function App() {
     try {
       const upload = await uploadImage(config, file, "elearn/topics");
       setTopicForm((prev) => ({ ...prev, imageUrl: upload.secureUrl }));
-      notify(`Da upload Topic image: ${upload.publicId || "ok"}`);
+      notify(`Đã upload ảnh Topic: ${upload.publicId || "ok"}`);
     } catch (error) {
-      notify(`Upload Topic image that bai: ${toUiError(error)}`);
+      notify(`Upload ảnh Topic thất bại: ${toUiError(error)}`);
     }
   };
 
@@ -1557,9 +1755,9 @@ export function App() {
     try {
       const upload = await uploadImage(config, file, "elearn/lessons");
       setLessonForm((prev) => ({ ...prev, imageUrl: upload.secureUrl }));
-      notify(`Da upload Lesson image: ${upload.publicId || "ok"}`);
+      notify(`Đã upload ảnh Lesson: ${upload.publicId || "ok"}`);
     } catch (error) {
-      notify(`Upload Lesson image that bai: ${toUiError(error)}`);
+      notify(`Upload ảnh Lesson thất bại: ${toUiError(error)}`);
     }
   };
 
@@ -1573,14 +1771,14 @@ export function App() {
         imageName: upload.originalFilename ?? file.name,
         imageSize: upload.bytes ?? file.size,
       }));
-      notify(`Da upload anh flashcard (Cloudinary): ${upload.publicId || "ok"}`);
+      notify(`Đã upload ảnh flashcard (Cloudinary): ${upload.publicId || "ok"}`);
     } catch (error) {
-      notify(`Upload anh flashcard that bai: ${toUiError(error)}`);
+      notify(`Upload ảnh flashcard thất bại: ${toUiError(error)}`);
     }
   };
 
   const onDeleteTopic = async (topic: Topic) => {
-    if (!window.confirm(`Ban chac chan muon xoa Topic #${topic.id}?`)) {
+    if (!window.confirm(`Bạn chắc chắn muốn xóa Topic #${topic.id}?`)) {
       return;
     }
     setLoading(true);
@@ -1589,17 +1787,17 @@ export function App() {
       if (selectedTopic?.id === topic.id) {
         setSelectedTopic(null);
       }
-      notify("Xoa Topic thanh cong");
+      notify("Xóa Topic thành công");
       await refreshAll();
     } catch (error) {
-      notify(`Xoa Topic that bai: ${toUiError(error)}`);
+      notify(`Xóa Topic thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
   };
 
   const onDeleteLesson = async (lesson: Lesson) => {
-    if (!window.confirm(`Ban chac chan muon xoa Lesson #${lesson.id}?`)) {
+    if (!window.confirm(`Bạn chắc chắn muốn xóa Lesson #${lesson.id}?`)) {
       return;
     }
     setLoading(true);
@@ -1608,17 +1806,17 @@ export function App() {
       if (selectedLesson?.id === lesson.id) {
         setSelectedLesson(null);
       }
-      notify("Xoa Lesson thanh cong");
+      notify("Xóa Lesson thành công");
       await refreshAll();
     } catch (error) {
-      notify(`Xoa Lesson that bai: ${toUiError(error)}`);
+      notify(`Xóa Lesson thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
   };
 
   const onDeleteScenario = async (scenario: Scenario) => {
-    if (!window.confirm(`Ban chac chan muon xoa Scenario #${scenario.id}?`)) {
+    if (!window.confirm(`Bạn chắc chắn muốn xóa Scenario #${scenario.id}?`)) {
       return;
     }
     setLoading(true);
@@ -1627,10 +1825,10 @@ export function App() {
       if (selectedScenario?.id === scenario.id) {
         setSelectedScenario(null);
       }
-      notify("Xoa Scenario thanh cong");
+      notify("Xóa Scenario thành công");
       await refreshAll();
     } catch (error) {
-      notify(`Xoa Scenario that bai: ${toUiError(error)}`);
+      notify(`Xóa Scenario thất bại: ${toUiError(error)}`);
     } finally {
       setLoading(false);
     }
@@ -1640,19 +1838,19 @@ export function App() {
     <div className="panel-grid">
       <section className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Danh sach Topic</h3>
+          <h3 style={{ margin: 0 }}>Danh sách Topic</h3>
           <button onClick={() => { setSelectedTopic(null); setTopicForm({}); }} style={{ padding: "0.5rem 1rem" }}>
-            + Tao Topic
+            + Tạo Topic
           </button>
         </div>
         <div className="list-toolbar">
           <input
-            placeholder="Tim nhanh Topic tren trang hien tai..."
+            placeholder="Tìm nhanh Topic trên trang hiện tại..."
             value={topicQuery}
             onChange={(e) => setTopicQuery(e.target.value)}
           />
           <span>
-            Hien {filteredTopics.length}/{topics.length} muc
+            Hiện {filteredTopics.length}/{topics.length} mục
           </span>
         </div>
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
@@ -1689,8 +1887,8 @@ export function App() {
             <tr>
               <th>ID</th>
               <th>Ten</th>
-              <th>Mo ta</th>
-              <th>Anh</th>
+              <th>Mô tả</th>
+              <th>Ảnh</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -1719,12 +1917,12 @@ export function App() {
         {selectedTopic && !topicForm.id ? (
           <div>
             <div className="detail-box">
-              <h4>Chi tiet Topic #{selectedTopic.id}</h4>
-              <p><strong>Ten:</strong> {selectedTopic.name}</p>
-              <p><strong>Mo ta:</strong> {selectedTopic.description}</p>
+              <h4>Chi tiết Topic #{selectedTopic.id}</h4>
+              <p><strong>Tên:</strong> {selectedTopic.name}</p>
+              <p><strong>Mô tả:</strong> {selectedTopic.description}</p>
               <p>
-                <strong>Image:</strong>{" "}
-                {selectedTopic.imageUrl ? <a href={selectedTopic.imageUrl}>Mo anh</a> : "Khong co"}
+                <strong>Ảnh:</strong>{" "}
+                {selectedTopic.imageUrl ? <a href={selectedTopic.imageUrl}>Mở ảnh</a> : "Không có"}
               </p>
               {selectedTopic.imageUrl && (
                 <img className="image-preview" src={selectedTopic.imageUrl} alt={selectedTopic.name} />
@@ -1733,17 +1931,17 @@ export function App() {
           </div>
         ) : (
           <>
-            <h3>{topicForm.id ? "Cap nhat Topic" : "Tao Topic"}</h3>
+            <h3>{topicForm.id ? "Cập nhật Topic" : "Tạo Topic"}</h3>
             <form onSubmit={onTopicSubmit} className="form-grid">
               <input
-                placeholder="Ten topic"
+                placeholder="Tên topic"
                 value={topicForm.name || ""}
                 onChange={(e) => setTopicForm((prev) => ({ ...prev, name: e.target.value }))}
                 maxLength={255}
                 required
               />
               <textarea
-                placeholder="Mo ta"
+                placeholder="Mô tả"
                 value={topicForm.description || ""}
                 onChange={(e) => setTopicForm((prev) => ({ ...prev, description: e.target.value }))}
                 maxLength={500}
@@ -1769,7 +1967,7 @@ export function App() {
                 }}
               />
               <button type="submit" disabled={loading}>
-                {topicForm.id ? "Luu cap nhat" : "Tao moi"}
+                {topicForm.id ? "Lưu cập nhật" : "Tạo mới"}
               </button>
               <button type="button" onClick={() => setTopicForm({})}>
                 Reset
@@ -1785,19 +1983,19 @@ export function App() {
     <div className="panel-grid">
       <section className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Danh sach Lesson</h3>
+          <h3 style={{ margin: 0 }}>Danh sách Lesson</h3>
           <button onClick={() => { setSelectedLesson(null); setLessonForm({ type: "LISTENING" }); }} style={{ padding: "0.5rem 1rem" }}>
-            + Tao Lesson
+            + Tạo Lesson
           </button>
         </div>
         <div className="list-toolbar">
           <input
-            placeholder="Tim nhanh Lesson tren trang hien tai..."
+            placeholder="Tìm nhanh Lesson trên trang hiện tại..."
             value={lessonQuery}
             onChange={(e) => setLessonQuery(e.target.value)}
           />
           <span>
-            Hien {filteredLessons.length}/{lessons.length} muc
+            Hiện {filteredLessons.length}/{lessons.length} mục
           </span>
         </div>
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
@@ -1836,7 +2034,7 @@ export function App() {
               <th>Topic</th>
               <th>Title</th>
               <th>Type</th>
-              <th>Anh</th>
+              <th>Ảnh</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -1866,14 +2064,14 @@ export function App() {
         {selectedLesson && !lessonForm.id ? (
           <div>
             <div className="detail-box">
-              <h4>Chi tiet Lesson #{selectedLesson.id}</h4>
+              <h4>Chi tiết Lesson #{selectedLesson.id}</h4>
               <p><strong>Topic ID:</strong> {selectedLesson.topicId}</p>
-              <p><strong>Title:</strong> {selectedLesson.title}</p>
-              <p><strong>Type:</strong> {selectedLesson.type}</p>
-              <p><strong>Parent:</strong> {selectedLesson.parentId || "Khong co"}</p>
+              <p><strong>Tiêu đề:</strong> {selectedLesson.title}</p>
+              <p><strong>Loại:</strong> {selectedLesson.type}</p>
+              <p><strong>Parent:</strong> {selectedLesson.parentId || "Không có"}</p>
               <p>
-                <strong>Image:</strong>{" "}
-                {selectedLesson.imageUrl ? <a href={selectedLesson.imageUrl}>Mo anh</a> : "Khong co"}
+                <strong>Ảnh:</strong>{" "}
+                {selectedLesson.imageUrl ? <a href={selectedLesson.imageUrl}>Mở ảnh</a> : "Không có"}
               </p>
               {selectedLesson.imageUrl && (
                 <img className="image-preview" src={selectedLesson.imageUrl} alt={selectedLesson.title} />
@@ -1882,7 +2080,7 @@ export function App() {
           </div>
         ) : (
           <>
-            <h3>{lessonForm.id ? "Cap nhat Lesson" : "Tao Lesson"}</h3>
+            <h3>{lessonForm.id ? "Cập nhật Lesson" : "Tạo Lesson"}</h3>
             <form onSubmit={onLessonSubmit} className="form-grid">
               <input
                 type="number"
@@ -1895,7 +2093,7 @@ export function App() {
                 required
               />
               <input
-                placeholder="Title"
+                placeholder="Tiêu đề"
                 value={lessonForm.title || ""}
                 onChange={(e) => setLessonForm((prev) => ({ ...prev, title: e.target.value }))}
                 maxLength={255}
@@ -1943,7 +2141,7 @@ export function App() {
                 }
               />
               <button type="submit" disabled={loading}>
-                {lessonForm.id ? "Luu cap nhat" : "Tao moi"}
+                {lessonForm.id ? "Lưu cập nhật" : "Tạo mới"}
               </button>
               <button type="button" onClick={() => setLessonForm({ type: "LISTENING" })}>
                 Reset
@@ -1959,19 +2157,19 @@ export function App() {
     <div className="panel-grid">
       <section className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Danh sach Scenario</h3>
+          <h3 style={{ margin: 0 }}>Danh sách Scenario</h3>
           <button onClick={() => { setSelectedScenario(null); setScenarioForm({}); }} style={{ padding: "0.5rem 1rem" }}>
-            + Tao Scenario
+            + Tạo Scenario
           </button>
         </div>
         <div className="list-toolbar">
           <input
-            placeholder="Tim nhanh Scenario tren trang hien tai..."
+            placeholder="Tìm nhanh Scenario trên trang hiện tại..."
             value={scenarioQuery}
             onChange={(e) => setScenarioQuery(e.target.value)}
           />
           <span>
-            Hien {filteredScenarios.length}/{scenarios.length} muc
+            Hiện {filteredScenarios.length}/{scenarios.length} mục
           </span>
         </div>
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", alignItems: "center", flexWrap: "wrap" }}>
@@ -2038,11 +2236,11 @@ export function App() {
         {selectedScenario && !scenarioForm.id ? (
           <div>
             <div className="detail-box">
-              <h4>Chi tiet Scenario #{selectedScenario.id}</h4>
+              <h4>Chi tiết Scenario #{selectedScenario.id}</h4>
               <p><strong>Topic ID:</strong> {selectedScenario.topicId}</p>
               <p><strong>Lesson ID:</strong> {selectedScenario.lessonId}</p>
-              <p><strong>Title:</strong> {selectedScenario.title}</p>
-              <p><strong>Description:</strong> {selectedScenario.description}</p>
+              <p><strong>Tiêu đề:</strong> {selectedScenario.title}</p>
+              <p><strong>Mô tả:</strong> {selectedScenario.description}</p>
               <p><strong>AI Role:</strong> {selectedScenario.aiRole}</p>
               <p><strong>User Role:</strong> {selectedScenario.userRole}</p>
               <p><strong>Tasks:</strong> {selectedScenario.tasks || "-"}</p>
@@ -2053,7 +2251,7 @@ export function App() {
           </div>
         ) : (
           <>
-            <h3>{scenarioForm.id ? "Cap nhat Scenario" : "Tao Scenario"}</h3>
+            <h3>{scenarioForm.id ? "Cập nhật Scenario" : "Tạo Scenario"}</h3>
             <form onSubmit={onScenarioSubmit} className="form-grid">
               <input
                 type="number"
@@ -2076,14 +2274,14 @@ export function App() {
                 required
               />
               <input
-                placeholder="Title"
+                placeholder="Tiêu đề"
                 value={scenarioForm.title || ""}
                 onChange={(e) => setScenarioForm((prev) => ({ ...prev, title: e.target.value }))}
                 maxLength={255}
                 required
               />
               <textarea
-                placeholder="Description"
+                placeholder="Mô tả"
                 value={scenarioForm.description || ""}
                 onChange={(e) =>
                   setScenarioForm((prev) => ({ ...prev, description: e.target.value }))
@@ -2136,7 +2334,7 @@ export function App() {
                 maxLength={500}
               />
               <button type="submit" disabled={loading}>
-                {scenarioForm.id ? "Luu cap nhat" : "Tao moi"}
+                {scenarioForm.id ? "Lưu cập nhật" : "Tạo mới"}
               </button>
               <button type="button" onClick={() => setScenarioForm({})}>
                 Reset
@@ -2154,8 +2352,8 @@ export function App() {
         <section className="login-card">
           <div className="login-head">
             <p className="eyebrow">E-Learning Admin</p>
-            <h1>Dang nhap he thong quan tri</h1>
-            <p className="note">He thong quan tri Topic, Lesson, Scenario</p>
+            <h1>Đăng nhập hệ thống quản trị</h1>
+            <p className="note">Hệ thống quản trị Topic, Lesson, Scenario</p>
           </div>
           <form onSubmit={onLogin} className="form-grid">
             <label>
@@ -2179,10 +2377,10 @@ export function App() {
               />
             </label>
             <button type="submit" disabled={loading}>
-              {loading ? "Dang dang nhap..." : "Dang nhap"}
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
-          <p className="note">{message || "Nhap thong tin tai khoan admin BE de dang nhap."}</p>
+          <p className="note">{message || "Nhập thông tin tài khoản admin BE để đăng nhập."}</p>
         </section>
       </div>
     );
@@ -2192,7 +2390,7 @@ export function App() {
     <div className="dashboard-layout">
       <aside className="sidebar">
         <div className="brand">E-Learn Admin</div>
-        <p className="side-label">Quan tri noi dung</p>
+        <p className="side-label">Quản trị nội dung</p>
         <nav className="menu">
           <button className={tab === "topics" ? "active" : ""} onClick={() => setTab("topics")}>
             Topic
