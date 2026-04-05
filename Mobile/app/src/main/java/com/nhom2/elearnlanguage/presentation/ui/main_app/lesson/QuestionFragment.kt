@@ -1,21 +1,29 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.widget.Toast
 import android.media.MediaPlayer
 import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.media.SoundPool
 import android.os.Build
+import android.content.pm.PackageManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.QuestionFragmentDirections
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
@@ -39,9 +47,11 @@ import android.view.animation.OvershootInterpolator
 import androidx.annotation.RequiresApi
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
@@ -51,7 +61,17 @@ import java.time.format.DateTimeFormatter
 class QuestionFragment : Fragment() {
     companion object {
         private const val TAG = "QuestionFragment"
+        private const val SPEAKING_SAMPLE_RATE = 16000
+        private const val SPEAKING_CHANNEL_COUNT = 1
+        private const val SPEAKING_BITS_PER_SAMPLE = 16
+        private const val SPEAKING_CORRECT_THRESHOLD = 60.0
     }
+
+    private data class SpeakingFeedback(
+        val isCorrect: Boolean,
+        val displayText: String,
+        val answerContent: String
+    )
 
     private var _binding: FragmentQuestionBinding? = null
     private val binding get() = _binding!!
@@ -81,13 +101,40 @@ class QuestionFragment : Fragment() {
     private var hasHandledLoadErrorState: Boolean = false
     private var correctAnswerCount: Int = 0
     private val correctnessByQuestionId: MutableMap<Int, Boolean> = mutableMapOf()
+    private val speakingFeedbackByQuestionId: MutableMap<Int, SpeakingFeedback> = mutableMapOf()
+    private var isRecordingSpeaking: Boolean = false
+    private var speakingAudioRecord: AudioRecord? = null
+    private var speakingRecordJob: Job? = null
+    private var speakingRecordFile: File? = null
+    private var isAssessingSpeaking: Boolean = false
 
     private val lessonAudioCacheDir: File by lazy {
         File(requireContext().cacheDir, "audio_cache/lesson_${args.lessonId}")
     }
 
+    private val speakingAudioCacheDir: File by lazy {
+        File(requireContext().cacheDir, "speaking_assessment")
+    }
+
     private val answersByQuestionId: LinkedHashMap<Int, QuestionAnswerItem> = linkedMapOf()
     private val gson = GsonBuilder().setPrettyPrinting().create()
+
+    private val requestMicPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.you_need_to_grand_permission_to_speak),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@registerForActivityResult
+            }
+
+            val question = viewModel.getCurrentQuestion() ?: return@registerForActivityResult
+            if (question.type == QuestionType.SPEAKING_ASSESSMENT) {
+                onSpeakingMicClicked(question)
+            }
+        }
 
     private var lessonStartedAt: String? = null
 
@@ -266,10 +313,29 @@ class QuestionFragment : Fragment() {
             return
         }
 
+        if (currentQuestion.type == QuestionType.SPEAKING_ASSESSMENT) {
+            val feedback = speakingFeedbackByQuestionId[currentQuestion.id]
+            if (feedback == null) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.speaking_assessment_record_hint),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+            showFeedback(
+                isCorrect = feedback.isCorrect,
+                question = currentQuestion,
+                answerTextOverride = feedback.displayText
+            )
+            return
+        }
+
         val isCorrect = when (currentQuestion.type) {
             QuestionType.ONE_SELECTION -> checkOneSelection(currentQuestion)
             QuestionType.LISTEN_AND_ARRANGE_SENTENCE,
             QuestionType.TRANSLATE_AND_ARRANGE_SENTENCE -> checkArrangedSentence(currentQuestion)
+            QuestionType.SPEAKING_ASSESSMENT -> false
         }
 
         Log.d(TAG, "checkAnswer result=${if (isCorrect) "CORRECT" else "WRONG"} questionId=${currentQuestion.id} type=${currentQuestion.type}")
@@ -311,6 +377,16 @@ class QuestionFragment : Fragment() {
                     answer = SubmittedAnswer(
                         id = -1,
                         content = userSentence
+                    )
+                )
+            }
+
+            QuestionType.SPEAKING_ASSESSMENT -> {
+                answersByQuestionId[question.id] ?: QuestionAnswerItem(
+                    id = question.id,
+                    answer = SubmittedAnswer(
+                        id = -1,
+                        content = ""
                     )
                 )
             }
@@ -429,14 +505,18 @@ class QuestionFragment : Fragment() {
         }
     }
 
-    private fun showFeedback(isCorrect: Boolean, question: Question) {
+    private fun showFeedback(isCorrect: Boolean, question: Question, answerTextOverride: String? = null) {
         stopAudioIfPlaying()
         val correctAnswerContent = question.getCorrectAnswer()?.content?.trim().orEmpty()
-        val answerText = buildString {
-            append(getString(R.string.feedback_answer_prefix))
-            if (correctAnswerContent.isNotBlank()) {
-                append(" ")
-                append(correctAnswerContent)
+        val answerText = if (!answerTextOverride.isNullOrBlank()) {
+            "${getString(R.string.feedback_answer_prefix)} $answerTextOverride"
+        } else {
+            buildString {
+                append(getString(R.string.feedback_answer_prefix))
+                if (correctAnswerContent.isNotBlank()) {
+                    append(" ")
+                    append(correctAnswerContent)
+                }
             }
         }
 
@@ -576,6 +656,7 @@ class QuestionFragment : Fragment() {
             QuestionType.ONE_SELECTION -> displayMultipleChoice(currentQuestion)
             QuestionType.LISTEN_AND_ARRANGE_SENTENCE -> displayListenQuestion(currentQuestion)
             QuestionType.TRANSLATE_AND_ARRANGE_SENTENCE -> displayArrangeQuestion(currentQuestion)
+            QuestionType.SPEAKING_ASSESSMENT -> displaySpeakingAssessmentQuestion(currentQuestion)
         }
     }
 
@@ -613,13 +694,17 @@ class QuestionFragment : Fragment() {
         // Hide multiple choice
         binding.multipleChoiceContainer.visibility = View.GONE
         binding.arrangeContainer.visibility = View.VISIBLE
+        binding.btnCheckAnswer.isVisible = true
         binding.feedbackContainer.visibility = View.GONE
         hideFeedback(animated = false)
+        stopSpeakingRecordingIfActive()
         stopAudioIfPlaying()
 
+        binding.tvQuestionTitle.visibility = View.VISIBLE
         binding.tvQuestionTitle.text = currentQuestion.content
         
         // Hide speech bubble and arrange avatar for listen question
+        binding.tvSpeakingSentence.visibility = View.GONE
         binding.tvSentence.visibility = View.GONE
         binding.ivAvatar.visibility = View.GONE
         binding.ivAvatarListen.visibility = View.VISIBLE
@@ -648,13 +733,17 @@ class QuestionFragment : Fragment() {
         // Hide multiple choice
         binding.multipleChoiceContainer.visibility = View.GONE
         binding.arrangeContainer.visibility = View.VISIBLE
+        binding.btnCheckAnswer.isVisible = true
         binding.feedbackContainer.visibility = View.GONE
         hideFeedback(animated = false)
+        stopSpeakingRecordingIfActive()
         stopAudioIfPlaying()
 
+        binding.tvQuestionTitle.visibility = View.VISIBLE
         binding.tvQuestionTitle.text = resources.getString(R.string.arrange_question_title)
         
         // Show speech bubble and arrange avatar for arrange question
+        binding.tvSpeakingSentence.visibility = View.GONE
         binding.tvSentence.visibility = View.VISIBLE
         binding.tvSentence.text = currentQuestion.content
         binding.ivAvatar.visibility = View.VISIBLE
@@ -674,8 +763,36 @@ class QuestionFragment : Fragment() {
         setupArrangeUI(currentQuestion)
     }
 
+    private fun displaySpeakingAssessmentQuestion(currentQuestion: Question) {
+        binding.multipleChoiceContainer.visibility = View.GONE
+        binding.arrangeContainer.visibility = View.VISIBLE
+        binding.feedbackContainer.visibility = View.GONE
+        hideFeedback(animated = false)
+        stopAudioIfPlaying()
+
+        binding.btnCheckAnswer.isVisible = false
+        binding.tvQuestionTitle.visibility = View.GONE
+        binding.tvSentence.visibility = View.GONE
+        binding.ivAvatar.visibility = View.GONE
+        binding.ivAvatarListen.visibility = View.VISIBLE
+        binding.ivAvatarListen.translationY = 0f
+        binding.ivAvatarListen.setImageResource(
+            if (isRecordingSpeaking) R.drawable.pause_24px else R.drawable.mic_24px
+        )
+        binding.tvSpeakingSentence.visibility = View.VISIBLE
+        binding.tvSpeakingSentence.text = currentQuestion.content
+        binding.fbBlankWords.visibility = View.GONE
+        binding.fbWords.visibility = View.GONE
+        binding.ivAvatarListen.setOnClickListener {
+            onSpeakingMicClicked(currentQuestion)
+        }
+    }
+
     private fun setupArrangeUI(question: Question) {
         val words = question.getWordsForBank()
+
+        binding.fbBlankWords.visibility = View.VISIBLE
+        binding.fbWords.visibility = View.VISIBLE
 
         if (words.isEmpty()) {
             return
@@ -715,6 +832,7 @@ class QuestionFragment : Fragment() {
     }
 
     private fun moveNextQuestion() {
+        stopSpeakingRecordingIfActive()
         stopAudioIfPlaying()
         val nextQuestion = viewModel.getNextQuestion() ?: return
         viewModel.moveToNextQuestion()
@@ -724,10 +842,244 @@ class QuestionFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stopSpeakingRecordingIfActive()
         releaseAudioPlayer()
         releaseFeedbackSfx()
         hasInitialized = false
         _binding = null
+    }
+
+    private fun hasMicPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun onSpeakingMicClicked(question: Question) {
+        if (isAssessingSpeaking) return
+
+        if (!hasMicPermission()) {
+            requestMicPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            return
+        }
+
+        if (isRecordingSpeaking) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val audioFile = stopSpeakingRecordingAndGetFile() ?: return@launch
+                runSpeakingAssessment(question, audioFile)
+            }
+        } else {
+            startSpeakingRecording(question.id)
+        }
+    }
+
+    private fun startSpeakingRecording(questionId: Int) {
+        val minBufferSize = AudioRecord.getMinBufferSize(
+            SPEAKING_SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        )
+        if (minBufferSize <= 0) {
+            Toast.makeText(requireContext(), getString(R.string.error_generic), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!speakingAudioCacheDir.exists()) {
+            speakingAudioCacheDir.mkdirs()
+        }
+        val outFile = File(speakingAudioCacheDir, "q_${questionId}_${System.currentTimeMillis()}.wav")
+
+        val recorder = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            SPEAKING_SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            minBufferSize * 2
+        )
+
+        if (recorder.state != AudioRecord.STATE_INITIALIZED) {
+            recorder.release()
+            Toast.makeText(requireContext(), getString(R.string.error_generic), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            recorder.startRecording()
+        } catch (e: SecurityException) {
+            recorder.release()
+            Toast.makeText(requireContext(), getString(R.string.you_need_to_grand_permission_to_speak), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        speakingAudioRecord = recorder
+        speakingRecordFile = outFile
+        isRecordingSpeaking = true
+        binding.ivAvatarListen.setImageResource(R.drawable.pause_24px)
+
+        speakingRecordJob = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            recordPcmToWavFile(recorder, outFile, minBufferSize)
+        }
+    }
+
+    private suspend fun stopSpeakingRecordingAndGetFile(): File? {
+        val recorder = speakingAudioRecord ?: return speakingRecordFile
+        isRecordingSpeaking = false
+        try {
+            recorder.stop()
+        } catch (_: Exception) {
+        }
+        recorder.release()
+        speakingAudioRecord = null
+
+        speakingRecordJob?.join()
+        speakingRecordJob = null
+
+        if (_binding != null) {
+            binding.ivAvatarListen.setImageResource(R.drawable.mic_24px)
+        }
+
+        return speakingRecordFile?.takeIf { it.exists() }
+    }
+
+    private fun stopSpeakingRecordingIfActive() {
+        if (!isRecordingSpeaking && speakingAudioRecord == null) return
+        isRecordingSpeaking = false
+        try {
+            speakingAudioRecord?.stop()
+        } catch (_: Exception) {
+        }
+        try {
+            speakingAudioRecord?.release()
+        } catch (_: Exception) {
+        }
+        speakingAudioRecord = null
+        speakingRecordJob?.cancel()
+        speakingRecordJob = null
+        if (_binding != null) {
+            binding.ivAvatarListen.setImageResource(R.drawable.mic_24px)
+        }
+    }
+
+    private suspend fun runSpeakingAssessment(question: Question, audioFile: File) {
+        isAssessingSpeaking = true
+        if (_binding != null) {
+            binding.ivAvatarListen.isEnabled = false
+        }
+
+        val result = viewModel.assessSpeakingAssessment(
+            referenceText = question.content,
+            audioFile = audioFile,
+            language = "US_ENGLISH"
+        )
+
+        isAssessingSpeaking = false
+        if (_binding != null) {
+            binding.ivAvatarListen.isEnabled = true
+        }
+
+        result.onSuccess { assessment ->
+            val answerContent = buildSpeakingAnswerContent(assessment)
+            answersByQuestionId[question.id] = QuestionAnswerItem(
+                id = question.id,
+                answer = SubmittedAnswer(
+                    id = -1,
+                    content = answerContent
+                )
+            )
+
+            val isCorrect = assessment.overall.pronScore >= SPEAKING_CORRECT_THRESHOLD
+            val previousResult = correctnessByQuestionId[question.id]
+            if (previousResult != isCorrect) {
+                if (isCorrect) {
+                    correctAnswerCount++
+                } else if (previousResult == true) {
+                    correctAnswerCount = (correctAnswerCount - 1).coerceAtLeast(0)
+                }
+                correctnessByQuestionId[question.id] = isCorrect
+            }
+
+            speakingFeedbackByQuestionId[question.id] = SpeakingFeedback(
+                isCorrect = isCorrect,
+                displayText = assessment.displayText.ifBlank { question.content },
+                answerContent = answerContent
+            )
+
+            showFeedback(
+                isCorrect = isCorrect,
+                question = question,
+                answerTextOverride = assessment.displayText.ifBlank { question.content }
+            )
+        }.onFailure { error ->
+            Toast.makeText(
+                requireContext(),
+                error.message ?: getString(R.string.error_generic),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        try {
+            if (audioFile.exists()) audioFile.delete()
+        } catch (_: Exception) {
+        }
+        speakingRecordFile = null
+    }
+
+    private fun recordPcmToWavFile(recorder: AudioRecord, outFile: File, bufferSize: Int) {
+        var totalAudioLen = 0L
+        val buffer = ByteArray(bufferSize)
+
+        FileOutputStream(outFile).use { output ->
+            output.write(ByteArray(44))
+            while (isRecordingSpeaking) {
+                val read = recorder.read(buffer, 0, buffer.size)
+                if (read > 0) {
+                    output.write(buffer, 0, read)
+                    totalAudioLen += read
+                }
+            }
+        }
+
+        writeWavHeader(
+            file = outFile,
+            audioDataLength = totalAudioLen,
+            sampleRate = SPEAKING_SAMPLE_RATE,
+            channels = SPEAKING_CHANNEL_COUNT,
+            bitsPerSample = SPEAKING_BITS_PER_SAMPLE
+        )
+    }
+
+    private fun writeWavHeader(
+        file: File,
+        audioDataLength: Long,
+        sampleRate: Int,
+        channels: Int,
+        bitsPerSample: Int
+    ) {
+        val totalDataLen = audioDataLength + 36
+        val byteRate = sampleRate * channels * bitsPerSample / 8
+
+        RandomAccessFile(file, "rw").use { raf ->
+            raf.seek(0)
+            raf.writeBytes("RIFF")
+            raf.writeInt(Integer.reverseBytes(totalDataLen.toInt()))
+            raf.writeBytes("WAVE")
+            raf.writeBytes("fmt ")
+            raf.writeInt(Integer.reverseBytes(16))
+            raf.writeShort(java.lang.Short.reverseBytes(1.toShort()).toInt())
+            raf.writeShort(java.lang.Short.reverseBytes(channels.toShort()).toInt())
+            raf.writeInt(Integer.reverseBytes(sampleRate))
+            raf.writeInt(Integer.reverseBytes(byteRate))
+            raf.writeShort(java.lang.Short.reverseBytes((channels * bitsPerSample / 8).toShort()).toInt())
+            raf.writeShort(java.lang.Short.reverseBytes(bitsPerSample.toShort()).toInt())
+            raf.writeBytes("data")
+            raf.writeInt(Integer.reverseBytes(audioDataLength.toInt()))
+        }
+    }
+
+    private fun buildSpeakingAnswerContent(assessment: com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult): String {
+        val overall = assessment.overall
+        return "accuracyScore=${overall.accuracyScore},fluencyScore=${overall.fluencyScore},prosodyScore=${overall.prosodyScore},completenessScore=${overall.completenessScore},pronScore=${overall.pronScore};;${assessment.audioUrl}"
     }
 
     private fun toggleAudio(url: String) {

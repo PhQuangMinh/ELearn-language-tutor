@@ -215,10 +215,11 @@
                     android:layout_marginTop="32dp"
                     android:fontFamily="@font/lexend_bold"
                     android:gravity="center"
-                    android:maxLines="3"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:text="What's the meaning of this sentence?"
                     android:textColor="@color/neutral_100"
-                    android:textSize="26sp"
+                    android:textSize="24sp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -235,6 +236,26 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvQuestionTitle" />
+
+                <TextView
+                    android:id="@+id/tvSpeakingSentence"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="24dp"
+                    android:background="@drawable/speech_bubble_background"
+                    android:fontFamily="@font/lexend"
+                    android:gravity="center"
+                    android:maxLines="3"
+                    android:ellipsize="end"
+                    android:padding="16dp"
+                    android:textColor="@color/neutral_100"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivAvatarListen" />
 
                 <ImageView
                     android:id="@+id/ivAvatar"
