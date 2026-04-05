@@ -6,13 +6,11 @@ import com.example.BTL_Mobile.dto.response.FlashCardResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.DictionaryWord;
 import com.example.BTL_Mobile.model.FlashCard;
-import com.example.BTL_Mobile.model.Lesson;
 import com.example.BTL_Mobile.model.Media;
 import com.example.BTL_Mobile.model.Topic;
 import com.example.BTL_Mobile.model.enums.EMediaType;
 import com.example.BTL_Mobile.repository.DictionaryWordRepository;
 import com.example.BTL_Mobile.repository.FlashCardRepository;
-import com.example.BTL_Mobile.repository.LessonRepository;
 import com.example.BTL_Mobile.repository.MediaRepository;
 import com.example.BTL_Mobile.repository.TopicRepository;
 import java.util.Comparator;
@@ -26,20 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminLessonFlashCardService {
 
-    private final LessonRepository lessonRepository;
     private final TopicRepository topicRepository;
     private final DictionaryWordRepository dictionaryWordRepository;
     private final MediaRepository mediaRepository;
     private final FlashCardRepository flashCardRepository;
 
-    public List<FlashCardResponse> listFlashCards(Integer lessonId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            return List.of();
-        }
-
+    public List<FlashCardResponse> listFlashCards(Integer topicId) {
+        Topic topic = requireTopic(topicId);
         return flashCardRepository.findByTopicId(topic.getId()).stream()
                 .sorted(Comparator.comparing(FlashCard::getId, Comparator.nullsLast(Integer::compareTo)))
                 .map(this::toResponse)
@@ -47,13 +38,8 @@ public class AdminLessonFlashCardService {
     }
 
     @Transactional
-    public FlashCardResponse addFlashCard(Integer lessonId, AdminFlashCardCreateRequest request) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public FlashCardResponse addFlashCard(Integer topicId, AdminFlashCardCreateRequest request) {
+        Topic topic = requireTopic(topicId);
 
         DictionaryWord dictionaryWord = resolveDictionaryWord(request);
 
@@ -82,17 +68,12 @@ public class AdminLessonFlashCardService {
     }
 
     @Transactional
-    public FlashCardResponse updateFlashCard(Integer lessonId, Integer flashCardId, AdminFlashCardUpdateRequest request) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public FlashCardResponse updateFlashCard(Integer topicId, Integer flashCardId, AdminFlashCardUpdateRequest request) {
+        Topic topic = requireTopic(topicId);
 
         FlashCard flashCard = flashCardRepository.findById(flashCardId)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy flashcard", "FLASHCARD_NOT_FOUND"));
-        requireFlashCardInLessonTopic(topic, flashCard);
+        requireFlashCardInTopic(topic, flashCard);
 
         boolean hasChange = false;
 
@@ -142,32 +123,32 @@ public class AdminLessonFlashCardService {
     }
 
     @Transactional
-    public void deleteFlashCard(Integer lessonId, Integer flashCardId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public void deleteFlashCard(Integer topicId, Integer flashCardId) {
+        Topic topic = requireTopic(topicId);
 
         FlashCard flashCard = flashCardRepository.findById(flashCardId)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy flashcard", "FLASHCARD_NOT_FOUND"));
-        requireFlashCardInLessonTopic(topic, flashCard);
+        requireFlashCardInTopic(topic, flashCard);
         flashCardRepository.delete(flashCard);
     }
 
-    private void requireFlashCardInLessonTopic(Topic topic, FlashCard flashCard) {
+    private Topic requireTopic(Integer topicId) {
+        return topicRepository.findById(topicId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy topic", "TOPIC_NOT_FOUND"));
+    }
+
+    private void requireFlashCardInTopic(Topic topic, FlashCard flashCard) {
         DictionaryWord dw = flashCard.getDictionaryWord();
         if (dw == null || dw.getId() == null) {
             throw new BusinessException("Flashcard dữ liệu không hợp lệ", "FLASHCARD_INVALID");
         }
         if (topic.getVocabulary() == null || topic.getVocabulary().isEmpty()) {
-            throw new BusinessException("Flashcard không thuộc lesson/topic này", "FLASHCARD_NOT_IN_LESSON");
+            throw new BusinessException("Flashcard không thuộc topic này", "FLASHCARD_NOT_IN_TOPIC");
         }
         boolean linked = topic.getVocabulary().stream()
                 .anyMatch(w -> w.getId() != null && w.getId().equals(dw.getId()));
         if (!linked) {
-            throw new BusinessException("Flashcard không thuộc lesson/topic này", "FLASHCARD_NOT_IN_LESSON");
+            throw new BusinessException("Flashcard không thuộc topic này", "FLASHCARD_NOT_IN_TOPIC");
         }
     }
 
@@ -210,4 +191,3 @@ public class AdminLessonFlashCardService {
                 .build();
     }
 }
-

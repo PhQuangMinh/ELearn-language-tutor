@@ -5,11 +5,9 @@ import com.example.BTL_Mobile.dto.response.AdminWordResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
 import com.example.BTL_Mobile.model.DictionaryWord;
 import com.example.BTL_Mobile.model.FlashCard;
-import com.example.BTL_Mobile.model.Lesson;
 import com.example.BTL_Mobile.model.Topic;
 import com.example.BTL_Mobile.repository.DictionaryWordRepository;
 import com.example.BTL_Mobile.repository.FlashCardRepository;
-import com.example.BTL_Mobile.repository.LessonRepository;
 import com.example.BTL_Mobile.repository.TopicRepository;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -22,18 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminLessonVocabularyService {
 
-    private final LessonRepository lessonRepository;
     private final TopicRepository topicRepository;
     private final DictionaryWordRepository dictionaryWordRepository;
     private final FlashCardRepository flashCardRepository;
 
-    public List<AdminWordResponse> listWords(Integer lessonId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            return List.of();
-        }
+    public List<AdminWordResponse> listWords(Integer topicId) {
+        Topic topic = requireTopic(topicId);
 
         var vocab = topic.getVocabulary();
         if (vocab == null || vocab.isEmpty()) {
@@ -47,13 +39,8 @@ public class AdminLessonVocabularyService {
     }
 
     @Transactional
-    public AdminWordResponse addWord(Integer lessonId, AdminWordCreateRequest request) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public AdminWordResponse addWord(Integer topicId, AdminWordCreateRequest request) {
+        Topic topic = requireTopic(topicId);
 
         String normalizedWord = request.getWord().trim();
 
@@ -77,18 +64,13 @@ public class AdminLessonVocabularyService {
     }
 
     @Transactional
-    public AdminWordResponse updateWord(Integer lessonId, Integer wordId, AdminWordCreateRequest request) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public AdminWordResponse updateWord(Integer topicId, Integer wordId, AdminWordCreateRequest request) {
+        Topic topic = requireTopic(topicId);
 
         DictionaryWord word = dictionaryWordRepository.findById(wordId)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy word", "WORD_NOT_FOUND"));
         if (!isWordLinkedToTopic(topic, wordId)) {
-            throw new BusinessException("Word không thuộc lesson/topic này", "WORD_NOT_IN_LESSON");
+            throw new BusinessException("Word không thuộc topic này", "WORD_NOT_IN_TOPIC");
         }
 
         String normalizedWord = request.getWord().trim();
@@ -101,16 +83,11 @@ public class AdminLessonVocabularyService {
     }
 
     @Transactional
-    public void removeWordFromLesson(Integer lessonId, Integer wordId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new BusinessException("Không tìm thấy lesson", "LESSON_NOT_FOUND"));
-        Topic topic = lesson.getTopic();
-        if (topic == null) {
-            throw new BusinessException("Lesson chưa gắn topic", "LESSON_TOPIC_REQUIRED");
-        }
+    public void removeWordFromTopic(Integer topicId, Integer wordId) {
+        Topic topic = requireTopic(topicId);
 
         if (!isWordLinkedToTopic(topic, wordId)) {
-            throw new BusinessException("Word không thuộc lesson/topic này", "WORD_NOT_IN_LESSON");
+            throw new BusinessException("Word không thuộc topic này", "WORD_NOT_IN_TOPIC");
         }
 
         List<FlashCard> cardsInTopic = flashCardRepository.findByTopicId(topic.getId());
@@ -125,6 +102,11 @@ public class AdminLessonVocabularyService {
             topic.getVocabulary().removeIf(w -> w.getId() != null && w.getId().equals(wordId));
         }
         topicRepository.save(topic);
+    }
+
+    private Topic requireTopic(Integer topicId) {
+        return topicRepository.findById(topicId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy topic", "TOPIC_NOT_FOUND"));
     }
 
     private boolean isWordLinkedToTopic(Topic topic, Integer wordId) {
@@ -145,4 +127,3 @@ public class AdminLessonVocabularyService {
                 .build();
     }
 }
-

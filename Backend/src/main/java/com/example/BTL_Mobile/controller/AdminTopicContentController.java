@@ -24,88 +24,87 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/lessons/{lessonId}")
+@RequestMapping("/api/admin/topics/{topicId}")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", maxAge = 3600, allowedHeaders = "*", exposedHeaders = "*")
-public class AdminLessonContentController {
+public class AdminTopicContentController {
 
     private final AdminLessonVocabularyService adminLessonVocabularyService;
     private final AdminLessonFlashCardService adminLessonFlashCardService;
 
     @GetMapping("/words")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<AdminWordResponse>>> listWords(@PathVariable Integer lessonId) {
-        List<AdminWordResponse> words = adminLessonVocabularyService.listWords(lessonId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy vocabulary theo lesson thành công!", words));
+    public ResponseEntity<ApiResponse<List<AdminWordResponse>>> listWords(@PathVariable Integer topicId) {
+        List<AdminWordResponse> words = adminLessonVocabularyService.listWords(topicId);
+        return ResponseEntity.ok(ApiResponse.success("Lấy vocabulary theo topic thành công!", words));
     }
 
     @PostMapping("/words")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AdminWordResponse>> addWord(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @Valid @RequestBody AdminWordCreateRequest request
     ) {
-        AdminWordResponse created = adminLessonVocabularyService.addWord(lessonId, request);
-        return ResponseEntity.ok(ApiResponse.success("Thêm word vào lesson thành công!", created));
+        AdminWordResponse created = adminLessonVocabularyService.addWord(topicId, request);
+        return ResponseEntity.ok(ApiResponse.success("Thêm word vào topic thành công!", created));
     }
 
     @PutMapping("/words/{wordId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AdminWordResponse>> updateWord(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @PathVariable Integer wordId,
             @Valid @RequestBody AdminWordCreateRequest request
     ) {
-        AdminWordResponse updated = adminLessonVocabularyService.updateWord(lessonId, wordId, request);
+        AdminWordResponse updated = adminLessonVocabularyService.updateWord(topicId, wordId, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật word thành công!", updated));
     }
 
     @DeleteMapping("/words/{wordId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteWord(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @PathVariable Integer wordId
     ) {
-        adminLessonVocabularyService.removeWordFromLesson(lessonId, wordId);
-        return ResponseEntity.ok(ApiResponse.success("Xóa word khỏi lesson thành công!", null));
+        adminLessonVocabularyService.removeWordFromTopic(topicId, wordId);
+        return ResponseEntity.ok(ApiResponse.success("Xóa word khỏi topic thành công!", null));
     }
 
     @GetMapping("/flashcards")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<FlashCardResponse>>> listFlashCards(@PathVariable Integer lessonId) {
-        List<FlashCardResponse> cards = adminLessonFlashCardService.listFlashCards(lessonId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy flashcard theo lesson thành công!", cards));
+    public ResponseEntity<ApiResponse<List<FlashCardResponse>>> listFlashCards(@PathVariable Integer topicId) {
+        List<FlashCardResponse> cards = adminLessonFlashCardService.listFlashCards(topicId);
+        return ResponseEntity.ok(ApiResponse.success("Lấy flashcard theo topic thành công!", cards));
     }
 
     @PostMapping("/flashcards")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FlashCardResponse>> addFlashCard(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @Valid @RequestBody AdminFlashCardCreateRequest request
     ) {
-        FlashCardResponse created = adminLessonFlashCardService.addFlashCard(lessonId, request);
-        return ResponseEntity.ok(ApiResponse.success("Tạo flashcard theo lesson thành công!", created));
+        FlashCardResponse created = adminLessonFlashCardService.addFlashCard(topicId, request);
+        return ResponseEntity.ok(ApiResponse.success("Tạo flashcard theo topic thành công!", created));
     }
 
     @PutMapping("/flashcards/{flashCardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FlashCardResponse>> updateFlashCard(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @PathVariable Integer flashCardId,
             @Valid @RequestBody AdminFlashCardUpdateRequest request
     ) {
-        FlashCardResponse updated = adminLessonFlashCardService.updateFlashCard(lessonId, flashCardId, request);
+        FlashCardResponse updated = adminLessonFlashCardService.updateFlashCard(topicId, flashCardId, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật flashcard thành công!", updated));
     }
 
     @DeleteMapping("/flashcards/{flashCardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteFlashCard(
-            @PathVariable Integer lessonId,
+            @PathVariable Integer topicId,
             @PathVariable Integer flashCardId
     ) {
-        adminLessonFlashCardService.deleteFlashCard(lessonId, flashCardId);
+        adminLessonFlashCardService.deleteFlashCard(topicId, flashCardId);
         return ResponseEntity.ok(ApiResponse.success("Xóa flashcard thành công!", null));
     }
 }
-

@@ -25,7 +25,7 @@ const safeFetch = async (url: string, init?: RequestInit): Promise<Response> => 
     return await fetch(url, init);
   } catch {
     throw new Error(
-      `Khong ket noi duoc backend tai ${url}. Kiem tra backend da chay dung port va CORS da mo cho frontend.`
+      `Không kết nối được backend tại ${url}. Kiểm tra backend đã chạy đúng port và CORS đã mở cho frontend.`
     );
   }
 };
@@ -52,7 +52,7 @@ export const login = async (apiBase: string, credentials: Credentials): Promise<
   const data = await parseJson<ApiResponse<{ token: string }>>(response);
   const token = data.data?.token;
   if (!token) {
-    throw new Error("Khong lay duoc token");
+    throw new Error("Không lấy được token");
   }
   return token;
 };
@@ -115,6 +115,18 @@ export const uploadImage = async (
 export const listTopics = (config: SessionConfig, page: number, size: number) =>
   getPaged<Topic>(config, `/api/admin/topics?page=${page}&size=${size}&sort=id,desc`);
 
+/** Loads every topic page for admin dropdowns. */
+export const listAllTopics = async (config: SessionConfig): Promise<Topic[]> => {
+  const pageSize = 200;
+  const first = await listTopics(config, 0, pageSize);
+  const all: Topic[] = [...first.content];
+  for (let p = 1; p < first.totalPages; p++) {
+    const next = await listTopics(config, p, pageSize);
+    all.push(...next.content);
+  }
+  return all;
+};
+
 export const createTopic = (config: SessionConfig, payload: Omit<Topic, "id">) =>
   postJson<Topic>(config, "/api/admin/topics", payload);
 
@@ -174,36 +186,36 @@ export const deleteScenario = (config: SessionConfig, id: number) =>
 export const bulkImportScenarios = (config: SessionConfig, scenarios: any[]) =>
   postJson<Scenario[]>(config, "/api/admin/scenarios/import", scenarios);
 
-export const listLessonWords = (config: SessionConfig, lessonId: number) => {
-  const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/words`, {
+export const listTopicWords = (config: SessionConfig, topicId: number) => {
+  const response = safeFetch(`${config.apiBase}/api/admin/topics/${topicId}/words`, {
     headers: withHeaders(config.token),
   });
   return response.then((r) => parseJson<ApiResponse<Word[]>>(r)).then((d) => d.data);
 };
 
-export const createLessonWord = (config: SessionConfig, lessonId: number, payload: Omit<Word, "id">) =>
-  postJson<Word>(config, `/api/admin/lessons/${lessonId}/words`, payload);
+export const createTopicWord = (config: SessionConfig, topicId: number, payload: Omit<Word, "id">) =>
+  postJson<Word>(config, `/api/admin/topics/${topicId}/words`, payload);
 
-export const updateLessonWord = (
+export const updateTopicWord = (
   config: SessionConfig,
-  lessonId: number,
+  topicId: number,
   wordId: number,
   payload: Omit<Word, "id">
-) => putJson<Word>(config, `/api/admin/lessons/${lessonId}/words/${wordId}`, payload);
+) => putJson<Word>(config, `/api/admin/topics/${topicId}/words/${wordId}`, payload);
 
-export const deleteLessonWord = (config: SessionConfig, lessonId: number, wordId: number) =>
-  del(config, `/api/admin/lessons/${lessonId}/words/${wordId}`);
+export const deleteTopicWord = (config: SessionConfig, topicId: number, wordId: number) =>
+  del(config, `/api/admin/topics/${topicId}/words/${wordId}`);
 
-export const listLessonFlashCards = (config: SessionConfig, lessonId: number) => {
-  const response = safeFetch(`${config.apiBase}/api/admin/lessons/${lessonId}/flashcards`, {
+export const listTopicFlashCards = (config: SessionConfig, topicId: number) => {
+  const response = safeFetch(`${config.apiBase}/api/admin/topics/${topicId}/flashcards`, {
     headers: withHeaders(config.token),
   });
   return response.then((r) => parseJson<ApiResponse<FlashCard[]>>(r)).then((d) => d.data);
 };
 
-export const createLessonFlashCard = (
+export const createTopicFlashCard = (
   config: SessionConfig,
-  lessonId: number,
+  topicId: number,
   payload: {
     dictionaryWordId?: number | null;
     word?: string | null;
@@ -215,11 +227,11 @@ export const createLessonFlashCard = (
     imageName?: string | null;
     imageSize?: number | null;
   }
-) => postJson<FlashCard>(config, `/api/admin/lessons/${lessonId}/flashcards`, payload);
+) => postJson<FlashCard>(config, `/api/admin/topics/${topicId}/flashcards`, payload);
 
-export const updateLessonFlashCard = (
+export const updateTopicFlashCard = (
   config: SessionConfig,
-  lessonId: number,
+  topicId: number,
   flashCardId: number,
   payload: {
     dictionaryWordId?: number | null;
@@ -232,10 +244,10 @@ export const updateLessonFlashCard = (
     imageName?: string | null;
     imageSize?: number | null;
   }
-) => putJson<FlashCard>(config, `/api/admin/lessons/${lessonId}/flashcards/${flashCardId}`, payload);
+) => putJson<FlashCard>(config, `/api/admin/topics/${topicId}/flashcards/${flashCardId}`, payload);
 
-export const deleteLessonFlashCard = (config: SessionConfig, lessonId: number, flashCardId: number) =>
-  del(config, `/api/admin/lessons/${lessonId}/flashcards/${flashCardId}`);
+export const deleteTopicFlashCard = (config: SessionConfig, topicId: number, flashCardId: number) =>
+  del(config, `/api/admin/topics/${topicId}/flashcards/${flashCardId}`);
 
 const postMultipart = async <T>(config: SessionConfig, path: string, file: File): Promise<T> => {
   const formData = new FormData();
@@ -249,16 +261,16 @@ const postMultipart = async <T>(config: SessionConfig, path: string, file: File)
   return data.data;
 };
 
-export const importWordsExcel = (config: SessionConfig, lessonId: number, file: File) =>
+export const importWordsExcel = (config: SessionConfig, topicId: number, file: File) =>
   postMultipart<ImportResult>(
     config,
-    `/api/admin/import/words?lessonId=${encodeURIComponent(String(lessonId))}`,
+    `/api/admin/import/words?topicId=${encodeURIComponent(String(topicId))}`,
     file
   );
 
-export const importFlashCardsExcel = (config: SessionConfig, lessonId: number, file: File) =>
+export const importFlashCardsExcel = (config: SessionConfig, topicId: number, file: File) =>
   postMultipart<ImportResult>(
     config,
-    `/api/admin/import/flashcards?lessonId=${encodeURIComponent(String(lessonId))}`,
+    `/api/admin/import/flashcards?topicId=${encodeURIComponent(String(topicId))}`,
     file
   );

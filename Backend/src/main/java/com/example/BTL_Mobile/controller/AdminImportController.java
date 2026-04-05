@@ -26,20 +26,20 @@ public class AdminImportController {
     @PostMapping(value = "/words", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AdminImportResult>> importWords(
-            @RequestParam("lessonId") Integer lessonId,
+            @RequestParam("topicId") Integer topicId,
             @RequestPart("file") MultipartFile file
     ) {
-        AdminImportResult result = adminExcelImportService.importWords(lessonId, file);
+        AdminImportResult result = adminExcelImportService.importWords(topicId, file);
         return ResponseEntity.ok(ApiResponse.success("Import vocabulary từ Excel hoàn tất", result));
     }
 
     @PostMapping(value = "/flashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AdminImportResult>> importFlashCards(
-            @RequestParam("lessonId") Integer lessonId,
+            @RequestParam("topicId") Integer topicId,
             @RequestPart("file") MultipartFile file
     ) {
-        AdminImportResult result = adminExcelImportService.importFlashCards(lessonId, file);
+        AdminImportResult result = adminExcelImportService.importFlashCards(topicId, file);
         return ResponseEntity.ok(ApiResponse.success("Import flashcard từ Excel hoàn tất", result));
     }
 }
