@@ -138,6 +138,8 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun canLoadMoreCourses(): Boolean = hasMoreCourses
 }
 
 enum class StreakStatus {

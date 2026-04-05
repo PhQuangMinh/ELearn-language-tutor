@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.nhom2.elearnlanguage.databinding.FragmentSpeakingTabBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -54,6 +55,20 @@ class SpeakingTabFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = topicAdapter
         }
+
+        val layoutManager = binding.rvCourses.layoutManager as? LinearLayoutManager
+        binding.rvCourses.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy <= 0 || layoutManager == null) return
+
+                val totalItems = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (totalItems > 0 && lastVisible >= totalItems - 3) {
+                    viewModel.loadMoreCourses()
+                }
+            }
+        })
     }
 
     private fun observeViewModel() {
@@ -65,6 +80,11 @@ class SpeakingTabFragment : Fragment() {
                         is HomeUiState.Success -> {
                             showLoading(false)
                             topicAdapter.submitList(state.data.courses)
+                            binding.rvCourses.post {
+                                if (!binding.rvCourses.canScrollVertically(1)) {
+                                    viewModel.loadMoreCourses()
+                                }
+                            }
                         }
                         is HomeUiState.Error -> {
                             showLoading(false)
