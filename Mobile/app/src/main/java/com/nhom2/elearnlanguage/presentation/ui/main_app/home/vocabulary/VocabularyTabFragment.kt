@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -24,6 +25,11 @@ class VocabularyTabFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels()
+    private var allCourses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress> = emptyList()
+    private var visibleTopicCount = PAGE_SIZE
+    private var visibleFlashcardCount = PAGE_SIZE
+    private var pendingTopicLoadMore = false
+    private var pendingFlashcardLoadMore = false
 
     private val topicAdapter = VocabularyTopicAdapter { course ->
         val action = HomeFragmentDirections.actionHomeFragmentToTopicVocabularyFragment(
@@ -54,8 +60,55 @@ class VocabularyTabFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupBottomSheet()
         setupRecyclerViews()
+        setupLoadMoreButtons()
         observeViewModel()
         viewModel.loadHomeData()
+    }
+
+    private fun setupLoadMoreButtons() {
+        binding.btnLoadMoreTopic.setOnClickListener {
+            if (visibleTopicCount < allCourses.size) {
+                visibleTopicCount += PAGE_SIZE
+                renderCourses(allCourses)
+                return@setOnClickListener
+            }
+
+            if (viewModel.canLoadMoreCourses()) {
+                pendingTopicLoadMore = true
+                viewModel.loadMoreCourses()
+            } else {
+                Toast.makeText(requireContext(), "Da hien thi het topic", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnLoadMoreFlashcard.setOnClickListener {
+            if (visibleFlashcardCount < allCourses.size) {
+                visibleFlashcardCount += PAGE_SIZE
+                renderCourses(allCourses)
+                return@setOnClickListener
+            }
+
+            if (viewModel.canLoadMoreCourses()) {
+                pendingFlashcardLoadMore = true
+                viewModel.loadMoreCourses()
+            } else {
+                Toast.makeText(requireContext(), "Da hien thi het flashcard", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun renderCourses(courses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress>) {
+        val topicVisible = courses.take(visibleTopicCount)
+        val flashVisible = courses.take(visibleFlashcardCount)
+
+        topicAdapter.submitList(topicVisible)
+        flashcardAdapter.submitList(flashVisible)
+
+        val shouldShowTopicLoadMore = visibleTopicCount < courses.size || viewModel.canLoadMoreCourses()
+        val shouldShowFlashLoadMore = visibleFlashcardCount < courses.size || viewModel.canLoadMoreCourses()
+
+        binding.btnLoadMoreTopic.visibility = if (shouldShowTopicLoadMore) View.VISIBLE else View.GONE
+        binding.btnLoadMoreFlashcard.visibility = if (shouldShowFlashLoadMore) View.VISIBLE else View.GONE
     }
 
     private fun setupBottomSheet() {
@@ -97,8 +150,18 @@ class VocabularyTabFragment : Fragment() {
                         is HomeUiState.Success -> {
                             showLoading(false)
                             val courses = state.data.courses
-                            topicAdapter.submitList(courses)
-                            flashcardAdapter.submitList(courses)
+                            allCourses = courses
+
+                            if (pendingTopicLoadMore) {
+                                visibleTopicCount += PAGE_SIZE
+                                pendingTopicLoadMore = false
+                            }
+                            if (pendingFlashcardLoadMore) {
+                                visibleFlashcardCount += PAGE_SIZE
+                                pendingFlashcardLoadMore = false
+                            }
+
+                            renderCourses(courses)
                         }
                         is HomeUiState.Error -> {
                             showLoading(false)
@@ -119,6 +182,14 @@ class VocabularyTabFragment : Fragment() {
         binding.rvFlashcard.visibility = if (isLoading) View.GONE else View.VISIBLE
         binding.tvTopicSection.visibility = if (isLoading) View.GONE else View.VISIBLE
         binding.tvFlashcardSection.visibility = if (isLoading) View.GONE else View.VISIBLE
+        if (isLoading) {
+            binding.btnLoadMoreTopic.visibility = View.GONE
+            binding.btnLoadMoreFlashcard.visibility = View.GONE
+        }
+    }
+
+    private companion object {
+        const val PAGE_SIZE = 10
     }
 
     override fun onDestroyView() {

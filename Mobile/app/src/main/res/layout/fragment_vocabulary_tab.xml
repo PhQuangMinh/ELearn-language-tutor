@@ -104,6 +104,16 @@
                     android:overScrollMode="never"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+                <Button
+                    android:id="@+id/btnLoadMoreTopic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:text="Hiện thêm"
+                    android:textAllCaps="false"
+                    android:visibility="gone" />
+
                 <!-- Flashcard section -->
                 <TextView
                     android:id="@+id/tvFlashcardSection"
@@ -123,6 +133,16 @@
                     android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+                <Button
+                    android:id="@+id/btnLoadMoreFlashcard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:text="Hiện thêm"
+                    android:textAllCaps="false"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

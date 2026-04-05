@@ -11,7 +11,6 @@ import org.mapstruct.ReportingPolicy;
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public abstract class DictionaryWordMapper {
-
     public abstract WordDTO toWordDTO(DictionaryWord dictionaryWord);
 
 }

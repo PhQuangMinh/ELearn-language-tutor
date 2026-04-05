@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentLessonTabBinding
@@ -96,6 +97,22 @@ class LessonTabFragment : Fragment() {
     }
 
     private fun setupLoadMoreOnScroll() {
+        val layoutManager = binding.rvCourses.layoutManager as? LinearLayoutManager
+
+        // Trigger load-more when user scrolls the course list itself.
+        binding.rvCourses.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy <= 0 || layoutManager == null) return
+
+                val totalItems = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (totalItems > 0 && lastVisible >= totalItems - 3) {
+                    viewModel.loadMoreCourses()
+                }
+            }
+        })
+
         // Vì rvCourses đang nằm trong NestedScrollView (bottomSheetContent) nên scroll event thực tế là của scrollView.
         binding.bottomSheetContent.setOnScrollChangeListener { v, _, scrollY, _, _ ->
             val scrollView = v as? NestedScrollView ?: return@setOnScrollChangeListener
@@ -121,6 +138,13 @@ class LessonTabFragment : Fragment() {
                                 val data = state.data
                                 binding.tvGreeting.text = "Hi, ${data.fullName}!"
                                 courseAdapter.submitList(data.courses)
+
+                                // If current content does not fill the viewport yet, request next page.
+                                binding.rvCourses.post {
+                                    if (!binding.rvCourses.canScrollVertically(1)) {
+                                        viewModel.loadMoreCourses()
+                                    }
+                                }
                             }
                             is HomeUiState.Error -> {
                                 showLoading(false)

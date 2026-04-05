@@ -64,7 +64,7 @@ server:
 
 jwt:
   # Support both JWT_SECRET and legacy JWT_SECRET_KEY
-  secret: ${JWT_SECRET:${JWT_SECRET_KEY}}
+  secret: ${JWT_SECRET_KEY}
   expiration: ${JWT_EXPIRATION}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION}
 
