@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -43,8 +44,27 @@ class ChangePasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupBackPressHandler()
         setupListeners()
         observeViewModel()
+    }
+
+    private fun setupBackPressHandler() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    navigateBackToProfile()
+                }
+            }
+        )
+    }
+
+    private fun navigateBackToProfile() {
+        val popped = parentFragmentManager.popBackStackImmediate()
+        if (!popped) {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun setupListeners() {
@@ -69,7 +89,7 @@ class ChangePasswordFragment : Fragment() {
             }
 
             topBackButton.root.setOnClickListener {
-                parentFragmentManager.popBackStack()
+                navigateBackToProfile()
             }
 
             etNewPassword.addTextChangedListener(object : TextWatcher {
@@ -124,7 +144,7 @@ class ChangePasswordFragment : Fragment() {
                             setLoading(false)
                             Toast.makeText(requireContext(), getString(R.string.change_password_success), Toast.LENGTH_SHORT).show()
                             viewModel.resetState()
-                            parentFragmentManager.popBackStack()
+                            navigateBackToProfile()
                         }
                         is ChangePasswordUiState.Error -> {
                             setLoading(false)
