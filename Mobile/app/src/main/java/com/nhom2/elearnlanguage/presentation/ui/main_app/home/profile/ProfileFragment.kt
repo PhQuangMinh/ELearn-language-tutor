@@ -92,8 +92,10 @@ class ProfileFragment : Fragment() {
     }
 
     private fun openChangePasswordScreen() {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.flTabContainer, ChangePasswordFragment())
+        requireParentFragment().childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .hide(this)
+            .add(R.id.flTabContainer, ChangePasswordFragment())
             .addToBackStack("change_password")
             .commit()
     }
@@ -176,10 +178,11 @@ class ProfileFragment : Fragment() {
             if (profile.provider.equals("google", ignoreCase = true)) View.GONE else View.VISIBLE
 
         if (selectedAvatarUri == null) {
-            if (profile.avatarUrl.isNullOrBlank()) {
+            val avatarUrl = profile.avatarUrl?.trim()
+            if (avatarUrl.isNullOrBlank()) {
                 renderDefaultAvatar()
             } else {
-                renderAvatar(profile.avatarUrl)
+                renderAvatar(avatarUrl)
             }
         }
     }
@@ -257,6 +260,10 @@ class ProfileFragment : Fragment() {
     }
 
     private fun renderAvatar(source: Any) {
+        if (source is String && source.isBlank()) {
+            renderDefaultAvatar()
+            return
+        }
         binding.ivAvatar.setPadding(0, 0, 0, 0)
         binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_CROP
         binding.ivAvatar.imageTintList = null
