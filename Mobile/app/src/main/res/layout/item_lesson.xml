@@ -73,7 +73,8 @@
                 android:layout_gravity="center"
                 android:contentDescription="@string/open"
                 android:rotation="180"
-                android:src="@drawable/baseline_chevron_left_24" />
+                android:src="@drawable/baseline_chevron_left_24"
+                app:tint="@color/topic_item_arrow_tint" />
         </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
