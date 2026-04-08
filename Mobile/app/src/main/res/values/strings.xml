@@ -40,6 +40,9 @@
     <string name="learning_vocabulary">Learning Vocabulary</string>
     <string name="section_topic">TOPIC</string>
     <string name="section_flashcard">Flashcard</string>
+    <string name="choose_study_mode_message">Chọn cách học cho chủ đề này</string>
+    <string name="label_mode_vocab">Vocab</string>
+    <string name="label_mode_flashcard">Flashcard</string>
     <string name="noun">Noun</string>
     <string name="verb">Verb</string>
     <string name="adjective">Adjective</string>

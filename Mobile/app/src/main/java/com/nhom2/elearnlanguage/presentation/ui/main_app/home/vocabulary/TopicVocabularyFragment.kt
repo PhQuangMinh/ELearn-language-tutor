@@ -45,6 +45,15 @@ class TopicVocabularyFragment : Fragment() {
 
         binding.backButton.root.setOnClickListener { findNavController().navigateUp() }
 
+        binding.tvModeFlashcard.setOnClickListener {
+            findNavController().navigate(
+                TopicVocabularyFragmentDirections.actionTopicVocabularyFragmentToFlashcardFragment(
+                    topicId = args.topicId,
+                    topicTitle = args.topicName
+                )
+            )
+        }
+
         setupList()
         setupTabs()
 
@@ -129,6 +138,7 @@ class TopicVocabularyFragment : Fragment() {
         binding.rvVocabulary.visibility = contentVisibility
         binding.rvPages.visibility = contentVisibility
         binding.llTypeTabs.visibility = contentVisibility
+        binding.llModeSegment.visibility = View.VISIBLE
         if (isLoading) binding.tvError.visibility = View.GONE
     }
 

@@ -7,10 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.nhom2.elearnlanguage.R
@@ -25,9 +28,11 @@ class FlashcardFragment : Fragment() {
     private var _binding: FragmentFlashCardBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FlashcardViewModel by viewModels()
+    // Keep VM across fragment recreation so switching mode doesn't refetch every time.
+    private val viewModel: FlashcardViewModel by activityViewModels()
     private lateinit var adapter: FlashcardAdapter
     private lateinit var progressAdapter: ProgressSegmentAdapter
+    private val args: FlashcardFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,9 +45,8 @@ class FlashcardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Get topic data from arguments
-        val topicId = arguments?.getInt("topicId", 15)
-        val topicTitle = arguments?.getString("topicTitle", "") ?: ""
+        val topicId = args.topicId
+        val topicTitle = args.topicTitle
 
         // Set title
         binding.tvTitle.text = topicTitle
@@ -53,7 +57,24 @@ class FlashcardFragment : Fragment() {
         setUpObservers()
         setupBackButton()
 
-        // Fetch flashcards (pass null if topicId is invalid)
+        binding.tvModeVocab.setOnClickListener {
+            val nav = findNavController()
+            if (nav.previousBackStackEntry?.destination?.id == R.id.topicVocabularyFragment) {
+                nav.popBackStack()
+            } else {
+                nav.navigate(
+                    FlashcardFragmentDirections.actionFlashcardFragmentToTopicVocabularyFragment(
+                        topicId = topicId,
+                        topicName = topicTitle
+                    ),
+                    NavOptions.Builder()
+                        .setPopUpTo(R.id.flashcardFragment, true)
+                        .build()
+                )
+            }
+        }
+
+        // Fetch flashcards (cached by topicId inside VM)
         viewModel.getFlashcards(topicId)
     }
 
@@ -122,7 +143,7 @@ class FlashcardFragment : Fragment() {
 
     private fun setupBackButton() {
         binding.btnBack.root.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
 
         binding.btnPrevious.setOnClickListener {
