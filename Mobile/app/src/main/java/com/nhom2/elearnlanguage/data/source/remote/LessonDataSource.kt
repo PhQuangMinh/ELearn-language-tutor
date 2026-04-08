@@ -15,8 +15,8 @@ import io.ktor.client.request.setBody
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import java.io.File
 import javax.inject.Inject
@@ -41,6 +41,8 @@ class LessonDataSource @Inject constructor(
     }
 
     suspend fun assessSpeaking(referenceText: String, audioFile: File, language: String): VoiceAssessmentDTO {
+        val wavBytes = audioFile.readBytes()
+
         val response = client.submitFormWithBinaryData(
             url = "${BuildConfig.API_BASE_URL}/api/voice/assess",
             formData = formData {
@@ -48,13 +50,10 @@ class LessonDataSource @Inject constructor(
                 append("language", language)
                 append(
                     key = "audio",
-                    value = audioFile.readBytes(),
+                    value = wavBytes,
                     headers = Headers.build {
-                        append(
-                            HttpHeaders.ContentDisposition,
-                            "form-data; name=\"audio\"; filename=\"${audioFile.name}\""
-                        )
                         append(HttpHeaders.ContentType, "audio/wav")
+                        append(HttpHeaders.ContentDisposition, "filename=\"${audioFile.name}\"")
                     }
                 )
             }
