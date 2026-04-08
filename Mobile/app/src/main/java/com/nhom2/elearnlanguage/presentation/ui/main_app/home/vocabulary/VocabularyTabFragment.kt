@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -12,9 +12,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentVocabularyTabBinding
+import com.nhom2.elearnlanguage.presentation.ui.main_app.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -26,23 +28,11 @@ class VocabularyTabFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private var allCourses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress> = emptyList()
-    private var visibleTopicCount = PAGE_SIZE
-    private var visibleFlashcardCount = PAGE_SIZE
-    private var pendingTopicLoadMore = false
-    private var pendingFlashcardLoadMore = false
 
     private val topicAdapter = VocabularyTopicAdapter { course ->
         val action = HomeFragmentDirections.actionHomeFragmentToTopicVocabularyFragment(
             topicId = course.id,
             topicName = course.title
-        )
-        requireParentFragment().findNavController().navigate(action)
-    }
-
-    private val flashcardAdapter = VocabularyTopicAdapter { course ->
-        val action = HomeFragmentDirections.actionHomeFragmentToFlashcardFragment(
-            topicId = course.id,
-            topicTitle = course.title
         )
         requireParentFragment().findNavController().navigate(action)
     }
@@ -60,55 +50,13 @@ class VocabularyTabFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupBottomSheet()
         setupRecyclerViews()
-        setupLoadMoreButtons()
+        setupLoadMoreOnScroll()
         observeViewModel()
         viewModel.loadHomeData()
     }
 
-    private fun setupLoadMoreButtons() {
-        binding.btnLoadMoreTopic.setOnClickListener {
-            if (visibleTopicCount < allCourses.size) {
-                visibleTopicCount += PAGE_SIZE
-                renderCourses(allCourses)
-                return@setOnClickListener
-            }
-
-            if (viewModel.canLoadMoreCourses()) {
-                pendingTopicLoadMore = true
-                viewModel.loadMoreCourses()
-            } else {
-                Toast.makeText(requireContext(), "Da hien thi het topic", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.btnLoadMoreFlashcard.setOnClickListener {
-            if (visibleFlashcardCount < allCourses.size) {
-                visibleFlashcardCount += PAGE_SIZE
-                renderCourses(allCourses)
-                return@setOnClickListener
-            }
-
-            if (viewModel.canLoadMoreCourses()) {
-                pendingFlashcardLoadMore = true
-                viewModel.loadMoreCourses()
-            } else {
-                Toast.makeText(requireContext(), "Da hien thi het flashcard", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun renderCourses(courses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress>) {
-        val topicVisible = courses.take(visibleTopicCount)
-        val flashVisible = courses.take(visibleFlashcardCount)
-
-        topicAdapter.submitList(topicVisible)
-        flashcardAdapter.submitList(flashVisible)
-
-        val shouldShowTopicLoadMore = visibleTopicCount < courses.size || viewModel.canLoadMoreCourses()
-        val shouldShowFlashLoadMore = visibleFlashcardCount < courses.size || viewModel.canLoadMoreCourses()
-
-        binding.btnLoadMoreTopic.visibility = if (shouldShowTopicLoadMore) View.VISIBLE else View.GONE
-        binding.btnLoadMoreFlashcard.visibility = if (shouldShowFlashLoadMore) View.VISIBLE else View.GONE
+        topicAdapter.submitList(courses)
     }
 
     private fun setupBottomSheet() {
@@ -135,9 +83,34 @@ class VocabularyTabFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = topicAdapter
         }
-        binding.rvFlashcard.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = flashcardAdapter
+    }
+
+    private fun setupLoadMoreOnScroll() {
+        val layoutManager = binding.rvTopic.layoutManager as? LinearLayoutManager
+
+        // Trigger load-more when user scrolls the topic list itself.
+        binding.rvTopic.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy <= 0 || layoutManager == null) return
+
+                val totalItems = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (totalItems > 0 && lastVisible >= totalItems - 3) {
+                    viewModel.loadMoreCourses()
+                }
+            }
+        })
+
+        // rvTopic nằm trong NestedScrollView (bottomSheetContent) nên scroll event thực tế thường là của scrollView.
+        binding.bottomSheetContent.setOnScrollChangeListener { v, _, scrollY, _, _ ->
+            val scrollView = v as? NestedScrollView ?: return@setOnScrollChangeListener
+            val child = scrollView.getChildAt(0) ?: return@setOnScrollChangeListener
+
+            val distanceToBottom = child.measuredHeight - scrollView.height - scrollY
+            if (distanceToBottom <= 200) {
+                viewModel.loadMoreCourses()
+            }
         }
     }
 
@@ -151,17 +124,14 @@ class VocabularyTabFragment : Fragment() {
                             showLoading(false)
                             val courses = state.data.courses
                             allCourses = courses
-
-                            if (pendingTopicLoadMore) {
-                                visibleTopicCount += PAGE_SIZE
-                                pendingTopicLoadMore = false
-                            }
-                            if (pendingFlashcardLoadMore) {
-                                visibleFlashcardCount += PAGE_SIZE
-                                pendingFlashcardLoadMore = false
-                            }
-
                             renderCourses(courses)
+
+                            // If current content does not fill the viewport yet, request next page.
+                            binding.rvTopic.post {
+                                if (!binding.rvTopic.canScrollVertically(1)) {
+                                    viewModel.loadMoreCourses()
+                                }
+                            }
                         }
                         is HomeUiState.Error -> {
                             showLoading(false)
@@ -179,17 +149,7 @@ class VocabularyTabFragment : Fragment() {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.tvError.visibility = View.GONE
         binding.rvTopic.visibility = if (isLoading) View.GONE else View.VISIBLE
-        binding.rvFlashcard.visibility = if (isLoading) View.GONE else View.VISIBLE
         binding.tvTopicSection.visibility = if (isLoading) View.GONE else View.VISIBLE
-        binding.tvFlashcardSection.visibility = if (isLoading) View.GONE else View.VISIBLE
-        if (isLoading) {
-            binding.btnLoadMoreTopic.visibility = View.GONE
-            binding.btnLoadMoreFlashcard.visibility = View.GONE
-        }
-    }
-
-    private companion object {
-        const val PAGE_SIZE = 10
     }
 
     override fun onDestroyView() {

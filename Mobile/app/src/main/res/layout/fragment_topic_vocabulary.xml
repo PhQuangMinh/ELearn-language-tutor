@@ -17,18 +17,60 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/llModeSegment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_vocab_mode_segment_container"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/backButton">
+
+        <TextView
+            android:id="@+id/tvModeVocab"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_vocab_mode_segment_item_selected"
+            android:fontFamily="@font/lexend_semibold"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="@string/label_mode_vocab"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvModeFlashcard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_vocab_mode_segment_item_unselected"
+            android:fontFamily="@font/lexend_semibold"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="@string/label_mode_flashcard"
+            android:textColor="@color/neutral_100"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tvTopicTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/lexend_bold"
         android:gravity="center"
         android:textColor="@color/title_blue"
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
         tools:text="Travelling" />
 
     <LinearLayout

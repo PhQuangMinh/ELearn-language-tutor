@@ -50,6 +50,9 @@
         <argument
             android:name="topicName"
             app:argType="string" />
+        <action
+            android:id="@+id/action_topicVocabularyFragment_to_flashcardFragment"
+            app:destination="@id/flashcardFragment" />
     </fragment>
 
     <fragment
@@ -65,6 +68,9 @@
             android:name="topicTitle"
             app:argType="string"
             android:defaultValue="" />
+        <action
+            android:id="@+id/action_flashcardFragment_to_topicVocabularyFragment"
+            app:destination="@id/topicVocabularyFragment" />
     </fragment>
 
     <fragment
