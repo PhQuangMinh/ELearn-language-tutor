@@ -32,8 +32,9 @@ import {
   uploadImage,
 } from "./api";
 import type { FlashCard, Lesson, PageResponse, Scenario, Topic, Word } from "./types";
+import { QuestionImportTab } from "./QuestionImportTab";
 
-type Tab = "topics" | "lessons" | "scenarios" | "words" | "flashcards";
+type Tab = "topics" | "lessons" | "scenarios" | "words" | "flashcards" | "questions-import";
 
 const PAGE_SIZE = 10;
 const DEFAULT_API_BASE = "http://localhost:8080";
@@ -2407,6 +2408,12 @@ export function App() {
           <button className={tab === "flashcards" ? "active" : ""} onClick={() => setTab("flashcards")}>
             Flashcards
           </button>
+          <button
+            className={tab === "questions-import" ? "active" : ""}
+            onClick={() => setTab("questions-import")}
+          >
+            Question Import
+          </button>
         </nav>
       </aside>
 
@@ -2446,6 +2453,14 @@ export function App() {
         {tab === "scenarios" && renderScenarioTab()}
         {tab === "words" && renderWordsTab()}
         {tab === "flashcards" && renderFlashCardsTab()}
+        {tab === "questions-import" && (
+          <QuestionImportTab
+            apiBase={API_BASE}
+            token={token}
+            defaultLessonId={selectedLesson?.id || null}
+            onMessage={notify}
+          />
+        )}
 
       </main>
     </div>

@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.model;
 
+import com.example.BTL_Mobile.model.audit.AbstractAuditEntity;
 import com.example.BTL_Mobile.model.enums.EQuestionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -13,26 +14,21 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "questions", schema = "btl_mobile")
-public class Question {
+public class Question extends AbstractAuditEntity {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lesson_id", nullable = false)
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "content", nullable = false)
+    @Column(name = "content")
     private String content;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "type", nullable = false, length = 50)
+    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private EQuestionType type;
 

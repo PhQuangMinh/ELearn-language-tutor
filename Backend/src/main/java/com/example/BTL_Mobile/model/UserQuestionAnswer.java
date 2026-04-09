@@ -36,7 +36,6 @@ public class UserQuestionAnswer extends AbstractAuditEntity {
     @JoinColumn(name = "media_id")
     private Media media;
 
-    @Size(max = 255)
     @Column(name = "content")
     private String content;
 
