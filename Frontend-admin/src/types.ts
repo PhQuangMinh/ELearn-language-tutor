@@ -60,6 +60,27 @@ export type Scenario = {
   translation?: string | null;
 };
 
+export type QuestionAnswer = {
+  id: number;
+  content: string;
+  correct: boolean;
+};
+
+export type QuestionDetail = {
+  id: number;
+  content: string;
+  type: string;
+  repeatable: boolean;
+  media?: {
+    id?: number;
+    type?: string;
+    url?: string;
+    size?: number;
+    name?: string;
+  } | null;
+  answers: QuestionAnswer[];
+};
+
 export type CloudinaryUpload = {
   secureUrl: string;
   publicId?: string;
@@ -73,5 +94,41 @@ export type CloudinaryUpload = {
 export type ImportResult = {
   successCount: number;
   errorCount: number;
+  errors: string[];
+};
+
+export type QuestionImportPreviewAnswer = {
+  content: string;
+  correct: boolean;
+};
+
+export type QuestionImportPreviewItem = {
+  sourceRow: number;
+  lessonId: number;
+  content: string;
+  type:
+    | "ONE_SELECTION"
+    | "LISTEN_AND_ARRANGE_SENTENCE"
+    | "TRANSLATE_AND_ARRANGE_SENTENCE"
+    | "SPEAKING_ASSESSMENT";
+  repeatable: boolean;
+  mediaUrl?: string | null;
+  answers: QuestionImportPreviewAnswer[];
+};
+
+export type QuestionImportPreviewResponse = {
+  validCount: number;
+  skippedCount: number;
+  errorCount: number;
+  skippedLessonIds: number[];
+  questions: QuestionImportPreviewItem[];
+  errors: string[];
+};
+
+export type QuestionImportCommitResponse = {
+  importedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  skippedLessonIds: number[];
   errors: string[];
 };

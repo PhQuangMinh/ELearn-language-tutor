@@ -4,7 +4,10 @@ import type {
   FlashCard,
   ImportResult,
   Lesson,
+  QuestionImportCommitResponse,
   PageResponse,
+  QuestionDetail,
+  QuestionImportPreviewResponse,
   Scenario,
   Topic,
   Word,
@@ -274,3 +277,28 @@ export const importFlashCardsExcel = (config: SessionConfig, topicId: number, fi
     `/api/admin/import/flashcards?topicId=${encodeURIComponent(String(topicId))}`,
     file
   );
+
+export const importQuestionsExcel = (config: SessionConfig, lessonId: number, file: File) =>
+  postMultipart<ImportResult>(
+    config,
+    `/api/admin/import/questions?lessonId=${encodeURIComponent(String(lessonId))}`,
+    file
+  );
+
+export const previewQuestionsExcel = (config: SessionConfig, file: File) =>
+  postMultipart<QuestionImportPreviewResponse>(config, "/api/admin/import/questions/preview", file);
+
+export const commitQuestionsImport = (
+  config: SessionConfig,
+  payload: QuestionImportPreviewResponse["questions"]
+) => postJson<QuestionImportCommitResponse>(config, "/api/admin/import/questions/commit", payload);
+
+export const listQuestionsByLesson = async (
+  config: SessionConfig,
+  lessonId: number
+): Promise<QuestionDetail[]> => {
+  const response = await safeFetch(`${config.apiBase}/api/lessons/${lessonId}/questions`, {
+    headers: withHeaders(config.token),
+  });
+  return parseJson<QuestionDetail[]>(response);
+};

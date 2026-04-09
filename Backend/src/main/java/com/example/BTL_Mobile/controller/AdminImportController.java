@@ -1,7 +1,11 @@
 package com.example.BTL_Mobile.controller;
 
 import com.example.BTL_Mobile.dto.response.AdminImportResult;
+import com.example.BTL_Mobile.dto.response.AdminQuestionImportCommitResponse;
+import com.example.BTL_Mobile.dto.response.AdminQuestionImportPreviewItem;
+import com.example.BTL_Mobile.dto.response.AdminQuestionImportPreviewResponse;
 import com.example.BTL_Mobile.dto.response.ApiResponse;
+import java.util.List;
 import com.example.BTL_Mobile.service.AdminExcelImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -9,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -41,5 +46,23 @@ public class AdminImportController {
     ) {
         AdminImportResult result = adminExcelImportService.importFlashCards(topicId, file);
         return ResponseEntity.ok(ApiResponse.success("Import flashcard từ Excel hoàn tất", result));
+    }
+
+    @PostMapping(value = "/questions/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AdminQuestionImportPreviewResponse>> previewQuestions(
+            @RequestPart("file") MultipartFile file
+    ) {
+        AdminQuestionImportPreviewResponse result = adminExcelImportService.previewQuestions(file);
+        return ResponseEntity.ok(ApiResponse.success("Preview import question từ Excel thành công", result));
+    }
+
+    @PostMapping("/questions/commit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AdminQuestionImportCommitResponse>> commitQuestions(
+            @RequestBody List<AdminQuestionImportPreviewItem> requests
+    ) {
+        AdminQuestionImportCommitResponse result = adminExcelImportService.commitQuestions(requests);
+        return ResponseEntity.ok(ApiResponse.success("Lưu danh sách question preview thành công", result));
     }
 }
