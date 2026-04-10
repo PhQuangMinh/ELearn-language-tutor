@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         handleOAuthCallback()
+        restoreSessionIfAvailable()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -60,5 +61,19 @@ class MainActivity : AppCompatActivity() {
             .setPopUpTo(R.id.loginFragment, true)
             .build()
         findNavController(R.id.nav_host_fragment).navigate(R.id.homeFragment, null, navOptions)
+    }
+
+    private fun restoreSessionIfAvailable() {
+        val accessToken = TokenManager.getAccessToken(this)
+        if (accessToken.isNullOrBlank()) return
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        val currentDestId = navController.currentDestination?.id
+        if (currentDestId == R.id.loginFragment) {
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.loginFragment, true)
+                .build()
+            navController.navigate(R.id.homeFragment, null, navOptions)
+        }
     }
 }

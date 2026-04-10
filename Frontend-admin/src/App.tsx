@@ -1628,6 +1628,14 @@ export function App() {
         return;
       }
 
+      const confirmed = window.confirm(
+        `Đã đọc được ${topicReqs.length} topic hợp lệ${skipped > 0 ? `, bỏ qua ${skipped} dòng` : ""}.\nBạn có muốn xác nhận lưu vào hệ thống không?`
+      );
+      if (!confirmed) {
+        notify("Đã hủy lưu topic import.");
+        return;
+      }
+
       notify(`Đang import ${topicReqs.length} topic...`);
       const result = await bulkImportTopics(config, topicReqs);
       notify(`Đã import ${result.length} topic${skipped > 0 ? `, bỏ qua ${skipped} dòng không hợp lệ` : ""}`);
@@ -1663,6 +1671,14 @@ export function App() {
 
       if (lessonReqs.length === 0) {
         notify("Không có dữ liệu hợp lệ trong file");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Đã đọc được ${lessonReqs.length} lesson hợp lệ${skipped > 0 ? `, bỏ qua ${skipped} dòng` : ""}.\nBạn có muốn xác nhận lưu vào hệ thống không?`
+      );
+      if (!confirmed) {
+        notify("Đã hủy lưu lesson import.");
         return;
       }
 
@@ -1726,6 +1742,14 @@ export function App() {
 
       if (scenarioReqs.length === 0) {
         notify("Không có dữ liệu hợp lệ trong file");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Đã đọc được ${scenarioReqs.length} scenario hợp lệ${skipped > 0 ? `, bỏ qua ${skipped} dòng` : ""}.\nBạn có muốn xác nhận lưu vào hệ thống không?`
+      );
+      if (!confirmed) {
+        notify("Đã hủy lưu scenario import.");
         return;
       }
 
