@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,14 +60,16 @@ class MainActivity : AppCompatActivity() {
         val navOptions = NavOptions.Builder()
             .setPopUpTo(R.id.loginFragment, true)
             .build()
-        findNavController(R.id.nav_host_fragment).navigate(R.id.homeFragment, null, navOptions)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment.navController.navigate(R.id.homeFragment, null, navOptions)
     }
 
     private fun restoreSessionIfAvailable() {
         val accessToken = TokenManager.getAccessToken(this)
         if (accessToken.isNullOrBlank()) return
 
-        val navController = findNavController(R.id.nav_host_fragment)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
         val currentDestId = navController.currentDestination?.id
         if (currentDestId == R.id.loginFragment) {
             val navOptions = NavOptions.Builder()
