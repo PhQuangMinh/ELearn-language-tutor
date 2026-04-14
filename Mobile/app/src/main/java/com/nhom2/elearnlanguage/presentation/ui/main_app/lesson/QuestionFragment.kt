@@ -2,6 +2,9 @@ package com.nhom2.elearnlanguage.presentation.ui.main_app.lesson
 
 import android.Manifest
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.TypedValue
 import android.widget.Toast
@@ -64,13 +67,13 @@ class QuestionFragment : Fragment() {
         private const val SPEAKING_SAMPLE_RATE = 16000
         private const val SPEAKING_CHANNEL_COUNT = 1
         private const val SPEAKING_BITS_PER_SAMPLE = 16
-        private const val SPEAKING_CORRECT_THRESHOLD = 60.0
+        private const val SPEAKING_CORRECT_THRESHOLD = 70.0
     }
 
     private data class SpeakingFeedback(
         val isCorrect: Boolean,
-        val displayText: String,
-        val answerContent: String
+        val answerContent: String,
+        val answerFeedbackText: CharSequence
     )
 
     private var _binding: FragmentQuestionBinding? = null
@@ -326,7 +329,7 @@ class QuestionFragment : Fragment() {
             showFeedback(
                 isCorrect = feedback.isCorrect,
                 question = currentQuestion,
-                answerTextOverride = feedback.displayText
+                answerTextOverride = feedback.answerFeedbackText
             )
             return
         }
@@ -505,11 +508,11 @@ class QuestionFragment : Fragment() {
         }
     }
 
-    private fun showFeedback(isCorrect: Boolean, question: Question, answerTextOverride: String? = null) {
+    private fun showFeedback(isCorrect: Boolean, question: Question, answerTextOverride: CharSequence? = null) {
         stopAudioIfPlaying()
         val correctAnswerContent = question.getCorrectAnswer()?.content?.trim().orEmpty()
-        val answerText = if (!answerTextOverride.isNullOrBlank()) {
-            "${getString(R.string.feedback_answer_prefix)} $answerTextOverride"
+        val answerText: CharSequence = if (!answerTextOverride.isNullOrBlank()) {
+            answerTextOverride
         } else {
             buildString {
                 append(getString(R.string.feedback_answer_prefix))
@@ -980,6 +983,8 @@ class QuestionFragment : Fragment() {
 
         result.onSuccess { assessment ->
             val answerContent = buildSpeakingAnswerContent(assessment)
+            val isCorrect = calculateSpeakingCorrectness(assessment)
+            val answerFeedbackText = buildSpeakingWordFeedbackText(assessment, question, isCorrect)
             answersByQuestionId[question.id] = QuestionAnswerItem(
                 id = question.id,
                 answer = SubmittedAnswer(
@@ -988,7 +993,6 @@ class QuestionFragment : Fragment() {
                 )
             )
 
-            val isCorrect = assessment.overall.pronScore >= SPEAKING_CORRECT_THRESHOLD
             val previousResult = correctnessByQuestionId[question.id]
             if (previousResult != isCorrect) {
                 if (isCorrect) {
@@ -1001,14 +1005,14 @@ class QuestionFragment : Fragment() {
 
             speakingFeedbackByQuestionId[question.id] = SpeakingFeedback(
                 isCorrect = isCorrect,
-                displayText = assessment.displayText.ifBlank { question.content },
-                answerContent = answerContent
+                answerContent = answerContent,
+                answerFeedbackText = answerFeedbackText
             )
 
             showFeedback(
                 isCorrect = isCorrect,
                 question = question,
-                answerTextOverride = assessment.displayText.ifBlank { question.content }
+                answerTextOverride = answerFeedbackText
             )
         }.onFailure { error ->
             Toast.makeText(
@@ -1080,6 +1084,67 @@ class QuestionFragment : Fragment() {
     private fun buildSpeakingAnswerContent(assessment: com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult): String {
         val overall = assessment.overall
         return "accuracyScore=${overall.accuracyScore},fluencyScore=${overall.fluencyScore},prosodyScore=${overall.prosodyScore},completenessScore=${overall.completenessScore},pronScore=${overall.pronScore};;${assessment.audioUrl}"
+    }
+
+    private fun calculateSpeakingCorrectness(assessment: com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult): Boolean {
+        val overall = assessment.overall
+        val avg = listOf(
+            overall.accuracyScore,
+            overall.fluencyScore,
+            overall.prosodyScore,
+            overall.completenessScore,
+            overall.pronScore
+        ).average()
+        return avg >= SPEAKING_CORRECT_THRESHOLD
+    }
+
+    private fun buildSpeakingWordFeedbackText(
+        assessment: com.nhom2.elearnlanguage.domain.model.lesson.SpeakingAssessmentResult,
+        question: Question,
+        isCorrectAnswer: Boolean
+    ): CharSequence {
+        val builder = SpannableStringBuilder()
+        builder.append(getString(R.string.feedback_answer_prefix))
+
+        val wordAssessments = assessment.words
+        val fallbackText = assessment.displayText.ifBlank {
+            if (wordAssessments.isNotEmpty()) {
+                wordAssessments.joinToString(" ") { it.word }
+            } else {
+                question.content
+            }
+        }
+
+        builder.append(" ")
+        if (!isCorrectAnswer || wordAssessments.isEmpty()) {
+            builder.append(fallbackText)
+            return builder
+        }
+
+        wordAssessments.forEachIndexed { index, wordAssessment ->
+            val start = builder.length
+            builder.append(wordAssessment.word)
+
+            val isCorrectWord = isSpeakingWordCorrect(wordAssessment.errorType)
+            if (!isCorrectWord) {
+                builder.setSpan(
+                    ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.warning_100)),
+                    start,
+                    builder.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+
+            if (index < wordAssessments.lastIndex) {
+                builder.append(" ")
+            }
+        }
+        return builder
+    }
+
+    private fun isSpeakingWordCorrect(errorType: String): Boolean {
+        val normalizedErrorType = errorType.trim()
+        return normalizedErrorType.equals("None", ignoreCase = true)
     }
 
     private fun toggleAudio(url: String) {
