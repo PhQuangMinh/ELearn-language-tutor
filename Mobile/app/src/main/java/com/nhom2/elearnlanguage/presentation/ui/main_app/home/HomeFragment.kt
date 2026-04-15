@@ -16,7 +16,12 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var currentTabId: Int = 0
+    private var currentTabId: Int = R.id.tab_lesson
+    private val fragments = mutableMapOf<Int, Fragment>()
+
+    companion object {
+        private const val KEY_CURRENT_TAB = "currentTabId"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,11 +33,21 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Khôi phục tab đã lưu trước đó
+        if (savedInstanceState != null) {
+            currentTabId = savedInstanceState.getInt(KEY_CURRENT_TAB, R.id.tab_lesson)
+        }
+        
         setupBottomNav()
-        if (savedInstanceState == null) {
-            binding.root.post {
-                showTab(R.id.tab_lesson)
-                binding.bottomNav.selectedItemId = R.id.tab_lesson
+        
+        // Hiển thị tab đã lưu
+        binding.root.post {
+            binding.bottomNav.selectedItemId = currentTabId
+            if (fragments[currentTabId] == null) {
+                showTab(currentTabId)
+            } else {
+                switchToTab(currentTabId)
             }
         }
     }
@@ -46,8 +61,13 @@ class HomeFragment : Fragment() {
             if (itemId == R.id.tab_lesson || itemId == R.id.tab_vocabulary ||
                 itemId == R.id.tab_speaking || itemId == R.id.tab_profile
             ) {
-                showTab(itemId)
                 currentTabId = itemId
+                
+                if (fragments[itemId] == null) {
+                    showTab(itemId)
+                } else {
+                    switchToTab(itemId)
+                }
             }
             true
         }
@@ -61,10 +81,32 @@ class HomeFragment : Fragment() {
             R.id.tab_profile -> ProfileFragment()
             else -> return
         }
+        fragments[itemId] = fragment
         currentTabId = itemId
+        
         childFragmentManager.beginTransaction()
-            .replace(R.id.flTabContainer, fragment)
+            .add(R.id.flTabContainer, fragment, "tab_${itemId}")
             .commit()
+    }
+
+    private fun switchToTab(itemId: Int) {
+        val currentFragment = fragments[currentTabId]
+        val newFragment = fragments[itemId]
+        
+        if (newFragment == null) return
+        
+        currentTabId = itemId
+        
+        val transaction = childFragmentManager.beginTransaction()
+        if (currentFragment != null) {
+            transaction.hide(currentFragment)
+        }
+        transaction.show(newFragment).commit()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_CURRENT_TAB, currentTabId)
     }
 
     override fun onDestroyView() {
