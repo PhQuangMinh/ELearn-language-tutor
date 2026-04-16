@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentTopicVocabularyBinding
 import com.nhom2.elearnlanguage.domain.model.vocabulary.VocabularyType
+import com.nhom2.elearnlanguage.presentation.ui.main_app.vocabulary.FlashcardViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -27,6 +29,7 @@ class TopicVocabularyFragment : Fragment() {
 
     private val args: TopicVocabularyFragmentArgs by navArgs()
     private val viewModel: TopicVocabularyViewModel by viewModels()
+    private val flashcardViewModel: FlashcardViewModel by activityViewModels()
 
     private lateinit var vocabAdapter: VocabularyCardAdapter
     private lateinit var pageAdapter: PageAdapter
@@ -63,6 +66,10 @@ class TopicVocabularyFragment : Fragment() {
             topicId = args.topicId,
             topicTitle = args.topicName
         )
+
+        // Prefetch flashcards as soon as vocabulary screen opens
+        // so switching to Flashcard mode feels instant.
+        flashcardViewModel.getFlashcards(args.topicId)
     }
 
     private fun setupList() {
