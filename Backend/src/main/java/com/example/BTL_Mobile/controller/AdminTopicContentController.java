@@ -87,6 +87,16 @@ public class AdminTopicContentController {
         return ResponseEntity.ok(ApiResponse.success("Tạo flashcard theo topic thành công!", created));
     }
 
+    /**
+     * Xóa toàn bộ flashcard của topic rồi tạo lại flashcard khớp 1-1 với từ vựng hiện có trong topic.
+     */
+    @PostMapping("/flashcards/sync-from-words")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<FlashCardResponse>>> syncFlashCardsFromWords(@PathVariable Integer topicId) {
+        List<FlashCardResponse> synced = adminLessonFlashCardService.syncFlashCardsFromTopicWords(topicId);
+        return ResponseEntity.ok(ApiResponse.success("Đã đồng bộ flashcard theo từ vựng topic!", synced));
+    }
+
     @PutMapping("/flashcards/{flashCardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FlashCardResponse>> updateFlashCard(
