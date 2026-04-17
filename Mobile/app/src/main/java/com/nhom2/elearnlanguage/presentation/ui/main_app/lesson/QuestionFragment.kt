@@ -804,14 +804,14 @@ class QuestionFragment : Fragment() {
         val answerSlots = words.mapIndexed { index, word ->
             AnswerSlotAdapter.AnswerSlotItem(index = index, correctWord = word)
         }
-        val shuffledWordItems = words.shuffled().map { word ->
-            WordChoiceAdapter.WordChoiceItem(word = word)
-        }
+        val shuffledWordItems = words.mapIndexed { index, word ->
+            WordChoiceAdapter.WordChoiceItem(id = index, word = word)
+        }.shuffled()
 
         answerSlotAdapter = AnswerSlotAdapter(
             initialData = answerSlots,
-            onSlotClicked = { _, removedWord ->
-                wordChoiceAdapter?.markWordAsAvailable(removedWord)
+            onSlotClicked = { _, _, removedWordId ->
+                removedWordId?.let { wordChoiceAdapter?.markWordAsAvailable(it) }
             }
         )
         binding.fbBlankWords.apply {
@@ -821,10 +821,14 @@ class QuestionFragment : Fragment() {
 
         wordChoiceAdapter = WordChoiceAdapter(
             initialWords = shuffledWordItems,
-            onWordClicked = { word ->
+            onWordClicked = { selectedItem ->
                 val emptyIndex = answerSlotAdapter?.getAnswerText()?.indexOfFirst { it.isBlank() } ?: -1
                 if (emptyIndex != -1) {
-                    answerSlotAdapter?.updateSlot(emptyIndex, word)
+                    answerSlotAdapter?.updateSlot(
+                        index = emptyIndex,
+                        word = selectedItem.word,
+                        wordId = selectedItem.id
+                    )
                 }
             }
         )
