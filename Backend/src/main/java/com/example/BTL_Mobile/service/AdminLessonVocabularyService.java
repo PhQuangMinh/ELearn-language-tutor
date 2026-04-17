@@ -1,5 +1,6 @@
 package com.example.BTL_Mobile.service;
 
+import com.example.BTL_Mobile.dto.request.AdminFlashCardCreateRequest;
 import com.example.BTL_Mobile.dto.request.AdminWordCreateRequest;
 import com.example.BTL_Mobile.dto.response.AdminWordResponse;
 import com.example.BTL_Mobile.exception.BusinessException;
@@ -23,6 +24,7 @@ public class AdminLessonVocabularyService {
     private final TopicRepository topicRepository;
     private final DictionaryWordRepository dictionaryWordRepository;
     private final FlashCardRepository flashCardRepository;
+    private final AdminLessonFlashCardService adminLessonFlashCardService;
 
     public List<AdminWordResponse> listWords(Integer topicId) {
         Topic topic = requireTopic(topicId);
@@ -60,7 +62,28 @@ public class AdminLessonVocabularyService {
         topic.getVocabulary().add(dictionaryWord);
         topicRepository.save(topic);
 
+        createAutoFlashCardForWord(topicId, dictionaryWord, request);
+
         return toResponse(dictionaryWord);
+    }
+
+    /**
+     * Mỗi lần {@link #addWord} (form admin hoặc import Excel): luôn tạo thêm một flashcard trong đúng topic,
+     * gắn {@code dictionaryWordId} tương ứng — example = meaning, ảnh placeholder (admin sửa sau nếu cần).
+     */
+    private void createAutoFlashCardForWord(Integer topicId, DictionaryWord dictionaryWord, AdminWordCreateRequest request) {
+        Integer dwId = dictionaryWord.getId();
+        if (dwId == null) {
+            return;
+        }
+
+        AdminFlashCardCreateRequest fcReq = new AdminFlashCardCreateRequest();
+        fcReq.setDictionaryWordId(dwId);
+        fcReq.setExample(request.getMeaning().trim());
+        fcReq.setImageUrl(AdminLessonFlashCardService.FLASHCARD_PLACEHOLDER_IMAGE_URL);
+        fcReq.setImageName("auto_from_word");
+        fcReq.setImageSize(0);
+        adminLessonFlashCardService.addFlashCard(topicId, fcReq);
     }
 
     @Transactional
