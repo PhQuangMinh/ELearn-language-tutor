@@ -216,6 +216,10 @@ export const listTopicFlashCards = (config: SessionConfig, topicId: number) => {
   return response.then((r) => parseJson<ApiResponse<FlashCard[]>>(r)).then((d) => d.data);
 };
 
+/** Xóa toàn bộ flashcard của topic rồi tạo lại khớp với từ vựng hiện có. */
+export const syncTopicFlashCardsFromWords = (config: SessionConfig, topicId: number) =>
+  postJson<FlashCard[]>(config, `/api/admin/topics/${topicId}/flashcards/sync-from-words`, {});
+
 export const createTopicFlashCard = (
   config: SessionConfig,
   topicId: number,

@@ -26,7 +26,7 @@ class VocabularyTabFragment : Fragment() {
     private var _binding: FragmentVocabularyTabBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModels({ requireParentFragment() })
     private var allCourses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress> = emptyList()
 
     private val topicAdapter = VocabularyTopicAdapter { course ->
@@ -52,7 +52,6 @@ class VocabularyTabFragment : Fragment() {
         setupRecyclerViews()
         setupLoadMoreOnScroll()
         observeViewModel()
-        viewModel.loadHomeData()
     }
 
     override fun onResume() {

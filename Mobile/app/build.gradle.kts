@@ -71,6 +71,7 @@ dependencies {
 
     implementation("com.google.dagger:hilt-android:2.57.1")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
 
     //navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
@@ -94,6 +95,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.21")
 
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     //Image loading
     implementation("io.coil-kt:coil:2.7.0")

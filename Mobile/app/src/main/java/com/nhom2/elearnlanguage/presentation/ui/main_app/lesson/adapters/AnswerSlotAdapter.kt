@@ -11,13 +11,14 @@ import com.nhom2.elearnlanguage.databinding.ItemAnswerSlotBinding
 
 class AnswerSlotAdapter(
     initialData: List<AnswerSlotItem>,
-    private val onSlotClicked: (Int, String) -> Unit
+    private val onSlotClicked: (Int, String, Int?) -> Unit
 ) : ListAdapter<AnswerSlotAdapter.AnswerSlotItem, AnswerSlotAdapter.AnswerSlotViewHolder>(DiffCallback()) {
 
     data class AnswerSlotItem(
         val index: Int,
         val correctWord: String,
         val selectedWord: String = "",
+        val selectedWordId: Int? = null,
         val state: SlotState = SlotState.EMPTY
     )
 
@@ -54,8 +55,9 @@ class AnswerSlotAdapter(
                 setOnClickListener {
                     if (item.selectedWord.isNotEmpty() && item.state == SlotState.FILLED) {
                         val removedWord = item.selectedWord
+                        val removedWordId = item.selectedWordId
                         updateSlot(item.index, "")
-                        onSlotClicked(item.index, removedWord)
+                        onSlotClicked(item.index, removedWord, removedWordId)
                     }
                 }
             }
@@ -75,11 +77,11 @@ class AnswerSlotAdapter(
         submitList(initialData.map { it.copy() })
     }
 
-    fun updateSlot(index: Int, word: String) {
+    fun updateSlot(index: Int, word: String, wordId: Int? = null) {
         val updated = currentList.map {
             if (it.index == index) {
-                if (word.isBlank()) it.copy(selectedWord = "", state = SlotState.EMPTY)
-                else it.copy(selectedWord = word, state = SlotState.FILLED)
+                if (word.isBlank()) it.copy(selectedWord = "", selectedWordId = null, state = SlotState.EMPTY)
+                else it.copy(selectedWord = word, selectedWordId = wordId, state = SlotState.FILLED)
             } else it
         }
         submitList(updated)
@@ -87,7 +89,7 @@ class AnswerSlotAdapter(
 
     fun clearSlot(index: Int) {
         val updated = currentList.map {
-            if (it.index == index) it.copy(selectedWord = "", state = SlotState.EMPTY)
+            if (it.index == index) it.copy(selectedWord = "", selectedWordId = null, state = SlotState.EMPTY)
             else it
         }
         submitList(updated)

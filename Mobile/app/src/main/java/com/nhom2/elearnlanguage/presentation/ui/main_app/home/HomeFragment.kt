@@ -45,7 +45,17 @@ class HomeFragment : Fragment() {
         binding.root.post {
             binding.bottomNav.selectedItemId = currentTabId
             if (fragments[currentTabId] == null) {
+<<<<<<< HEAD
                 showTab(currentTabId, null)
+=======
+                showTab(currentTabId)
+            } else {
+                childFragmentManager.beginTransaction().apply {
+                    fragments.forEach { (id, fr) ->
+                        if (id == currentTabId) show(fr) else hide(fr)
+                    }
+                }.commit()
+>>>>>>> a7894dc46e0a6c7c7a9b3114a76e675b1bdbe4c8
             }
         }
     }
@@ -60,10 +70,20 @@ class HomeFragment : Fragment() {
             if (itemId == R.id.tab_lesson || itemId == R.id.tab_vocabulary ||
                 itemId == R.id.tab_speaking || itemId == R.id.tab_profile
             ) {
+<<<<<<< HEAD
+=======
+                val previousTabId = currentTabId
+                currentTabId = itemId
+
+>>>>>>> a7894dc46e0a6c7c7a9b3114a76e675b1bdbe4c8
                 if (fragments[itemId] == null) {
                     showTab(itemId, previousTabId)
                 } else {
+<<<<<<< HEAD
                     switchToTab(previousTabId, itemId)
+=======
+                    switchToTab(itemId, previousTabId)
+>>>>>>> a7894dc46e0a6c7c7a9b3114a76e675b1bdbe4c8
                 }
                 currentTabId = itemId
             }
@@ -81,6 +101,7 @@ class HomeFragment : Fragment() {
         }
         fragments[itemId] = fragment
 
+<<<<<<< HEAD
         val transaction = childFragmentManager.beginTransaction()
         val previousFragment = previousTabId?.let { fragments[it] }
         if (previousFragment != null) {
@@ -103,6 +124,38 @@ class HomeFragment : Fragment() {
             transaction.hide(currentFragment)
         }
         transaction.show(newFragment).commit()
+=======
+        val tx = childFragmentManager.beginTransaction()
+        // Lần đầu mở một tab: phải ẩn các tab đã add trước đó, nếu không cả hai cùng visible → không thấy đổi tab.
+        fragments.forEach { (id, fr) ->
+            if (id != itemId) {
+                tx.hide(fr)
+            }
+        }
+        tx.add(R.id.flTabContainer, fragment, "tab_${itemId}")
+        tx.show(fragment)
+        tx.commit()
+    }
+
+    /**
+     * @param previousTabId tab đang hiển thị *trước* khi listener gán [currentTabId] sang tab mới
+     * (nếu lấy [currentTabId] sau khi đã gán thì trùng fragment đích → hide/show sai, tab không đổi).
+     */
+    private fun switchToTab(newItemId: Int, previousTabId: Int) {
+        val newFragment = fragments[newItemId] ?: return
+
+        childFragmentManager.beginTransaction().apply {
+            val previousFragment = fragments[previousTabId]
+            if (previousFragment != null) {
+                hide(previousFragment)
+            } else {
+                fragments.forEach { (id, fr) ->
+                    if (id != newItemId) hide(fr)
+                }
+            }
+            show(newFragment)
+        }.commit()
+>>>>>>> a7894dc46e0a6c7c7a9b3114a76e675b1bdbe4c8
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

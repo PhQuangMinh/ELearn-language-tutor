@@ -20,6 +20,7 @@ import {
   listAllTopics,
   listTopicFlashCards,
   listTopicWords,
+  syncTopicFlashCardsFromWords,
   listLessons,
   listScenarios,
   listTopics,
@@ -635,22 +636,30 @@ export function App() {
 
     setLoading(true);
     try {
+      const wasEditing = editingWordId != null;
       const payload = {
         word: trimOrEmpty(wordForm.word),
         pronunciation: trimOrEmpty(wordForm.pronunciation),
         meaning: trimOrEmpty(wordForm.meaning),
         type: (wordForm.type || "NOUN") as Word["type"],
       };
-      if (editingWordId != null) {
+      if (wasEditing) {
         await updateTopicWord(config, Number(wordTopicId), editingWordId, payload);
         notify("Đã cập nhật từ");
         setEditingWordId(null);
       } else {
         await createTopicWord(config, Number(wordTopicId), payload);
-        notify("Đã thêm từ vào topic");
+        notify("Đã thêm từ vào topic (đã tạo flashcard tương ứng — có thể sửa ảnh/ví dụ ở tab Flashcard)");
       }
       setWordForm({ type: "NOUN" });
       await loadWordsForTopic(Number(wordTopicId));
+      if (
+        !wasEditing &&
+        isPositiveInt(flashTopicId) &&
+        Number(flashTopicId) === Number(wordTopicId)
+      ) {
+        await loadFlashCardsForTopic(Number(wordTopicId));
+      }
     } catch (error) {
       notify(`Lưu từ thất bại: ${toUiError(error)}`);
     } finally {
@@ -770,6 +779,29 @@ export function App() {
       }
       return next;
     });
+  };
+
+  const onSyncFlashCardsFromWords = async () => {
+    requireAuth();
+    if (!isPositiveInt(wordTopicId)) {
+      notify("Chọn topic");
+      return;
+    }
+    if (!window.confirm("Xác nhận đồng bộ")) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await syncTopicFlashCardsFromWords(config, Number(wordTopicId));
+      notify("Đã đồng bộ flashcard theo từ vựng");
+      if (isPositiveInt(flashTopicId) && Number(flashTopicId) === Number(wordTopicId)) {
+        await loadFlashCardsForTopic(Number(wordTopicId));
+      }
+    } catch (error) {
+      notify(`Đồng bộ flashcard thất bại: ${toUiError(error)}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const bulkDeleteSelectedWords = async () => {
@@ -973,6 +1005,14 @@ export function App() {
           <span>Hiện {filteredWords.length}/{words.length} mục</span>
         </div>
         <div className="list-toolbar" style={{ gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            disabled={loading || !isPositiveInt(wordTopicId)}
+            onClick={() => void onSyncFlashCardsFromWords()}
+            title="Xóa hết flashcard của topic này rồi tạo lại theo đúng các từ đang có"
+          >
+            Đồng bộ flashcard
+          </button>
           <button
             type="button"
             className="danger"

@@ -26,7 +26,7 @@ class LessonTabFragment : Fragment() {
     private var _binding: FragmentLessonTabBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModels({ requireParentFragment() })
 
     private val courseAdapter = CourseAdapter { course ->
         val action = HomeFragmentDirections.actionHomeFragmentToLessonListFragment(

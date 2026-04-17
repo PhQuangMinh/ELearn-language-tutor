@@ -11,10 +11,11 @@ import com.nhom2.elearnlanguage.databinding.ItemWordChoiceBinding
 
 class WordChoiceAdapter(
     initialWords: List<WordChoiceItem>,
-    private val onWordClicked: (String) -> Unit
+    private val onWordClicked: (WordChoiceItem) -> Unit
 ) : ListAdapter<WordChoiceAdapter.WordChoiceItem, WordChoiceAdapter.WordChoiceViewHolder>(DiffCallback()) {
 
     data class WordChoiceItem(
+        val id: Int,
         val word: String,
         val isUsed: Boolean = false
     )
@@ -38,8 +39,8 @@ class WordChoiceAdapter(
 
                 setOnClickListener {
                     if (!item.isUsed) {
-                        markWordAsUsed(item.word)
-                        onWordClicked(item.word)
+                        markWordAsUsed(item.id)
+                        onWordClicked(item)
                     }
                 }
             }
@@ -59,16 +60,16 @@ class WordChoiceAdapter(
         submitList(initialWords.map { it.copy() })
     }
 
-    fun markWordAsAvailable(word: String) {
+    fun markWordAsAvailable(id: Int) {
         val updated = currentList.map {
-            if (it.word == word) it.copy(isUsed = false) else it
+            if (it.id == id) it.copy(isUsed = false) else it
         }
         submitList(updated)
     }
 
-    fun markWordAsUsed(word: String) {
+    fun markWordAsUsed(id: Int) {
         val updated = currentList.map {
-            if (it.word == word) it.copy(isUsed = true) else it
+            if (it.id == id) it.copy(isUsed = true) else it
         }
         submitList(updated)
     }
@@ -79,7 +80,7 @@ class WordChoiceAdapter(
 
     class DiffCallback : DiffUtil.ItemCallback<WordChoiceItem>() {
         override fun areItemsTheSame(oldItem: WordChoiceItem, newItem: WordChoiceItem): Boolean {
-            return oldItem.word == newItem.word
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: WordChoiceItem, newItem: WordChoiceItem): Boolean {

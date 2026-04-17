@@ -27,18 +27,26 @@ class TopicVocabularyViewModel @Inject constructor(
     private var selectedType: VocabularyType = VocabularyType.NOUN
     private var currentPage: Int = 1
     private var all: List<Vocabulary> = emptyList()
+    private var loadedTopicId: Int? = null
 
     fun load(topicId: Int, topicTitle: String) {
-        // If already loaded, keep current state
-        if (_uiState.value is TopicVocabularyUiState.Success) return
+        if (loadedTopicId == topicId && _uiState.value is TopicVocabularyUiState.Success) {
+            return
+        }
 
         this.topicTitle = topicTitle
+        if (loadedTopicId != topicId) {
+            selectedType = VocabularyType.NOUN
+            currentPage = 1
+        }
         viewModelScope.launch {
             _uiState.value = TopicVocabularyUiState.Loading
             try {
                 all = getTopicVocabulariesUseCase(topicId)
+                loadedTopicId = topicId
                 emitSuccess()
             } catch (e: Exception) {
+                loadedTopicId = null
                 _uiState.value = TopicVocabularyUiState.Error(e.message)
             }
         }
