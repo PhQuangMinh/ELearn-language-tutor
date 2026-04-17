@@ -6,5 +6,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AnswerMapper {
+    
     AnswerDTO toAnswerDTO(Answer answer);
 }
