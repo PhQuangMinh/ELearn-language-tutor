@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -30,7 +30,7 @@ class AiConversationFragment : Fragment() {
     private var _binding: FragmentAiConversationBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: AiConversationViewModel by viewModels()
+    private val viewModel: AiConversationViewModel by hiltNavGraphViewModels(R.id.nav_main)
     private val args: AiConversationFragmentArgs by navArgs()
     private lateinit var adapter: AiConversationAdapter
 
