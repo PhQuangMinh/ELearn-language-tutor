@@ -44,10 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class AdminExcelImportService {
 
-    /** Flashcard import không có cột ảnh: backend gắn URL placeholder hợp lệ để thỏa DB. */
-    public static final String FLASHCARD_IMPORT_PLACEHOLDER_IMAGE =
-            "https://placehold.co/600x400/e2e8f0/64748b/png?text=Flashcard";
-
     private static final int MAX_ERROR_LINES = 100;
 
     private final AdminLessonVocabularyService adminLessonVocabularyService;
@@ -165,7 +161,7 @@ public class AdminExcelImportService {
                     req.setMeaning(meaning);
                     req.setType(type);
                     req.setExample(example);
-                    req.setImageUrl(FLASHCARD_IMPORT_PLACEHOLDER_IMAGE);
+                    req.setImageUrl(AdminLessonFlashCardService.FLASHCARD_PLACEHOLDER_IMAGE_URL);
                     req.setImageName("import_placeholder");
                     req.setImageSize(0);
 

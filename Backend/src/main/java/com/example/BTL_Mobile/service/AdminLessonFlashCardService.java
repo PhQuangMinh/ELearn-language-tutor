@@ -13,6 +13,7 @@ import com.example.BTL_Mobile.repository.DictionaryWordRepository;
 import com.example.BTL_Mobile.repository.FlashCardRepository;
 import com.example.BTL_Mobile.repository.MediaRepository;
 import com.example.BTL_Mobile.repository.TopicRepository;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AdminLessonFlashCardService {
+
+    /**
+     * Ảnh mặc định khi tạo flashcard mà chưa upload (import Excel không cột ảnh, hoặc tạo kèm từ trong admin).
+     */
+    public static final String FLASHCARD_PLACEHOLDER_IMAGE_URL =
+            "https://placehold.co/600x400/e2e8f0/64748b/png?text=Flashcard";
 
     private final TopicRepository topicRepository;
     private final DictionaryWordRepository dictionaryWordRepository;
@@ -65,6 +72,40 @@ public class AdminLessonFlashCardService {
         FlashCard saved = flashCardRepository.save(flashCard);
 
         return toResponse(saved);
+    }
+
+    /**
+     * Xóa mọi flashcard đang gắn với topic (qua topic_vocabulary), rồi tạo lại đúng một flashcard cho mỗi từ trong topic
+     * (example = meaning hiện tại, ảnh placeholder).
+     */
+    @Transactional
+    public List<FlashCardResponse> syncFlashCardsFromTopicWords(Integer topicId) {
+        Topic topic = requireTopic(topicId);
+
+        List<FlashCard> existing = flashCardRepository.findByTopicId(topicId);
+        if (!existing.isEmpty()) {
+            flashCardRepository.deleteAll(existing);
+        }
+
+        if (topic.getVocabulary() == null || topic.getVocabulary().isEmpty()) {
+            return List.of();
+        }
+
+        List<DictionaryWord> words = topic.getVocabulary().stream()
+                .sorted(Comparator.comparing(DictionaryWord::getId, Comparator.nullsLast(Integer::compareTo)))
+                .toList();
+
+        List<FlashCardResponse> created = new ArrayList<>();
+        for (DictionaryWord dw : words) {
+            AdminFlashCardCreateRequest fcReq = new AdminFlashCardCreateRequest();
+            fcReq.setDictionaryWordId(dw.getId());
+            fcReq.setExample(dw.getMeaning().trim());
+            fcReq.setImageUrl(FLASHCARD_PLACEHOLDER_IMAGE_URL);
+            fcReq.setImageName("sync_from_words");
+            fcReq.setImageSize(0);
+            created.add(addFlashCard(topicId, fcReq));
+        }
+        return created;
     }
 
     @Transactional
