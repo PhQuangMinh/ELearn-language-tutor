@@ -18,13 +18,7 @@ class LessonListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<LessonListUiState>(LessonListUiState.Idle)
     val uiState: StateFlow<LessonListUiState> = _uiState.asStateFlow()
 
-    private var loadedTopicId: Int? = null
-
     fun load(topicId: Int, topicName: String, topicImageUrl: String?) {
-        if (loadedTopicId == topicId && _uiState.value is LessonListUiState.Success) {
-            return
-        }
-
         viewModelScope.launch {
             _uiState.value = LessonListUiState.Loading
             try {
@@ -37,14 +31,12 @@ class LessonListViewModel @Inject constructor(
                         imageUrl = lesson.imageUrl
                     )
                 }
-                loadedTopicId = topicId
                 _uiState.value = LessonListUiState.Success(
                     topicName = topicName,
                     topicImageUrl = topicImageUrl,
                     lessons = items
                 )
             } catch (e: Exception) {
-                loadedTopicId = null
                 _uiState.value = LessonListUiState.Error(e.message)
             }
         }

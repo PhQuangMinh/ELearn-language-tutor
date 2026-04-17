@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -28,7 +28,7 @@ class TopicVocabularyFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: TopicVocabularyFragmentArgs by navArgs()
-    private val viewModel: TopicVocabularyViewModel by hiltNavGraphViewModels(R.id.nav_main)
+    private val viewModel: TopicVocabularyViewModel by viewModels()
     private val flashcardViewModel: FlashcardViewModel by activityViewModels()
 
     private lateinit var vocabAdapter: VocabularyCardAdapter

@@ -23,7 +23,7 @@ class SpeakingTabFragment : Fragment() {
     private var _binding: FragmentSpeakingTabBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels({ requireParentFragment() })
+    private val viewModel: HomeViewModel by viewModels()
 
     private val topicAdapter = VocabularyTopicAdapter { topic ->
         val action = HomeFragmentDirections.actionHomeFragmentToLessonListFragment(
@@ -47,6 +47,7 @@ class SpeakingTabFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeViewModel()
+        viewModel.loadHomeData()
     }
 
     private fun setupRecyclerView() {

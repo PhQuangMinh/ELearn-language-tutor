@@ -14,10 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentFlashCardBinding
@@ -108,12 +105,7 @@ class FlashcardFragment : Fragment() {
                     if (flashcards.isNotEmpty() && !::progressAdapter.isInitialized) {
                         progressAdapter = ProgressSegmentAdapter(flashcards.size)
                         binding.rvProgressBar.apply {
-                            layoutManager = FlexboxLayoutManager(requireContext()).apply {
-                                flexDirection = FlexDirection.ROW
-                                flexWrap = FlexWrap.WRAP
-                                // Hàng chưa đủ width (vd. hàng 2 sau khi wrap) căn giữa trang
-                                justifyContent = JustifyContent.CENTER
-                            }
+                            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
                             adapter = progressAdapter
                         }
 

@@ -4,5 +4,4 @@
     android:layout_width="24dp"
     android:layout_height="8dp"
     android:layout_marginEnd="4dp"
-    android:layout_marginBottom="6dp"
     android:background="@drawable/progress_segment_empty" />

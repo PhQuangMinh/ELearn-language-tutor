@@ -93,28 +93,19 @@ class AiConversationViewModel @Inject constructor(
     private val _openImproveSheet = MutableSharedFlow<ImproveResult>(extraBufferCapacity = 1)
     val openImproveSheet: SharedFlow<ImproveResult> = _openImproveSheet
 
-    private var activeLessonId: Int? = null
+    private var hasStarted = false
     private var scenarioId: Int? = null
     private var speakingSessionId: Int? = null
 
     fun start(lessonId: Int) {
-        if (activeLessonId == lessonId) return
-
-        if (activeLessonId != null) {
-            cleanupSpeakingSession()
-            _context.value = initialContext
-            _uiState.value = ConversationUiState(
-                messages = emptyList(),
-                expandedHintMessageId = null
-            )
-        }
+        if (hasStarted) return
+        hasStarted = true
 
         viewModelScope.launch {
             val scenario = try {
                 // API1: lấy scenario theo lesson (start hội thoại phần trên)
                 getScenarioByLessonUseCase(lessonId)
             } catch (_: Exception) {
-                activeLessonId = null
                 _context.value = initialContext
                 _uiState.value = ConversationUiState(
                     messages = emptyList(),
@@ -130,22 +121,7 @@ class AiConversationViewModel @Inject constructor(
                 null
             }
 
-            activeLessonId = lessonId
             applyScenario(scenario)
-        }
-    }
-
-    private fun cleanupSpeakingSession() {
-        val sessionId = speakingSessionId
-        speakingSessionId = null
-        scenarioId = null
-        if (sessionId != null) {
-            viewModelScope.launch {
-                try {
-                    endSpeakingSessionUseCase(sessionId)
-                } catch (_: Exception) {
-                }
-            }
         }
     }
 

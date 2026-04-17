@@ -50,11 +50,7 @@ class HomeViewModel @Inject constructor(
         loadCurrentStreak()
     }
 
-    /** @param forceRefresh bỏ qua cache (ví dụ pull-to-refresh sau này). */
-    fun loadHomeData(forceRefresh: Boolean = false) {
-        if (!forceRefresh && _uiState.value is HomeUiState.Success) {
-            return
-        }
+    fun loadHomeData() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             try {
