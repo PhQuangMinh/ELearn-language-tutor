@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,7 +23,7 @@ class LessonListFragment : Fragment() {
     private var _binding: FragmentLessonListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LessonListViewModel by viewModels()
+    private val viewModel: LessonListViewModel by hiltNavGraphViewModels(R.id.nav_main)
     private val args: LessonListFragmentArgs by navArgs()
 
     private lateinit var adapter: LessonAdapter
