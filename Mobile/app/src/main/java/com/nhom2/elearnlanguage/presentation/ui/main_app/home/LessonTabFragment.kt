@@ -57,6 +57,8 @@ class LessonTabFragment : Fragment() {
         super.onResume()
         // Re-read streak from shared in-memory cache when user returns to Home.
         viewModel.refreshCurrentStreak()
+        // Refresh courses to reflect latest topic progress after completing lessons.
+        viewModel.loadHomeData()
     }
 
     private fun setupBottomSheet() {
@@ -165,6 +167,12 @@ class LessonTabFragment : Fragment() {
                 launch {
                     viewModel.streakStatus.collect { status ->
                         binding.ivIllustration.setImageResource(resolveStreakImageRes(status))
+                    }
+                }
+
+                launch {
+                    viewModel.isLoadingMoreCourses.collect { isLoadingMore ->
+                        binding.loadMoreProgressBar.visibility = if (isLoadingMore) View.VISIBLE else View.GONE
                     }
                 }
             }

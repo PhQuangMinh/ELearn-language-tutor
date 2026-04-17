@@ -31,6 +31,8 @@ class HomeViewModel @Inject constructor(
     val currentStreak: StateFlow<Int?> = _currentStreak.asStateFlow()
     private val _streakStatus = MutableStateFlow(StreakStatus.UNKNOWN)
     val streakStatus: StateFlow<StreakStatus> = _streakStatus.asStateFlow()
+    private val _isLoadingMoreCourses = MutableStateFlow(false)
+    val isLoadingMoreCourses: StateFlow<Boolean> = _isLoadingMoreCourses.asStateFlow()
     private var isLoadingStreak = false
     private var lastStreakLoadStartedAtMs = 0L
     private val streakLoadMinIntervalMs = 800L
@@ -38,7 +40,7 @@ class HomeViewModel @Inject constructor(
     // Paging state cho course list
     private var currentCoursePage = 0
     private val pageSize = 10
-    private var isLoadingMoreCourses = false
+    private var isLoadingMoreCoursesInFlight = false
     private var hasMoreCourses = true
 
     init {
@@ -56,7 +58,8 @@ class HomeViewModel @Inject constructor(
             try {
                 val data = getHomeDataUseCase()
                 currentCoursePage = 0
-                isLoadingMoreCourses = false
+                isLoadingMoreCoursesInFlight = false
+                _isLoadingMoreCourses.value = false
                 hasMoreCourses = data.courses.size >= pageSize
                 Log.d("HOME_PAGING", "init courses=${data.courses.size} hasMore=$hasMoreCourses")
                 _uiState.value = HomeUiState.Success(data)
@@ -111,11 +114,12 @@ class HomeViewModel @Inject constructor(
     fun loadMoreCourses() {
         val currentState = _uiState.value
         if (currentState !is HomeUiState.Success) return
-        if (isLoadingMoreCourses || !hasMoreCourses) return
+        if (isLoadingMoreCoursesInFlight || !hasMoreCourses) return
 
         viewModelScope.launch {
             try {
-                isLoadingMoreCourses = true
+                isLoadingMoreCoursesInFlight = true
+                _isLoadingMoreCourses.value = true
                 val nextPage = currentCoursePage + 1
                 Log.d("HOME_PAGING", "loadMore page=$nextPage size=$pageSize")
                 val newCourses: List<CourseProgress> = getMoreCoursesUseCase(nextPage, pageSize)
@@ -134,7 +138,8 @@ class HomeViewModel @Inject constructor(
                 // Log để dễ debug (không tắt hasMore để còn retry khi user scroll tiếp)
                 Log.e("HOME_PAGING", "loadMore failed: ${e.message}", e)
             } finally {
-                isLoadingMoreCourses = false
+                isLoadingMoreCoursesInFlight = false
+                _isLoadingMoreCourses.value = false
             }
         }
     }

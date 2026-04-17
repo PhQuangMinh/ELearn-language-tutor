@@ -50,6 +50,12 @@ class SpeakingTabFragment : Fragment() {
         viewModel.loadHomeData()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh courses to reflect latest topic progress after completing lessons.
+        viewModel.loadHomeData()
+    }
+
     private fun setupRecyclerView() {
         binding.rvCourses.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -74,24 +80,32 @@ class SpeakingTabFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is HomeUiState.Loading -> showLoading(true)
-                        is HomeUiState.Success -> {
-                            showLoading(false)
-                            topicAdapter.submitList(state.data.courses)
-                            binding.rvCourses.post {
-                                if (!binding.rvCourses.canScrollVertically(1)) {
-                                    viewModel.loadMoreCourses()
+                launch {
+                    viewModel.uiState.collect { state ->
+                        when (state) {
+                            is HomeUiState.Loading -> showLoading(true)
+                            is HomeUiState.Success -> {
+                                showLoading(false)
+                                topicAdapter.submitList(state.data.courses)
+                                binding.rvCourses.post {
+                                    if (!binding.rvCourses.canScrollVertically(1)) {
+                                        viewModel.loadMoreCourses()
+                                    }
                                 }
                             }
+                            is HomeUiState.Error -> {
+                                showLoading(false)
+                                binding.tvError.visibility = View.VISIBLE
+                                binding.tvError.text = state.message
+                                    ?: getString(R.string.error_load_home)
+                            }
                         }
-                        is HomeUiState.Error -> {
-                            showLoading(false)
-                            binding.tvError.visibility = View.VISIBLE
-                            binding.tvError.text = state.message
-                                ?: getString(R.string.error_load_home)
-                        }
+                    }
+                }
+
+                launch {
+                    viewModel.isLoadingMoreCourses.collect { isLoadingMore ->
+                        binding.loadMoreProgressBar.visibility = if (isLoadingMore) View.VISIBLE else View.GONE
                     }
                 }
             }

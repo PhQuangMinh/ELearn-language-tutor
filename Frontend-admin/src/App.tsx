@@ -2378,7 +2378,6 @@ export function App() {
           <div className="login-head">
             <p className="eyebrow">E-Learning Admin</p>
             <h1>Đăng nhập hệ thống quản trị</h1>
-            <p className="note">Hệ thống quản trị Topic, Lesson, Scenario</p>
           </div>
           <form onSubmit={onLogin} className="form-grid">
             <label>

@@ -55,6 +55,12 @@ class VocabularyTabFragment : Fragment() {
         viewModel.loadHomeData()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh courses to reflect latest topic progress after completing lessons.
+        viewModel.loadHomeData()
+    }
+
     private fun renderCourses(courses: List<com.nhom2.elearnlanguage.domain.model.CourseProgress>) {
         topicAdapter.submitList(courses)
     }
@@ -117,28 +123,36 @@ class VocabularyTabFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is HomeUiState.Loading -> showLoading(true)
-                        is HomeUiState.Success -> {
-                            showLoading(false)
-                            val courses = state.data.courses
-                            allCourses = courses
-                            renderCourses(courses)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        when (state) {
+                            is HomeUiState.Loading -> showLoading(true)
+                            is HomeUiState.Success -> {
+                                showLoading(false)
+                                val courses = state.data.courses
+                                allCourses = courses
+                                renderCourses(courses)
 
-                            // If current content does not fill the viewport yet, request next page.
-                            binding.rvTopic.post {
-                                if (!binding.rvTopic.canScrollVertically(1)) {
-                                    viewModel.loadMoreCourses()
+                                // If current content does not fill the viewport yet, request next page.
+                                binding.rvTopic.post {
+                                    if (!binding.rvTopic.canScrollVertically(1)) {
+                                        viewModel.loadMoreCourses()
+                                    }
                                 }
                             }
+                            is HomeUiState.Error -> {
+                                showLoading(false)
+                                binding.tvError.visibility = View.VISIBLE
+                                binding.tvError.text = state.message
+                                    ?: getString(R.string.error_load_home)
+                            }
                         }
-                        is HomeUiState.Error -> {
-                            showLoading(false)
-                            binding.tvError.visibility = View.VISIBLE
-                            binding.tvError.text = state.message
-                                ?: getString(R.string.error_load_home)
-                        }
+                    }
+                }
+
+                launch {
+                    viewModel.isLoadingMoreCourses.collect { isLoadingMore ->
+                        binding.loadMoreProgressBar.visibility = if (isLoadingMore) View.VISIBLE else View.GONE
                     }
                 }
             }

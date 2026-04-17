@@ -45,9 +45,7 @@ class HomeFragment : Fragment() {
         binding.root.post {
             binding.bottomNav.selectedItemId = currentTabId
             if (fragments[currentTabId] == null) {
-                showTab(currentTabId)
-            } else {
-                switchToTab(currentTabId)
+                showTab(currentTabId, null)
             }
         }
     }
@@ -55,25 +53,25 @@ class HomeFragment : Fragment() {
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             val itemId = item.itemId
-            if (itemId == currentTabId) {
+            val previousTabId = currentTabId
+            if (itemId == previousTabId) {
                 return@setOnItemSelectedListener true
             }
             if (itemId == R.id.tab_lesson || itemId == R.id.tab_vocabulary ||
                 itemId == R.id.tab_speaking || itemId == R.id.tab_profile
             ) {
-                currentTabId = itemId
-                
                 if (fragments[itemId] == null) {
-                    showTab(itemId)
+                    showTab(itemId, previousTabId)
                 } else {
-                    switchToTab(itemId)
+                    switchToTab(previousTabId, itemId)
                 }
+                currentTabId = itemId
             }
             true
         }
     }
 
-    private fun showTab(itemId: Int) {
+    private fun showTab(itemId: Int, previousTabId: Int? = null) {
         val fragment = when (itemId) {
             R.id.tab_lesson -> LessonTabFragment()
             R.id.tab_vocabulary -> VocabularyTabFragment()
@@ -82,21 +80,24 @@ class HomeFragment : Fragment() {
             else -> return
         }
         fragments[itemId] = fragment
-        currentTabId = itemId
-        
-        childFragmentManager.beginTransaction()
+
+        val transaction = childFragmentManager.beginTransaction()
+        val previousFragment = previousTabId?.let { fragments[it] }
+        if (previousFragment != null) {
+            transaction.hide(previousFragment)
+        }
+
+        transaction
             .add(R.id.flTabContainer, fragment, "tab_${itemId}")
             .commit()
     }
 
-    private fun switchToTab(itemId: Int) {
-        val currentFragment = fragments[currentTabId]
-        val newFragment = fragments[itemId]
+    private fun switchToTab(previousTabId: Int, newTabId: Int) {
+        val currentFragment = fragments[previousTabId]
+        val newFragment = fragments[newTabId]
         
         if (newFragment == null) return
-        
-        currentTabId = itemId
-        
+
         val transaction = childFragmentManager.beginTransaction()
         if (currentFragment != null) {
             transaction.hide(currentFragment)

@@ -11,6 +11,7 @@ import org.mapstruct.ReportingPolicy;
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public abstract class UserStreakMapper {
+    
     public abstract UserStreakInfoDTO toInfoDTO(UserStreak userStreak);
 
 }
