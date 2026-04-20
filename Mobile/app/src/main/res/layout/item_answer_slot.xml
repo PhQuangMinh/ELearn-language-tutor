@@ -15,6 +15,11 @@
         android:background="@drawable/bottom_border"
         android:textSize="18sp"
         android:text="beautiful"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="18sp"
+        android:autoSizeStepGranularity="1sp"
         android:fontFamily="@font/lexend"
         android:layout_margin="2dp"
         android:padding="4dp" />

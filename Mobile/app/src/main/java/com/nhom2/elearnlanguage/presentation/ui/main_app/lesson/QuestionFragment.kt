@@ -17,11 +17,11 @@ import android.media.SoundPool
 import android.os.Build
 import android.content.pm.PackageManager
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -79,7 +79,7 @@ class QuestionFragment : Fragment() {
     private var _binding: FragmentQuestionBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LessonViewModel by activityViewModels()
+    private val viewModel: LessonViewModel by viewModels()
     private val args: QuestionFragmentArgs by navArgs()
     private lateinit var progressAdapter: ProgressSegmentAdapter
     
@@ -793,6 +793,7 @@ class QuestionFragment : Fragment() {
 
     private fun setupArrangeUI(question: Question) {
         val words = question.getWordsForBank()
+        val spanCount = resolveArrangeGridSpanCount(words)
 
         binding.fbBlankWords.visibility = View.VISIBLE
         binding.fbWords.visibility = View.VISIBLE
@@ -815,7 +816,7 @@ class QuestionFragment : Fragment() {
             }
         )
         binding.fbBlankWords.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
+            layoutManager = GridLayoutManager(requireContext(), spanCount)
             adapter = answerSlotAdapter
         }
 
@@ -833,9 +834,15 @@ class QuestionFragment : Fragment() {
             }
         )
         binding.fbWords.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
+            layoutManager = GridLayoutManager(requireContext(), spanCount)
             adapter = wordChoiceAdapter
         }
+    }
+
+    private fun resolveArrangeGridSpanCount(words: List<String>): Int {
+        val maxWordLength = words.maxOfOrNull { it.length } ?: 0
+        // Keep 3 columns for visual balance; only drop to 2 for very long words.
+        return if (maxWordLength >= 13) 2 else 3
     }
 
     private fun moveNextQuestion() {
