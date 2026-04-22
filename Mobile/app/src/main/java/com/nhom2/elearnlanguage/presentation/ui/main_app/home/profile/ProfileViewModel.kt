@@ -7,6 +7,7 @@ import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.ProfileRepository
 import com.nhom2.elearnlanguage.domain.repository.TokenStorage
 import com.nhom2.elearnlanguage.domain.usecase.GetUserStreakUseCase
+import com.nhom2.elearnlanguage.domain.usecase.UnregisterFcmTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +32,8 @@ class ProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val authRepository: AuthRepository,
     private val getUserStreakUseCase: GetUserStreakUseCase,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val unregisterFcmTokenUseCase: UnregisterFcmTokenUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -130,6 +132,7 @@ class ProfileViewModel @Inject constructor(
 
             val refreshToken = tokenStorage.getRefreshToken()
             val logoutErrorMessage = try {
+                runCatching { unregisterFcmTokenUseCase() }
                 if (!refreshToken.isNullOrBlank()) {
                     authRepository.logout(refreshToken)
                 }

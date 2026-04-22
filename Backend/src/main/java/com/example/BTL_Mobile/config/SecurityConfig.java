@@ -82,7 +82,8 @@ public class SecurityConfig {
                 "/api/scenarios/by-lesson/*",
                 "/api/ai/respond",
                 "/api/conversation/improve",
-                "/conversation/improve"
+                "/conversation/improve",
+                "/api/admin/notifications/streak-reminder/trigger"
             ).permitAll()
             .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
             .requestMatchers("/api/auth/**").authenticated()

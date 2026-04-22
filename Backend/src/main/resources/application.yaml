@@ -94,3 +94,13 @@ azure:
     key: ${SPEECH_AZURE_API_KEY}
     region: ${SPEECH_AZURE_REGION}
     default-language: ${SPEECH_AZURE_DEFAULT_LANGUAGE}
+
+firebase:
+  credentials-path: ${FIREBASE_CREDENTIALS_PATH}
+  project-id: ${FIREBASE_PROJECT_ID}
+
+streak-reminder:
+  enabled: ${STREAK_REMINDER_ENABLED:false}
+  # Chạy cronjob vào 9h và 19h hằng ngày
+  cron: ${STREAK_REMINDER_CRON:0 0 9,19 * * *}
+  zone: ${STREAK_REMINDER_ZONE:Asia/Ho_Chi_Minh}
