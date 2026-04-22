@@ -690,6 +690,33 @@ class QuestionFragment : Fragment() {
             binding.btn2.text = currentQuestion.answers[1].content
             binding.btn3.text = currentQuestion.answers[2].content
             binding.btn4.text = currentQuestion.answers[3].content
+            equalizeMultipleChoiceButtonHeights()
+        }
+    }
+
+    private fun equalizeMultipleChoiceButtonHeights() {
+        val buttons = listOf(binding.btn1, binding.btn2, binding.btn3, binding.btn4)
+
+        // Reset first so height can shrink back for shorter answers on next question.
+        buttons.forEach { btn ->
+            val params = btn.layoutParams
+            if (params.height != ViewGroup.LayoutParams.WRAP_CONTENT) {
+                params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                btn.layoutParams = params
+            }
+        }
+
+        binding.multipleChoiceContainer.post {
+            if (_binding == null) return@post
+            val maxHeight = buttons.maxOfOrNull { it.height } ?: return@post
+            if (maxHeight <= 0) return@post
+            buttons.forEach { btn ->
+                val params = btn.layoutParams
+                if (params.height != maxHeight) {
+                    params.height = maxHeight
+                    btn.layoutParams = params
+                }
+            }
         }
     }
 

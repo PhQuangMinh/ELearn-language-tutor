@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public abstract class UserLessonResultMapper {
+    
     public UserLessonResult toModel(Lesson lesson, SubmitLessonRequest submitLesson, double score) {
         int userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         User user = User.builder().id(userId).build();
