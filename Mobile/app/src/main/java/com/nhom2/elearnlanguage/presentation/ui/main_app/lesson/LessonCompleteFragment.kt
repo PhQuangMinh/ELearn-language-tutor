@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class LessonCompleteFragment : Fragment() {
     companion object {
         private const val TAG = "LessonCompleteFragment"
+        private const val KEY_LESSON_COMPLETED_EVENT_ID = "lessonCompletedEventId"
     }
 
     private var _binding: FragmentLessonCompleteBinding? = null
@@ -44,11 +45,24 @@ class LessonCompleteFragment : Fragment() {
         Log.d(TAG, "onViewCreated streakExtended=${args.streakExtended}, currentStreak=${args.currentStreak}")
 
         binding.btnContinue.setOnClickListener {
+            val eventId = System.currentTimeMillis()
             if (args.streakExtended) {
+                // Invalidate cached lists when user finished a lesson.
+                findNavController().getBackStackEntry(R.id.lessonListFragment)
+                    .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+                findNavController().getBackStackEntry(R.id.homeFragment)
+                    .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+
                 val action = LessonCompleteFragmentDirections
                     .actionLessonCompleteFragmentToLessonStreakFragment(args.currentStreak)
                 findNavController().navigate(action)
             } else {
+                // Invalidate cached lists when user finished a lesson.
+                findNavController().getBackStackEntry(R.id.lessonListFragment)
+                    .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+                findNavController().getBackStackEntry(R.id.homeFragment)
+                    .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+
                 findNavController().popBackStack(R.id.lessonListFragment, false)
             }
         }

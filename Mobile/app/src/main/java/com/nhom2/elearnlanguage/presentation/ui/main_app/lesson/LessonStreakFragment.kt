@@ -17,6 +17,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LessonStreakFragment : Fragment() {
+    companion object {
+        private const val KEY_LESSON_COMPLETED_EVENT_ID = "lessonCompletedEventId"
+    }
 
     private var _binding: FragmentLessonStreakBinding? = null
     private val binding get() = _binding!!
@@ -41,6 +44,13 @@ class LessonStreakFragment : Fragment() {
         showContinueButtonWithDelay()
 
         binding.btnBackToLessonList.setOnClickListener {
+            val eventId = System.currentTimeMillis()
+            // Invalidate cached lists when user finished a lesson.
+            findNavController().getBackStackEntry(R.id.lessonListFragment)
+                .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+            findNavController().getBackStackEntry(R.id.homeFragment)
+                .savedStateHandle[KEY_LESSON_COMPLETED_EVENT_ID] = eventId
+
             findNavController().popBackStack(R.id.lessonListFragment, false)
         }
     }

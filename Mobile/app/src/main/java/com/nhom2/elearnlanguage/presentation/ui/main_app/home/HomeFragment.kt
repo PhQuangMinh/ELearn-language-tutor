@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentHomeBinding
 import com.nhom2.elearnlanguage.presentation.ui.main_app.home.profile.ProfileFragment
@@ -12,6 +14,10 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
+    companion object {
+        private const val KEY_LESSON_COMPLETED_EVENT_ID = "lessonCompletedEventId"
+        private const val KEY_CURRENT_TAB = "currentTabId"
+    }
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -19,9 +25,8 @@ class HomeFragment : Fragment() {
     private var currentTabId: Int = R.id.tab_lesson
     private val fragments = mutableMapOf<Int, Fragment>()
 
-    companion object {
-        private const val KEY_CURRENT_TAB = "currentTabId"
-    }
+    private val viewModel: HomeViewModel by viewModels()
+    private var lastHandledLessonCompletedEventId: Long = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,6 +52,18 @@ class HomeFragment : Fragment() {
             if (fragments[currentTabId] == null) {
                 showTab(currentTabId, null)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Only refresh cached home data when we know a lesson completion occurred.
+        val handle = findNavController().currentBackStackEntry?.savedStateHandle
+        val eventId = handle?.get<Long>(KEY_LESSON_COMPLETED_EVENT_ID) ?: 0L
+        if (eventId > 0L && eventId != lastHandledLessonCompletedEventId) {
+            lastHandledLessonCompletedEventId = eventId
+            viewModel.loadHomeData(forceRefresh = true)
+            viewModel.refreshCurrentStreak()
         }
     }
 
