@@ -3,6 +3,7 @@ package com.nhom2.elearnlanguage.presentation.ui.auth.register
 import androidx.lifecycle.ViewModel
 import com.nhom2.elearnlanguage.domain.repository.AuthRepository
 import com.nhom2.elearnlanguage.domain.repository.TokenStorage
+import com.nhom2.elearnlanguage.domain.usecase.SyncFcmTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +12,8 @@ import javax.inject.Inject
 @HiltViewModel // -> service/component
 class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val syncFcmTokenUseCase: SyncFcmTokenUseCase
 ) : ViewModel() {//Inject constructor() -> autowired
     private val _name = MutableStateFlow("")
     val name = _name.asStateFlow() // Biến thể hiện để cập nhật trên giao diện, không trực tiếp sửa đổi
@@ -64,5 +66,6 @@ class RegisterViewModel @Inject constructor(
         tokenStorage.saveAccessToken(session.accessToken)
         tokenStorage.saveRefreshToken(session.refreshToken)
         tokenStorage.saveUserId(session.user?.id)
+        syncFcmTokenUseCase()
     }
 }

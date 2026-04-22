@@ -24,3 +24,5 @@ build/
 src/main/resources/application-local.yaml
 
 .cursor
+
+service-account.json

@@ -9,6 +9,7 @@ object TokenManager {
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_USER_ID = "user_id"
+    private const val KEY_FCM_TOKEN = "fcm_token"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -65,6 +66,17 @@ object TokenManager {
                     .remove(KEY_REFRESH_TOKEN)
                     .remove(KEY_USER_ID)
             }
+    }
+
+    fun saveFcmToken(context: Context, token: String?) {
+        if (token.isNullOrBlank()) return
+        getPrefs(context).edit {
+            putString(KEY_FCM_TOKEN, token)
+        }
+    }
+
+    fun getFcmToken(context: Context): String? {
+        return getPrefs(context).getString(KEY_FCM_TOKEN, null)
     }
 
     private fun extractUserIdFromJwt(accessToken: String): Long? {

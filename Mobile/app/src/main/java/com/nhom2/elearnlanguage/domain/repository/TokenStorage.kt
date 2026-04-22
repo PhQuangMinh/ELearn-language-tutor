@@ -6,5 +6,7 @@ interface TokenStorage {
     fun getRefreshToken(): String?
     fun saveUserId(userId: Long?)
     fun getUserId(): Long?
+    fun saveFcmToken(token: String?)
+    fun getFcmToken(): String?
     fun clearTokens()
 }

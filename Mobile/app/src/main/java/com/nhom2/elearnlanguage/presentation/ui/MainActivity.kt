@@ -1,20 +1,37 @@
 package com.nhom2.elearnlanguage.presentation.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
+import com.nhom2.elearnlanguage.domain.usecase.SyncFcmTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var syncFcmTokenUseCase: SyncFcmTokenUseCase
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,6 +42,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        requestNotificationPermissionIfNeeded()
         handleOAuthCallback()
         restoreSessionIfAvailable()
     }
@@ -56,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         val refreshToken = data.getQueryParameter("refreshToken")
         TokenManager.saveAccessToken(this, accessToken)
         TokenManager.saveRefreshToken(this, refreshToken)
+        syncFcmToken()
 
         val navOptions = NavOptions.Builder()
             .setPopUpTo(R.id.loginFragment, true)
@@ -76,6 +95,27 @@ class MainActivity : AppCompatActivity() {
                 .setPopUpTo(R.id.loginFragment, true)
                 .build()
             navController.navigate(R.id.homeFragment, null, navOptions)
+        }
+        syncFcmToken()
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    private fun syncFcmToken() {
+        lifecycleScope.launch {
+            runCatching {
+                syncFcmTokenUseCase()
+            }
         }
     }
 }

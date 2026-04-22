@@ -30,6 +30,14 @@ class TokenStorageImpl @Inject constructor(
         return TokenManager.getUserId(context)
     }
 
+    override fun saveFcmToken(token: String?) {
+        TokenManager.saveFcmToken(context, token)
+    }
+
+    override fun getFcmToken(): String? {
+        return TokenManager.getFcmToken(context)
+    }
+
     override fun clearTokens() {
         TokenManager.clearTokens(context)
     }
