@@ -20,8 +20,8 @@ class LessonListViewModel @Inject constructor(
 
     private var loadedTopicId: Int? = null
 
-    fun load(topicId: Int, topicName: String, topicImageUrl: String?) {
-        if (loadedTopicId == topicId && _uiState.value is LessonListUiState.Success) {
+    fun load(topicId: Int, topicName: String, topicImageUrl: String?, forceRefresh: Boolean = false) {
+        if (!forceRefresh && loadedTopicId == topicId && _uiState.value is LessonListUiState.Success) {
             return
         }
 

@@ -19,6 +19,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LessonListFragment : Fragment() {
+    companion object {
+        private const val KEY_LESSON_COMPLETED_EVENT_ID = "lessonCompletedEventId"
+    }
 
     private var _binding: FragmentLessonListBinding? = null
     private val binding get() = _binding!!
@@ -65,11 +68,27 @@ class LessonListFragment : Fragment() {
 
         setUpObservers()
 
+        // Load initial list (cached in VM unless we force refresh).
         viewModel.load(
             topicId = args.topicId,
             topicName = args.topicName,
             topicImageUrl = args.topicImageUrl
         )
+
+        // Refresh exactly when a lesson was completed (invalidate cache → refetch).
+        val handle = findNavController().currentBackStackEntry?.savedStateHandle
+        handle
+            ?.getLiveData<Long>(KEY_LESSON_COMPLETED_EVENT_ID)
+            ?.observe(viewLifecycleOwner) { eventId ->
+                if (eventId != null && eventId > 0L) {
+                    viewModel.load(
+                        topicId = args.topicId,
+                        topicName = args.topicName,
+                        topicImageUrl = args.topicImageUrl,
+                        forceRefresh = true
+                    )
+                }
+            }
     }
 
     private fun setUpObservers() {
