@@ -20,12 +20,8 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">12sp</item>
-        <item name="android:autoSizeMaxTextSize">18sp</item>
-        <item name="android:autoSizeStepGranularity">1sp</item>
+        <item name="android:breakStrategy">balanced</item>
+        <item name="android:hyphenationFrequency">normal</item>
         <item name="android:padding">16dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>

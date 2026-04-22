@@ -38,9 +38,12 @@ class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     private var hasLoadedProfile = false
+    private var lastLoadedUserId: Long? = null
 
     fun loadProfile(forceReload: Boolean = false) {
-        if (hasLoadedProfile && !forceReload) return
+        val currentUserId = tokenStorage.getUserId()
+        val canUseCache = hasLoadedProfile && !forceReload && currentUserId != null && currentUserId == lastLoadedUserId
+        if (canUseCache) return
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -57,6 +60,7 @@ class ProfileViewModel @Inject constructor(
                     null
                 }
                 hasLoadedProfile = true
+                lastLoadedUserId = userId
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     profile = profile,
@@ -65,6 +69,8 @@ class ProfileViewModel @Inject constructor(
                     errorMessage = null
                 )
             } catch (e: Exception) {
+                hasLoadedProfile = false
+                lastLoadedUserId = null
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     errorMessage = e.message
@@ -134,8 +140,13 @@ class ProfileViewModel @Inject constructor(
                 tokenStorage.clearTokens()
             }
 
+            hasLoadedProfile = false
+            lastLoadedUserId = null
             _uiState.value = _uiState.value.copy(
                 isLoggingOut = false,
+                profile = null,
+                currentStreak = null,
+                longestStreak = null,
                 logoutCompleted = true,
                 errorMessage = logoutErrorMessage
             )
