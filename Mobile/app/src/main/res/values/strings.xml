@@ -133,4 +133,14 @@
     <string name="current_password_required">Current password cannot be empty!</string>
     <string name="confirm_password_mismatch">Confirm password does not match!</string>
     <string name="change_password_success">Change password successful.</string>
+    <string name="onboarding_title_1">No time for
+long lessons</string>
+    <string name="onboarding_desc_1">Even your busiest days have 5 minutes. That\'s all you need to start.</string>
+    <string name="onboarding_cta_1">Let\'s find out</string>
+    <string name="onboarding_title_2">Wherever you go, your English goes with you.</string>
+    <string name="onboarding_desc_2">Learn in small moments, whenever it works for you.</string>
+    <string name="onboarding_cta_2">Start right now</string>
+    <string name="onboarding_title_3">Ready to level up your English?</string>
+    <string name="onboarding_desc_3">Just a few minutes a day - and you\'re already ahead.</string>
+    <string name="onboarding_cta_3">Register</string>
 </resources>

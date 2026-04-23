@@ -97,6 +97,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.21")
 
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     //Image loading

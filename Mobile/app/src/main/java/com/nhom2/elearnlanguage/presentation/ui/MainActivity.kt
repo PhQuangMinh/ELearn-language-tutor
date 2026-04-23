@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import com.nhom2.elearnlanguage.data.source.local.OnboardingPreferenceManager
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.domain.usecase.SyncFcmTokenUseCase
@@ -85,15 +86,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restoreSessionIfAvailable() {
-        val accessToken = TokenManager.getAccessToken(this)
-        if (accessToken.isNullOrBlank()) return
+        val onboardingCompleted = OnboardingPreferenceManager.isOnboardingCompleted(this)
+        if (!onboardingCompleted) return
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         val currentDestId = navController.currentDestination?.id
-        if (currentDestId == R.id.loginFragment) {
+
+        if (currentDestId == R.id.onboardingFragment) {
             val navOptions = NavOptions.Builder()
-                .setPopUpTo(R.id.loginFragment, true)
+                .setPopUpTo(R.id.onboardingFragment, true)
+                .build()
+            navController.navigate(R.id.loginFragment, null, navOptions)
+        }
+
+        val accessToken = TokenManager.getAccessToken(this)
+        if (accessToken.isNullOrBlank()) return
+
+        if (currentDestId == R.id.loginFragment || currentDestId == R.id.onboardingFragment) {
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.onboardingFragment, true)
                 .build()
             navController.navigate(R.id.homeFragment, null, navOptions)
         }
