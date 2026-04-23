@@ -1,0 +1,35 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Env / local config ###
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.yaml
+
+.cursor
+
+service-account.json
+
+# JVM / Android crash & replay logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Kotlin daemon error logs
+Mobile/.kotlin/errors/*.log

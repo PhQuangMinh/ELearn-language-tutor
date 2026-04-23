@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/onboardingFragment">
+
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.onboarding.OnboardingFragment"
+        android:label="fragment_onboarding"
+        tools:layout="@layout/fragment_onboarding" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_nav_auth"
+            app:destination="@id/nav_auth" />
+        <action
+            android:id="@+id/action_loginFragment_to_inputEmailFragment"
+            app:destination="@id/inputEmailFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_lessonListFragment"
+            app:destination="@id/lessonListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_topicVocabularyFragment"
+            app:destination="@id/topicVocabularyFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_flashcardFragment"
+            app:destination="@id/flashcardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/topicVocabularyFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.vocabulary.TopicVocabularyFragment"
+        android:label="fragment_topic_vocabulary"
+        tools:layout="@layout/fragment_topic_vocabulary">
+        <argument
+            android:name="topicId"
+            app:argType="integer" />
+        <argument
+            android:name="topicName"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_topicVocabularyFragment_to_flashcardFragment"
+            app:destination="@id/flashcardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/flashcardFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.vocabulary.FlashcardFragment"
+        android:label="fragment_flashcard"
+        tools:layout="@layout/fragment_flash_card">
+        <argument
+            android:name="topicId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="topicTitle"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_flashcardFragment_to_topicVocabularyFragment"
+            app:destination="@id/topicVocabularyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/lessonListFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lessonlist.LessonListFragment"
+        android:label="fragment_lesson_list"
+        tools:layout="@layout/fragment_lesson_list">
+        <argument
+            android:name="topicId"
+            app:argType="integer" />
+        <argument
+            android:name="topicName"
+            app:argType="string" />
+        <argument
+            android:name="topicImageUrl"
+            app:argType="string" />
+        <argument
+            android:name="fromSpeaking"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/action_lessonListFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
+        <action
+            android:id="@+id/action_lessonListFragment_to_aiConversationFragment"
+            app:destination="@id/aiConversationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/aiConversationFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.home.speaking.AiConversationFragment"
+        android:label="fragment_ai_conversation"
+        tools:layout="@layout/fragment_ai_conversation">
+        <argument
+            android:name="lessonId"
+            app:argType="integer"
+            android:defaultValue="1" />
+    </fragment>
+    <include app:graph="@navigation/nav_auth" />
+    <fragment
+        android:id="@+id/inputEmailFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.InputEmailFragment"
+        android:label="InputEmailFragment" >
+        <action
+            android:id="@+id/action_inputEmailFragment_to_inputVerificationCodeFragment"
+            app:destination="@id/inputVerificationCodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inputVerificationCodeFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.InputVerificationCodeFragment"
+        android:label="InputVerificationCodeFragment" >
+        <action
+            android:id="@+id/action_inputVerificationCodeFragment_to_newPasswordFragment"
+            app:destination="@id/newPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPasswordFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.auth.forget_password.NewPasswordFragment"
+        android:label="NewPasswordFragment" />
+    <fragment
+        android:id="@+id/questionFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.QuestionFragment"
+        android:label="fragment_question"
+        tools:layout="@layout/fragment_question" >
+        <argument
+            android:name="lessonId"
+            app:argType="integer"
+            android:defaultValue="1" />
+        <action
+            android:id="@+id/action_questionFragment_to_lessonCompleteFragment"
+            app:destination="@id/lessonCompleteFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonCompleteFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.LessonCompleteFragment"
+        android:label="Lesson complete"
+        tools:layout="@layout/fragment_lesson_complete">
+        <argument
+            android:name="correctCount"
+            app:argType="integer" />
+        <argument
+            android:name="totalCount"
+            app:argType="integer" />
+        <argument
+            android:name="currentStreak"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="streakExtended"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/action_lessonCompleteFragment_to_lessonStreakFragment"
+            app:destination="@id/lessonStreakFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonStreakFragment"
+        android:name="com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.LessonStreakFragment"
+        android:label="Lesson streak"
+        tools:layout="@layout/fragment_lesson_streak">
+        <argument
+            android:name="currentStreak"
+            app:argType="integer" />
+    </fragment>
+</navigation>

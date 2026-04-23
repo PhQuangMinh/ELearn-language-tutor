@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark palette overrides for existing XML screens -->
+    <color name="app_surface">#10141B</color>
+    <color name="app_surface_card">#1E2839</color>
+    <color name="app_surface_input">#1F2A38</color>
+    <color name="primary_80">#167FC6</color>
+    <color name="primary_40">#2A3B56</color>
+    <color name="primary_20">#1C2636</color>
+    <color name="border_gray">#3D4F63</color>
+    <color name="neutral_20">#34475F</color>
+    <color name="neutral_40">#5A677B</color>
+    <color name="neutral_60">#92A0B7</color>
+    <color name="neutral_0">#10141B</color>
+    <color name="secondary_40">#2A3446</color>
+
+    <!-- Keep contrast readable on dark backgrounds -->
+    <color name="title_blue">#E5EEFF</color>
+    <color name="medium_gray">#C9D3E3</color>
+    <color name="dark_gray">#AEBACE</color>
+    <color name="neutral_100">#FFFFFF</color>
+    <color name="neutral_80">#D0D9E8</color>
+    <color name="stroke_neutral">#4A5B70</color>
+    <color name="back_icon_tint">#FFFFFF</color>
+    <color name="flashcard_title_tint">#FFFFFF</color>
+    <color name="topic_item_arrow_tint">#FFFFFF</color>
+    <color name="lesson_item_arrow_bg">#34475F</color>
+</resources>

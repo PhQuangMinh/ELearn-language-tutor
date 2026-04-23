@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Auth UI -->
+    <color name="primary_blue">#0693F1</color>
+    <color name="title_blue">#243B5A</color>
+    <color name="input_stroke_blue">#6AAEF2</color>
+    <color name="status_red">#E53935</color>
+    <color name="status_orange">#FB8C00</color>
+    <color name="status_green">#43A047</color>
+    <color name="status_grey">#9AA7B8</color>
+    <color name="stroke_neutral">#BFD0E0</color>
+    <color name="light_gray">#F5F5F5</color>
+    <color name="border_gray">#E0E0E0</color>
+    <color name="hint_gray">#CCCCCC</color>
+    <color name="dark_gray">#999999</color>
+    <color name="medium_gray">#666666</color>
+
+
+    <color name="primary_100">#0074CE</color>
+    <color name="primary_80">#0693F1</color>
+    <color name="primary_60">#3DB2FF</color>
+    <color name="primary_40">#B8E1FF</color>
+    <color name="primary_20">#EFF8FF</color>
+
+    <color name="secondary_100">#FFC845</color>
+    <color name="secondary_80">#FFD899</color>
+    <color name="secondary_60">#FFE5BB</color>
+    <color name="secondary_40">#FFF2DD</color>
+    <color name="secondary_20">#FFFAEF</color>
+
+    <color name="neutral_100">#2C313A</color>
+    <color name="neutral_80">#626262</color>
+    <color name="neutral_60">#A9A9A9</color>
+    <color name="neutral_40">#CACACA</color>
+    <color name="neutral_20">#E9E9E9</color>
+    <color name="neutral_0">#FFFFFF</color>
+
+    <color name="success_100">#16CB16</color>
+    <color name="success_80">#58E66D</color>
+    <color name="success_60">#88D680</color>
+    <color name="success_40">#AADFA0</color>
+    <color name="success_20">#D9E6DF</color>
+
+    <color name="warning_100">#E4C65B</color>
+    <color name="warning_80">#E9D17C</color>
+    <color name="warning_60">#EFDD9D</color>
+    <color name="warning_40">#F4E8BD</color>
+    <color name="warning_20">#FAF4DE</color>
+
+    <color name="error_100">#E25C5C</color>
+    <color name="error_80">#E87D7D</color>
+    <color name="error_60">#EE9D9D</color>
+    <color name="error_40">#F3BEBE</color>
+    <color name="error_20">#F9DEDE</color>
+
+    <color name="info_100">#2685CA</color>
+    <color name="info_80">#519DD5</color>
+    <color name="info_60">#7DB6DF</color>
+    <color name="info_40">#A8CEEA</color>
+    <color name="info_20">#D4E7F4</color>
+
+    <!-- Theme-aware surfaces for XML layouts -->
+    <color name="app_surface">#FFFFFF</color>
+    <color name="app_surface_card">#FFFFFF</color>
+    <color name="app_surface_input">#FFFFFF</color>
+    <color name="back_icon_tint">#0693F1</color>
+    <color name="flashcard_title_tint">#626262</color>
+    <color name="topic_item_arrow_tint">#A9A9A9</color>
+    <color name="lesson_item_arrow_bg">#FFFFFF</color>
+    <color name="onboarding_background">#20AFCB</color>
+    <color name="onboarding_button_text">#2398B5</color>
+
+</resources>

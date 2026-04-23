@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_surface"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    tools:context=".presentation.ui.main_app.lesson.LessonStreakFragment">
+
+    <ImageView
+        android:id="@+id/ivStreakImage"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="56dp"
+        android:contentDescription="@string/streak_image"
+        android:scaleType="fitCenter"
+        android:src="@drawable/streak_active"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvStreakTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/lexend_bold"
+        android:text="@string/streak_extended_title"
+        android:textColor="@color/secondary_100"
+        android:textSize="28sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivStreakImage" />
+
+    <FrameLayout
+        android:id="@+id/flStreakValueContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="72dp"
+        android:layout_marginTop="16dp"
+        android:clipChildren="true"
+        android:clipToPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvStreakTitle">
+
+        <TextView
+            android:id="@+id/tvStreakValueCurrent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/lexend_bold"
+            android:text="0"
+            android:textColor="@color/primary_100"
+            android:textSize="54sp"
+            tools:text="11" />
+
+        <TextView
+            android:id="@+id/tvStreakValueNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/lexend_bold"
+            android:text="0"
+            android:textColor="@color/primary_100"
+            android:textSize="54sp"
+            android:visibility="gone"
+            tools:text="12" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvStreakHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/lexend"
+        android:text="@string/streak_extended_hint"
+        android:textColor="@color/neutral_80"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flStreakValueContainer" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBackToLessonList"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/lesson_complete_continue"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_100"
+        app:cornerRadius="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

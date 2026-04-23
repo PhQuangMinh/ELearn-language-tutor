@@ -1,0 +1,27 @@
+package com.nhom2.elearnlanguage.data.repository
+
+import com.nhom2.elearnlanguage.data.source.remote.ImproveDataSource
+import com.nhom2.elearnlanguage.domain.model.speaking.ImproveTextResult
+import com.nhom2.elearnlanguage.domain.repository.ImproveRepository
+import javax.inject.Inject
+
+class ImproveRepositoryImpl @Inject constructor(
+    private val improveDataSource: ImproveDataSource
+) : ImproveRepository {
+
+    override suspend fun improveMessage(text: String, context: String): ImproveTextResult {
+        val response = improveDataSource.improveMessage(text, context)
+        val improved = response.improved?.trim().orEmpty()
+        val explanation = response.explanation?.trim().orEmpty()
+
+        if (improved.isBlank() || explanation.isBlank()) {
+            throw Exception("Improve API response is missing required fields")
+        }
+
+        return ImproveTextResult(
+            original = response.original?.trim().orEmpty().ifBlank { text },
+            improved = improved,
+            explanation = explanation
+        )
+    }
+}

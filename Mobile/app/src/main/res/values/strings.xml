@@ -1,0 +1,148 @@
+<resources>
+    <string name="app_name">ELearnLanguage</string>
+    <string name="fcm_default_channel_id">streak_reminder_v2</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="back">Back</string>
+    <string name="username">Username</string>
+    <string name="test_gmail_com">test@gmail.com</string>
+    <string name="password">Password</string>
+    <string name="enter_your_user_name_here">Enter your user name here</string>
+    <string name="enter_your_password_here">Enter your password here</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="login">Login</string>
+    <string name="login_with_google">Login with Google</string>
+    <string name="don_t_have_account">Don\'t have account?</string>
+    <string name="register">Register</string>
+    <string name="your_username_or_password_is_incorrect">Your email or password is incorrect</string>
+    <string name="what_is_your_email">What is your email?</string>
+    <string name="your_email">Your email</string>
+    <string name="next">Next</string>
+    <string name="your_verification_code_is_incorrect">Your verification code is incorrect.</string>
+    <string name="enter_the_verification_code_sent_nto_your_email">Enter the verification code sent\nto your email</string>
+    <string name="set_up_your_new_password">Set up your new password</string>
+    <string name="enter_your_new_password_here">Enter your new password here</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="enter_your_confirm_password_here">Enter your confirm password here</string>
+    <string name="email_cannot_be_empty">Email cannot be empty!</string>
+    <string name="email_format_incorrect">Email\'s format is incorrect!</string>
+    <string name="no_account_has_been_associated_with_this_email">No account associated with this email.</string>
+
+    <!-- Home screen -->
+    <string name="home_subtitle">Lets continue learning!</string>
+    <string name="lesson_being_learned">Lesson Being Learned</string>
+    <string name="lesson_label_prefix">LESSON</string>
+    <string name="level_suffix">Level</string>
+    <string name="tab_lesson">Lesson</string>
+    <string name="tab_vocabulary">Vocabulary</string>
+    <string name="tab_speaking">Speaking</string>
+    <string name="tab_profile">Profile</string>
+    <string name="vocabulary_coming_soon">Vocabulary - Coming soon</string>
+    <string name="learning_vocabulary">Learning Vocabulary</string>
+    <string name="section_topic">TOPIC</string>
+    <string name="section_flashcard">Flashcard</string>
+    <string name="choose_study_mode_message">Chọn cách học cho chủ đề này</string>
+    <string name="label_mode_vocab">Vocab</string>
+    <string name="label_mode_flashcard">Flashcard</string>
+    <string name="noun">Noun</string>
+    <string name="verb">Verb</string>
+    <string name="adjective">Adjective</string>
+    <string name="lesson_no_questions">Lesson No Question</string>
+    <string name="speaking_coming_soon">Speaking - Coming soon</string>
+    <string name="profile_coming_soon">Profile - Coming soon</string>
+    <string name="error_load_home">Không thể tải dữ liệu</string>
+    <string name="retry">Thử lại</string>
+
+    <!-- Main screen -->
+    <string name="topic_image">Topic image</string>
+    <string name="open">Open</string>
+    <string name="speak_word">Speak word</string>
+    <string name="tts_not_ready">Text-to-speech chưa sẵn sàng trên thiết bị.</string>
+    <string name="error_generic">Something went wrong</string>
+
+    <!-- Multiple Choice Question -->
+    <string name="feedback_wrong_title">Ups.. that\'s wrong</string>
+    <string name="feedback_correct_title">Amazing!</string>
+    <string name="feedback_answer_prefix">Answer:</string>
+    <string name="next_question">Next Question</string>
+    <string name="try_again">Try again</string>
+    <string name="complete">Complete</string>
+
+    <!-- Arrange Words Question -->
+    <string name="check_answer">Check Answer</string>
+    <string name="feedback_not_quite_right">Ups.. That not quite right</string>
+    <string name="answer">Answer:</string>
+    <string name="arrange_question_title">What\'s the meaning of this sentence?</string>
+    <string name="speaking_assessment_title">Speak this sentence</string>
+    <string name="speaking_assessment_record_hint">Tap the mic to record your answer first.</string>
+
+    <!-- Lesson complete -->
+    <string name="lesson_complete_celebration">Lesson complete celebration</string>
+    <string name="lesson_complete_title">Lesson complete!</string>
+    <string name="correct">Correct</string>
+    <string name="lesson_complete_continue">Continue</string>
+    <string name="lesson_complete_score">%1$d/%2$d Correct</string>
+    <string name="streak_image">Streak illustration</string>
+    <string name="streak_extended_title">Streak Increased!</string>
+    <string name="streak_extended_hint">Keep learning every day.</string>
+    <string name="speak_or_type_a_message">Speak or type a message</string>
+    <string name="improve_title">Improve message</string>
+    <string name="improve_subtitle">AI suggested a better version for your message.</string>
+    <string name="improve_original_text">Original text</string>
+    <string name="improve_result">Improved text</string>
+    <string name="improve_result_placeholder">Improved text will appear here.</string>
+    <string name="improve_explanation">Explanation</string>
+    <string name="improve_explanation_placeholder">Explanation will appear here.</string>
+    <string name="improve_error_empty_input">Please enter a sentence to improve.</string>
+    <string name="improve_error_generic">Cannot improve text right now. Please try again.</string>
+    <string name="improve_action">Improve</string>
+    <string name="improve_open_action">Open</string>
+    <string name="improve_retry_action">Retry</string>
+    <string name="improve_loading_action">...</string>
+    <string name="you_need_to_grand_permission_to_speak">You need to grand permission to speak</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_avatar">Profile avatar</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_name_value">User</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_email_value">user@gmail.com</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_change_avatar">Change avatar</string>
+    <string name="profile_my_account">My account</string>
+    <string name="profile_change_password">Change password</string>
+    <string name="profile_logout_account">Logout account</string>
+    <string name="profile_current_streak_label">Current streak</string>
+    <string name="profile_longest_streak_label">Longest streak</string>
+    <string name="profile_streak_default_value">--</string>
+    <string name="profile_avatar_read_failed">Cannot read avatar file.</string>
+    <string name="profile_avatar_too_large">Avatar must be &lt;= 10MB.</string>
+    <string name="profile_name_empty_error">Your name cannot be empty!</string>
+    <string name="profile_name_too_short_error">Your name\'s length must be &gt;= 4 characters.</string>
+    <string name="profile_theme_section">Theme</string>
+    <string name="profile_theme_dark_mode">Dark mode</string>
+    <string name="profile_logout_dialog_title">Logout Account?</string>
+    <string name="profile_logout_dialog_message">Are you sure want to logout this account?</string>
+    <string name="profile_logout_dialog_confirm">Logout</string>
+    <string name="profile_logout_dialog_cancel">Cancel</string>
+
+    <!-- Change password -->
+    <string name="change_password_title">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password_capital">New Password</string>
+    <string name="confirm_password_capital">Confirm Password</string>
+    <string name="current_password_required">Current password cannot be empty!</string>
+    <string name="confirm_password_mismatch">Confirm password does not match!</string>
+    <string name="change_password_success">Change password successful.</string>
+    <string name="onboarding_title_1">No time for
+long lessons</string>
+    <string name="onboarding_desc_1">Even your busiest days have 5 minutes. That\'s all you need to start.</string>
+    <string name="onboarding_cta_1">Let\'s find out</string>
+    <string name="onboarding_title_2">Wherever you go, your English goes with you.</string>
+    <string name="onboarding_desc_2">Learn in small moments, whenever it works for you.</string>
+    <string name="onboarding_cta_2">Start right now</string>
+    <string name="onboarding_title_3">Ready to level up your English?</string>
+    <string name="onboarding_desc_3">Just a few minutes a day - and you\'re already ahead.</string>
+    <string name="onboarding_cta_3">Register</string>
+</resources>
