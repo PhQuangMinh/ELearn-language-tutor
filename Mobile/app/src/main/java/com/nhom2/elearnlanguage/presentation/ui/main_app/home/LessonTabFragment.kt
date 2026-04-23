@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.doOnLayout
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -67,6 +68,15 @@ class LessonTabFragment : Fragment() {
         // Collapsed: header ~35-40%, sheet ~60-65% (đủ hiển thị 3 lesson cards)
         behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         behavior.isGestureInsetBottomIgnored = true
+        binding.root.doOnLayout { root ->
+            val rootHeight = root.height
+            if (rootHeight > 0) {
+                val targetRatio = 0.62f
+                val maxPeekPx = (460 * resources.displayMetrics.density).toInt()
+                val calculatedPeek = (rootHeight * targetRatio).toInt()
+                behavior.peekHeight = calculatedPeek.coerceAtMost(maxPeekPx)
+            }
+        }
         
         // Khi expanded: sheet che hết header (expandedOffset = 0)
         behavior.expandedOffset = 0
