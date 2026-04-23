@@ -56,6 +56,8 @@
     <!-- Main screen -->
     <string name="topic_image">Topic image</string>
     <string name="open">Open</string>
+    <string name="speak_word">Speak word</string>
+    <string name="tts_not_ready">Text-to-speech chưa sẵn sàng trên thiết bị.</string>
     <string name="error_generic">Something went wrong</string>
 
     <!-- Multiple Choice Question -->

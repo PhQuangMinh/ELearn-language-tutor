@@ -1,9 +1,11 @@
 package com.nhom2.elearnlanguage.presentation.ui.main_app.home.vocabulary
 
+import android.speech.tts.TextToSpeech
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
@@ -14,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Locale
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentTopicVocabularyBinding
 import com.nhom2.elearnlanguage.domain.model.vocabulary.VocabularyType
@@ -33,6 +36,8 @@ class TopicVocabularyFragment : Fragment() {
 
     private lateinit var vocabAdapter: VocabularyCardAdapter
     private lateinit var pageAdapter: PageAdapter
+    private var textToSpeech: TextToSpeech? = null
+    private var isTtsReady: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +50,13 @@ class TopicVocabularyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        textToSpeech = TextToSpeech(requireContext()) { status ->
+            isTtsReady = status == TextToSpeech.SUCCESS
+            if (!isTtsReady) {
+                Toast.makeText(requireContext(), getString(R.string.tts_not_ready), Toast.LENGTH_SHORT).show()
+            }
+        }
 
         binding.backButton.root.setOnClickListener { findNavController().navigateUp() }
 
@@ -73,7 +85,9 @@ class TopicVocabularyFragment : Fragment() {
     }
 
     private fun setupList() {
-        vocabAdapter = VocabularyCardAdapter()
+        vocabAdapter = VocabularyCardAdapter { item ->
+            speakWord(item.word)
+        }
         binding.rvVocabulary.layoutManager = LinearLayoutManager(requireContext())
         binding.rvVocabulary.adapter = vocabAdapter
 
@@ -83,6 +97,7 @@ class TopicVocabularyFragment : Fragment() {
         }
         binding.rvPages.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
         binding.rvPages.adapter = pageAdapter
+        binding.rvPages.itemAnimator = null
     }
 
     private fun setupTabs() {
@@ -150,8 +165,39 @@ class TopicVocabularyFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
+        isTtsReady = false
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun speakWord(text: String) {
+        val tts = textToSpeech ?: return
+        if (text.isBlank()) return
+        if (!isTtsReady) {
+            Toast.makeText(requireContext(), getString(R.string.tts_not_ready), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val locale = if (looksVietnamese(text)) Locale("vi", "VN") else Locale.US
+        val langResult = tts.setLanguage(locale)
+        if (langResult == TextToSpeech.LANG_MISSING_DATA ||
+            langResult == TextToSpeech.LANG_NOT_SUPPORTED
+        ) {
+            tts.setLanguage(Locale.US)
+        }
+
+        val result = tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "vocab_${System.nanoTime()}")
+        if (result == TextToSpeech.ERROR) {
+            Toast.makeText(requireContext(), getString(R.string.tts_not_ready), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun looksVietnamese(text: String): Boolean {
+        val regex = Regex("[àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]")
+        return regex.containsMatchIn(text)
     }
 }
 
