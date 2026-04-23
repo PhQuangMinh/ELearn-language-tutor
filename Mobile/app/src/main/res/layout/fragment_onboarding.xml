@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/onboarding_background"
+    android:paddingStart="24dp"
+    android:paddingTop="28dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="32dp"
+    tools:context=".presentation.ui.onboarding.OnboardingFragment">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vpOnboarding"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/layoutIndicators"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/layoutIndicators"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vpOnboarding">
+
+        <View
+            android:id="@+id/indicator1"
+            android:layout_width="18dp"
+            android:layout_height="8dp"
+            android:background="@drawable/bg_onboarding_indicator_active" />
+
+        <View
+            android:id="@+id/indicator2"
+            android:layout_width="18dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_onboarding_indicator_inactive" />
+
+        <View
+            android:id="@+id/indicator3"
+            android:layout_width="18dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_onboarding_indicator_inactive" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnOnboardingCta"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_onboarding_cta"
+        android:backgroundTint="@color/white"
+        android:fontFamily="@font/lexend_semibold"
+        android:text="@string/onboarding_cta_1"
+        android:textAllCaps="true"
+        android:textColor="@color/primary_blue"
+        android:textSize="19sp"
+        app:backgroundTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutIndicators" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
