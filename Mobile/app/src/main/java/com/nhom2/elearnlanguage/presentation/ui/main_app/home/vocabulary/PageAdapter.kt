@@ -15,8 +15,19 @@ class PageAdapter(
 
     var selectedPage: Int = 1
         set(value) {
+            if (field == value) return
+            val oldPage = field
             field = value
-            notifyDataSetChanged()
+            val oldIndex = currentList.indexOf(oldPage)
+            val newIndex = currentList.indexOf(value)
+
+            if (oldIndex == -1 || newIndex == -1) {
+                notifyDataSetChanged()
+                return
+            }
+
+            notifyItemChanged(oldIndex)
+            if (newIndex != oldIndex) notifyItemChanged(newIndex)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

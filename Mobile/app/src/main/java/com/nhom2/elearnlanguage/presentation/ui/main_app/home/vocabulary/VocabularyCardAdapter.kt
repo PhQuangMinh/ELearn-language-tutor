@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.nhom2.elearnlanguage.databinding.ItemVocabularyCardBinding
 
-class VocabularyCardAdapter : ListAdapter<VocabularyCardUiModel, VocabularyCardAdapter.VH>(Diff) {
+class VocabularyCardAdapter(
+    private val onSpeakClick: (VocabularyCardUiModel) -> Unit
+) : ListAdapter<VocabularyCardUiModel, VocabularyCardAdapter.VH>(Diff) {
 
     private var expandedWord: String? = null
 
@@ -56,6 +58,7 @@ class VocabularyCardAdapter : ListAdapter<VocabularyCardUiModel, VocabularyCardA
 
             binding.root.setOnClickListener { toggle(item) }
             binding.ivChevron.setOnClickListener { toggle(item) }
+            binding.ivSpeaker.setOnClickListener { onSpeakClick(item) }
         }
 
         private fun toggle(item: VocabularyCardUiModel) {
