@@ -41,10 +41,10 @@ public class AuthController {
    * Bấm "Đăng nhập bằng Google" -> redirect tới trang đăng nhập Google. Project này dành cho mobile
    * app: login xong redirect về deep link elearn://login/callback.
    */
-  @GetMapping("/oauth2/authorize/google")
-  public void authorizeGoogle(HttpServletResponse response) throws IOException {
-    response.sendRedirect("/oauth2/authorization/google");
-  }
+  // @GetMapping("/oauth2/authorize/google")
+  // public void authorizeGoogle(HttpServletResponse response) throws IOException {
+  //   response.sendRedirect("/oauth2/authorization/google");
+  // }
 
   /**
    * Mobile "popup chọn tài khoản Google" (Google Sign-In / Credential Manager) -> gửi idToken về
@@ -134,12 +134,12 @@ public class AuthController {
     return ResponseEntity.ok(ApiResponse.success("Change password successful!", null));
   }
 
-  @PostMapping("/password-strength")
-  public ResponseEntity<ApiResponse<PasswordStrengthResponse>> validatePasswordStrength(
-      @Valid @RequestBody PasswordStrengthRequest request) {
-    PasswordStrengthResponse response = authService.validatePasswordStrength(request.getPassword());
-    return ResponseEntity.ok(ApiResponse.success("Validate password successful!", response));
-  }
+  // @PostMapping("/password-strength")
+  // public ResponseEntity<ApiResponse<PasswordStrengthResponse>> validatePasswordStrength(
+  //     @Valid @RequestBody PasswordStrengthRequest request) {
+  //   PasswordStrengthResponse response = authService.validatePasswordStrength(request.getPassword());
+  //   return ResponseEntity.ok(ApiResponse.success("Validate password successful!", response));
+  // }
 
   @PostMapping("/validate")
   public ResponseEntity<ApiResponse<TokenValidationResponse>> validateToken(

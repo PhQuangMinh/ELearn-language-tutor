@@ -11,6 +11,5 @@ import java.util.ArrayList;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         imports = {ArrayList.class})
 public abstract class QuestionMapper {
-    
     public abstract QuestionDetailDTO toQuestionDetailDTO(Question question);
 }
