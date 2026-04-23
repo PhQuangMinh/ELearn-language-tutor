@@ -1163,7 +1163,7 @@ class QuestionFragment : Fragment() {
         }
 
         builder.append(" ")
-        if (!isCorrectAnswer || wordAssessments.isEmpty()) {
+        if (wordAssessments.isEmpty()) {
             builder.append(fallbackText)
             return builder
         }
@@ -1172,15 +1172,17 @@ class QuestionFragment : Fragment() {
             val start = builder.length
             builder.append(wordAssessment.word)
 
-            val isCorrectWord = isSpeakingWordCorrect(wordAssessment.errorType)
-            if (!isCorrectWord) {
-                builder.setSpan(
-                    ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.warning_100)),
-                    start,
-                    builder.length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+            val colorRes = if (isSpeakingWordCorrect(wordAssessment.errorType)) {
+                R.color.status_green
+            } else {
+                R.color.error_100
             }
+            builder.setSpan(
+                ForegroundColorSpan(ContextCompat.getColor(requireContext(), colorRes)),
+                start,
+                builder.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
 
             if (index < wordAssessments.lastIndex) {
                 builder.append(" ")
