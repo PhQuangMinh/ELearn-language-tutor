@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -43,6 +45,13 @@ class LessonCompleteFragment : Fragment() {
         binding.progressScore.max = 100
         binding.progressScore.progress = percent
         Log.d(TAG, "onViewCreated streakExtended=${args.streakExtended}, currentStreak=${args.currentStreak}")
+
+        // Handle bottom inset for navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(binding.btnContinue) { v, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            insets
+        }
 
         binding.btnContinue.setOnClickListener {
             val eventId = System.currentTimeMillis()

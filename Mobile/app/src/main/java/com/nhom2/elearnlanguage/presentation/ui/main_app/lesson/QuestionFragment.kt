@@ -22,6 +22,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -156,6 +158,13 @@ class QuestionFragment : Fragment() {
         renderLoadingState(isLoading = true)
         // Luôn load lại câu hỏi khi vào lesson để bắt đầu từ câu đầu tiên
         viewModel.loadLessonQuestions(args.lessonId)
+
+        // Handle bottom inset for navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomPanel) { v, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            insets
+        }
 
         initFeedbackSfx()
         

@@ -11,6 +11,8 @@ import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Lifecycle
@@ -103,6 +105,13 @@ class AiConversationFragment : Fragment() {
                 binding.conversationInput.etMessage.setText("")
                 viewModel.sendMessage(text)
             }
+        }
+
+        // Handle bottom inset for navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(binding.conversationInput.root) { v, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            insets
         }
 
         viewModel.start(args.lessonId)
