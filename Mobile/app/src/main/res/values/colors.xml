@@ -70,5 +70,7 @@
     <color name="flashcard_title_tint">#626262</color>
     <color name="topic_item_arrow_tint">#A9A9A9</color>
     <color name="lesson_item_arrow_bg">#FFFFFF</color>
+    <color name="onboarding_background">#20AFCB</color>
+    <color name="onboarding_button_text">#2398B5</color>
 
 </resources>
