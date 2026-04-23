@@ -22,11 +22,24 @@
             android:fontFamily="@font/lexend_bold"
             android:textColor="@color/neutral_100"
             android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@id/ivChevron"
+            app:layout_constraintEnd_toStartOf="@id/ivSpeaker"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:maxLines="1"
             android:ellipsize="end" />
+
+        <ImageView
+            android:id="@+id/ivSpeaker"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/speak_word"
+            android:padding="1dp"
+            android:src="@drawable/volume_up_24px"
+            android:tint="@color/primary_100"
+            app:layout_constraintBottom_toBottomOf="@id/tvWord"
+            app:layout_constraintEnd_toStartOf="@id/ivChevron"
+            app:layout_constraintTop_toTopOf="@id/tvWord" />
 
         <ImageView
             android:id="@+id/ivChevron"
