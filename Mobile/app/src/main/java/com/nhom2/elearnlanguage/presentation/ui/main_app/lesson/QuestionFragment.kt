@@ -7,7 +7,9 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.TypedValue
+import android.view.Gravity
 import android.widget.Toast
+import android.widget.TextView
 import android.media.MediaPlayer
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -16,6 +18,7 @@ import android.media.MediaRecorder
 import android.media.SoundPool
 import android.os.Build
 import android.content.pm.PackageManager
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import android.view.LayoutInflater
@@ -29,9 +32,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.nhom2.elearnlanguage.presentation.ui.main_app.lesson.QuestionFragmentDirections
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import com.google.android.material.snackbar.Snackbar
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentQuestionBinding
 import com.nhom2.elearnlanguage.domain.model.lesson.MediaType
@@ -325,6 +330,10 @@ class QuestionFragment : Fragment() {
             return
         }
 
+        if (!isAnswerReadyForSubmit(currentQuestion)) {
+            return
+        }
+
         if (currentQuestion.type == QuestionType.SPEAKING_ASSESSMENT) {
             val feedback = speakingFeedbackByQuestionId[currentQuestion.id]
             if (feedback == null) {
@@ -365,6 +374,65 @@ class QuestionFragment : Fragment() {
             applyOneSelectionCheckedStyle(isCorrect)
         }
         showFeedback(isCorrect = isCorrect, question = currentQuestion)
+    }
+
+    private fun isAnswerReadyForSubmit(question: Question): Boolean {
+        return when (question.type) {
+            QuestionType.ONE_SELECTION -> {
+                val hasSelectedAnswer = getSelectedOneSelectionIndex() != null
+                if (!hasSelectedAnswer) {
+                    showTopWarningNotification(getString(R.string.lesson_warning_select_answer))
+                }
+                hasSelectedAnswer
+            }
+
+            QuestionType.LISTEN_AND_ARRANGE_SENTENCE,
+            QuestionType.TRANSLATE_AND_ARRANGE_SENTENCE -> {
+                val userWords = answerSlotAdapter?.getAnswerText().orEmpty()
+                val hasEmptySlot = userWords.isEmpty() || userWords.any { it.isBlank() }
+                if (hasEmptySlot) {
+                    showTopWarningNotification(getString(R.string.lesson_warning_fill_all_blanks))
+                }
+                !hasEmptySlot
+            }
+
+            QuestionType.SPEAKING_ASSESSMENT -> true
+        }
+    }
+
+    private fun showTopWarningNotification(message: String) {
+        val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
+        snackbar.animationMode = Snackbar.ANIMATION_MODE_FADE
+        val snackbarView = snackbar.view
+        snackbarView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_warning_top_banner)
+        snackbarView.backgroundTintList = null
+        ViewCompat.setBackgroundTintList(snackbarView, null)
+        snackbarView.elevation = 8.dpToPx().toFloat()
+        snackbar.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_100))
+
+        val snackbarText = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        snackbarText.maxLines = 4
+        snackbarText.isSingleLine = false
+        snackbarText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        snackbarText.setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
+
+        val horizontalMargin = 20.dpToPx()
+        val topMargin = (binding.header.bottom.takeIf { it > 0 } ?: 56.dpToPx()) + 12.dpToPx()
+        when (val params = snackbarView.layoutParams) {
+            is FrameLayout.LayoutParams -> {
+                params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT
+                params.setMargins(horizontalMargin, topMargin, horizontalMargin, 0)
+                snackbarView.layoutParams = params
+            }
+            is CoordinatorLayout.LayoutParams -> {
+                params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT
+                params.setMargins(horizontalMargin, topMargin, horizontalMargin, 0)
+                snackbarView.layoutParams = params
+            }
+        }
+        snackbar.show()
     }
 
     private fun saveUserAnswer(question: Question) {
