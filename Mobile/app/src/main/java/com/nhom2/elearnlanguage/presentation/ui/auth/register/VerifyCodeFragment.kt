@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -26,6 +27,8 @@ class VerifyCodeFragment : Fragment(R.layout.fragment_verify_code) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.applyBottomSystemBarInsetPadding()
 
         val backButton = view.findViewById<View>(R.id.backButton)
         val tvResend = view.findViewById<TextView>(R.id.tvResend)

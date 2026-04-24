@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,8 @@ class EmailRegisterFragment : Fragment(R.layout.fragment_email_register) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.applyBottomSystemBarInsetPadding()
 
         val tvEmailTitle = view.findViewById<TextView>(R.id.tvEmailTitle)
         val edtEmailRegister = view.findViewById<EditText>(R.id.edtEmailRegister)

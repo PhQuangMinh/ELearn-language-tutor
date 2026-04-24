@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -46,12 +47,18 @@ class LessonCompleteFragment : Fragment() {
         binding.progressScore.progress = percent
         Log.d(TAG, "onViewCreated streakExtended=${args.streakExtended}, currentStreak=${args.currentStreak}")
 
-        // Handle bottom inset for navigation bar
+        val initialBottomMargin = (binding.btnContinue.layoutParams as ViewGroup.MarginLayoutParams)
+            .bottomMargin
+
+        // Move CTA above system navigation bar.
         ViewCompat.setOnApplyWindowInsetsListener(binding.btnContinue) { v, insets ->
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = initialBottomMargin + navigationBars.bottom
+            }
             insets
         }
+        ViewCompat.requestApplyInsets(binding.btnContinue)
 
         binding.btnContinue.setOnClickListener {
             val eventId = System.currentTimeMillis()

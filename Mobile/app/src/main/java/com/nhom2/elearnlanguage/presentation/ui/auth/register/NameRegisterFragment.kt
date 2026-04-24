@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,6 +37,8 @@ class NameRegisterFragment : Fragment(R.layout.fragment_name_register){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.applyBottomSystemBarInsetPadding()
 
         val edtNameRegister = view.findViewById<EditText>(R.id.edtNameRegister)
         val btnNextRegister = view.findViewById<Button>(R.id.btnNextRegister)

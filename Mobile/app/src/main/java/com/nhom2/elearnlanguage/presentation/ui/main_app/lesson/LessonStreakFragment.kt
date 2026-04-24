@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -45,12 +46,18 @@ class LessonStreakFragment : Fragment() {
         animateStreakSlideUp(startStreak, targetStreak)
         showContinueButtonWithDelay()
 
-        // Handle bottom inset for navigation bar
+        val initialBottomMargin = (binding.btnBackToLessonList.layoutParams as ViewGroup.MarginLayoutParams)
+            .bottomMargin
+
+        // Move CTA above system navigation bar.
         ViewCompat.setOnApplyWindowInsetsListener(binding.btnBackToLessonList) { v, insets ->
             val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = initialBottomMargin + navigationBars.bottom
+            }
             insets
         }
+        ViewCompat.requestApplyInsets(binding.btnBackToLessonList)
 
         binding.btnBackToLessonList.setOnClickListener {
             val eventId = System.currentTimeMillis()

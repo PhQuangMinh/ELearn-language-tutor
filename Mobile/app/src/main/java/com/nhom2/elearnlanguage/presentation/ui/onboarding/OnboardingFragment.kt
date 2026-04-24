@@ -11,7 +11,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.data.source.local.OnboardingPreferenceManager
+import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.databinding.FragmentOnboardingBinding
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 
 class OnboardingFragment : Fragment() {
 
@@ -60,8 +62,15 @@ class OnboardingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.root.applyBottomSystemBarInsetPadding()
+
         if (OnboardingPreferenceManager.isOnboardingCompleted(requireContext())) {
-            navigateToLogin()
+            val accessToken = TokenManager.getAccessToken(requireContext())
+            if (accessToken.isNullOrBlank()) {
+                navigateToLogin()
+            } else {
+                navigateToHome()
+            }
             return
         }
 
@@ -111,6 +120,13 @@ class OnboardingFragment : Fragment() {
             .setPopUpTo(R.id.onboardingFragment, true)
             .build()
         findNavController().navigate(R.id.loginFragment, null, navOptions)
+    }
+
+    private fun navigateToHome() {
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.onboardingFragment, true)
+            .build()
+        findNavController().navigate(R.id.homeFragment, null, navOptions)
     }
 
     override fun onDestroyView() {

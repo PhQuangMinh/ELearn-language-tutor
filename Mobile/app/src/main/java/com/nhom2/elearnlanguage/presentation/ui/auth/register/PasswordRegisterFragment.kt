@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -91,6 +92,8 @@ class PasswordRegisterFragment : Fragment(R.layout.fragment_password_register) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.applyBottomSystemBarInsetPadding()
 
         val backButton = view.findViewById<View>(R.id.backButton)
         val passwordInputLayout = view.findViewById<TextInputLayout>(R.id.passwordInputLayout)

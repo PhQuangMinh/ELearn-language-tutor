@@ -198,7 +198,7 @@ ELearn-language-tutor/
 1. Clone repository:
 
 ```bash
-git clone https://github.com/<username>/ELearn-language-tutor.git
+git clone https://github.com/PhQuangMinh/ELearn-language-tutor.git
 cd ELearn-language-tutor
 ```
 
@@ -211,7 +211,7 @@ cd ELearn-language-tutor
 ## 🧪 7) User flow gợi ý để demo đầy đủ chức năng
 
 1. Mở app -> đi qua onboarding.
-2. Đăng nhập/đăng ký.
+2. Đăng nhập/đăng ký, Quên mật khẩu.
 3. Vào Home và mở Lesson:
    - làm bài
    - xem feedback

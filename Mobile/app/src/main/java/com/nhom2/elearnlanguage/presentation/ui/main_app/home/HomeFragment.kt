@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentHomeBinding
 import com.nhom2.elearnlanguage.presentation.ui.main_app.home.profile.ProfileFragment
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,6 +39,8 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.bottomNav.applyBottomSystemBarInsetPadding()
         
         // Khôi phục tab đã lưu trước đó
         if (savedInstanceState != null) {

@@ -14,6 +14,7 @@ import androidx.navigation.fragment.navArgs
 import coil.load
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentLessonListBinding
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -61,6 +62,7 @@ class LessonListFragment : Fragment() {
         }
 
         binding.rvLessons.adapter = adapter
+        binding.rvLessons.applyBottomSystemBarInsetPadding()
 
         binding.backButton.root.setOnClickListener {
             findNavController().navigateUp()

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
@@ -37,12 +38,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        val mainContainer = findViewById<View>(R.id.main)
+        ViewCompat.setOnApplyWindowInsetsListener(mainContainer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Keep edge-to-edge for bottom area; child screens handle bottom inset where needed.
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
+        ViewCompat.requestApplyInsets(mainContainer)
 
         requestNotificationPermissionIfNeeded()
         handleOAuthCallback()

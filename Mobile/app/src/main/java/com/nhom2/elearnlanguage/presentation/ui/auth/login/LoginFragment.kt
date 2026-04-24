@@ -17,7 +17,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.nhom2.elearnlanguage.R
+import com.nhom2.elearnlanguage.data.source.local.TokenManager
 import com.nhom2.elearnlanguage.databinding.FragmentLoginBinding
+import com.nhom2.elearnlanguage.presentation.utils.applyBottomSystemBarInsetPadding
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
@@ -52,6 +54,17 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.root.applyBottomSystemBarInsetPadding()
+
+        val accessToken = TokenManager.getAccessToken(requireContext())
+        if (!accessToken.isNullOrBlank()) {
+            val navOptions = androidx.navigation.NavOptions.Builder()
+                .setPopUpTo(R.id.loginFragment, true)
+                .build()
+            findNavController().navigate(R.id.action_loginFragment_to_homeFragment, null, navOptions)
+            return
+        }
 
         with(binding) {
             emailTextColors = etEmail.textColors

@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlin.math.max
 import java.util.Locale
 import com.nhom2.elearnlanguage.R
 import com.nhom2.elearnlanguage.databinding.FragmentAiConversationBinding
@@ -107,12 +108,20 @@ class AiConversationFragment : Fragment() {
             }
         }
 
-        // Handle bottom inset for navigation bar
+        // Keep the input bar above either navigation bar or keyboard (IME).
+        val initialInputBottomPadding = binding.conversationInput.root.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(binding.conversationInput.root) { v, insets ->
-            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navigationBars.bottom)
+            val navigationBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            v.setPadding(
+                v.paddingLeft,
+                v.paddingTop,
+                v.paddingRight,
+                initialInputBottomPadding + max(navigationBottom, imeBottom)
+            )
             insets
         }
+        ViewCompat.requestApplyInsets(binding.conversationInput.root)
 
         viewModel.start(args.lessonId)
 
