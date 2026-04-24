@@ -19,17 +19,16 @@ ELearn Language Tutor tập trung vào 3 mục tiêu:
 - ⚡ Học nhanh mỗi ngày với các bài ngắn, câu hỏi tương tác, theo dõi tiến độ.
 - 📚 Mở rộng vốn từ với Vocabulary + Flashcard và phát âm trực tiếp bằng TTS Android.
 - 🎙️ Luyện giao tiếp với AI conversation, hỗ trợ nghe/ghi âm/cải thiện câu trả lời.
-- 🖼️ Nhắc người dùng học hằn ngày
+- 🖼️ Nhắc người dùng học hàng ngày
 - 🏠 Theo dõi Streak của người dùng
 
 ---
 
-## 🌟 2) Tính năng nổi bật (show full)
+## 🌟 2) Tính năng cụ thể
 
 ### 🧭 Onboarding & Authentication
 
 - 🖼️ Onboarding.
-- 🔐 Login/register rõ ràng.
 - 📨 Đăng nhập, đăng ký, quên mật khẩu, nhập mã xác thực, đặt mật khẩu mới.
 
 ### 🏠 Home & Learning Journey
@@ -182,7 +181,6 @@ ELearn-language-tutor/
 │   ├── build.gradle.kts                     # Build config cấp project (Mobile)
 │   └── settings.gradle.kts                  # Include modules
 ├── README.md
-└── README1.md                               # Bản tham khảo cũ
 ```
 
 ---
@@ -206,8 +204,7 @@ cd ELearn-language-tutor
 
 2. Mở thư mục `Mobile` bằng Android Studio.
 3. Chờ Gradle sync xong.
-4. Kiểm tra file cấu hình Firebase (`Mobile/app/google-services.json`).
-5. Chạy app trên emulator hoặc thiết bị thật.
+4. Chạy app trên emulator hoặc thiết bị thật.
 
 ---
 
@@ -232,25 +229,5 @@ cd ELearn-language-tutor
    - xem streak
    - đổi thông tin
    - bật/tắt dark mode
-
----
-
-## 🛣️ 8) Roadmap đề xuất
-
-- ☁️ Đồng bộ tiến độ học theo tài khoản realtime.
-- 🎯 Cá nhân hóa lộ trình theo năng lực.
-- 🎮 Thêm mini game luyện phản xạ từ vựng.
-- 📉 Dashboard thống kê sâu theo tuần/tháng.
-
----
-
-## 🤝 9) Đóng góp
-
-Bạn có thể đóng góp theo flow:
-
-1. Fork repo
-2. Tạo branch mới (`feature/...` hoặc `fix/...`)
-3. Commit rõ ràng, nhỏ gọn
-4. Tạo Pull Request kèm mô tả + test plan
 
 ---
